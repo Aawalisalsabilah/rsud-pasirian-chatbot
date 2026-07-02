@@ -15,11 +15,13 @@ export async function POST(request) {
             return NextResponse.json({ reply: 'Format data chat tidak valid.' }, { status: 400 });
         }
 
-        // Ambil pertanyaan terakhir dari pasien untuk menentukan modul knowledge yang relevan
+        // Ambil pertanyaan terakhir
         const lastUserMessage = [...incomingMessages].reverse().find((m) => m.role === 'user');
-        const dynamicSystemPrompt = buildSystemPrompt(lastUserMessage?.content || '');
+        
+        // --- PERUBAHAN DI SINI: Tambahkan 'await' ---
+        const dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '');
 
-        // Batasi histori chat yang dikirim (6 pesan terakhir) biar prompt tidak makin panjang seiring percakapan
+        // Batasi histori chat
         const recentMessages = incomingMessages.slice(-6);
 
         const fullMessages = [
