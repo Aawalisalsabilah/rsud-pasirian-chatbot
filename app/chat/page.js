@@ -16,6 +16,12 @@ export default function ChatPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const textareaRef = useRef(null);
 
+  const topics = [
+    { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', text: 'Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', loading: 'Memikirkan jawaban jadwal poli klinik...' },
+    { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', text: 'Apa saja Standar Pelayanan Publik di RSUD Pasirian?', loading: 'Memikirkan jawaban standar pelayanan publik...' },
+    { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', text: 'Bagaimana panduan pendaftaran melalui JKN Mobile?', loading: 'Memikirkan jawaban panduan pendaftaran JKN Mobile...' },
+  ];
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -58,7 +64,6 @@ export default function ChatPage() {
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-    // Auto-resize textarea sesuai isi teks
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
@@ -100,27 +105,16 @@ export default function ChatPage() {
               <p className="text-[11px] text-emerald-100/70 mt-0.5 italic">Layanan apa yang Anda butuhkan saat ini?</p>
             </div>
             <div className="flex flex-col gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', 'Memikirkan jawaban jadwal poli klinik...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium shadow-sm"
-              >
-                🩺 Jadwal Pelayanan Poli Klinik
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Apa saja Standar Pelayanan Publik di RSUD Pasirian?', 'Memikirkan jawaban standar pelayanan publik...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium shadow-sm"
-              >
-                📋 Standar Pelayanan Publik
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Bagaimana panduan pendaftaran melalui JKN Mobile?', 'Memikirkan jawaban panduan pendaftaran JKN Mobile...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium shadow-sm"
-              >
-                📝 Panduan Pendaftaran JKN Mobile
-              </button>
+              {topics.map((topic) => (
+                <button
+                  key={topic.label}
+                  type="button"
+                  onClick={() => handleTopicClick(topic.text, topic.loading)}
+                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium shadow-sm"
+                >
+                  {topic.icon} {topic.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -139,16 +133,16 @@ export default function ChatPage() {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg md:hidden flex items-center justify-center text-base"
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg md:hidden flex items-center justify-center text-lg"
               type="button"
             >
               ☰
             </button>
-            <h1 className="font-bold text-xs md:text-sm tracking-wide text-[#005c48] truncate">
+            <h1 className="font-bold text-sm md:text-base tracking-wide text-[#005c48] truncate">
               PASIRIAN SMART ASSISTANT
             </h1>
           </div>
-          <Link href="/" className="bg-amber-500 hover:bg-amber-600 text-white text-[11px] md:text-xs font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-full transition shadow-sm shrink-0">
+          <Link href="/" className="bg-amber-500 hover:bg-amber-600 text-white text-xs md:text-sm font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-full transition shadow-sm shrink-0">
             ← <span className="hidden sm:inline">Kembali ke </span>Beranda
           </Link>
         </header>
@@ -162,19 +156,19 @@ export default function ChatPage() {
                 
                 {/* Avatar */}
                 {msg.role !== 'user' && (
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden flex-shrink-0 border border-slate-200">
-                    <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={32} height={32} className="object-contain" />
+                  <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden flex-shrink-0 border border-slate-200">
+                    <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={36} height={36} className="object-contain" />
                   </div>
                 )}
 
                 {/* Kotak Pesan */}
-                <div className={`p-4 rounded-2xl text-xs md:text-sm leading-relaxed shadow-md max-w-[85%] md:max-w-[80%] border ${
+                <div className={`p-4 rounded-2xl text-sm md:text-base leading-relaxed shadow-md max-w-[85%] md:max-w-[80%] border ${
                   msg.role === 'user' 
                     ? 'bg-amber-500 text-white border-amber-600 rounded-tr-none shadow-amber-500/10' 
                     : 'bg-white text-slate-800 border-slate-200/80 rounded-tl-none'
                 }`}>
                   {msg.role === 'assistant' ? (
-                    <div className="text-xs md:text-sm leading-relaxed space-y-2 text-slate-800 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_li]:pl-1 [&_p]:my-1 [&_strong]:font-bold">
+                    <div className="text-sm md:text-base leading-relaxed space-y-2 text-slate-800 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_li]:pl-1 [&_p]:my-1 [&_strong]:font-bold">
                       <ReactMarkdown remarkPlugins={[remarkBreaks]}>
                         {msg.content}
                       </ReactMarkdown>
@@ -185,7 +179,7 @@ export default function ChatPage() {
                 </div>
 
                 {msg.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-md bg-amber-500 text-white">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-md bg-amber-500 text-white">
                     U
                   </div>
                 )}
@@ -195,10 +189,10 @@ export default function ChatPage() {
             {/* Efek Loading */}
             {isLoading && (
               <div className="flex gap-3 justify-start items-center">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden flex-shrink-0 border border-slate-200">
-                  <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={32} height={32} className="object-contain" />
+                <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden flex-shrink-0 border border-slate-200">
+                  <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={36} height={36} className="object-contain" />
                 </div>
-                <div className="bg-white p-4 rounded-2xl rounded-tl-none text-xs text-slate-500 italic flex items-center gap-2 shadow-md border border-slate-200/80">
+                <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-slate-500 italic flex items-center gap-2 shadow-md border border-slate-200/80">
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce"></span>
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
                   <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.4s]"></span>
@@ -206,6 +200,23 @@ export default function ChatPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Pill Topik - HANYA MOBILE, tepat di atas kolom input seperti ChatGPT */}
+        <div className="flex-shrink-0 md:hidden px-3 pt-2 bg-[#f4f7f6] overflow-x-auto">
+          <div className="flex gap-2 pb-2 w-max">
+            {topics.map((topic) => (
+              <button
+                key={topic.label}
+                type="button"
+                onClick={() => handleTopicClick(topic.text, topic.loading)}
+                className="flex-shrink-0 flex items-center gap-1.5 bg-white border border-slate-300 text-slate-700 text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm active:bg-slate-100 whitespace-nowrap"
+              >
+                <span>{topic.icon}</span>
+                <span>{topic.shortLabel}</span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -219,15 +230,15 @@ export default function ChatPage() {
             disabled={isLoading}
             rows={1}
             placeholder={isLoading ? "Mohon tunggu..." : "Tulis pertanyaanmu di sini..."}
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs md:text-sm focus:outline-none focus:border-[#005c48] focus:bg-white transition text-slate-800 placeholder-slate-400 disabled:opacity-50 resize-none leading-relaxed max-h-[120px] overflow-y-auto"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm md:text-base focus:outline-none focus:border-[#005c48] focus:bg-white transition text-slate-800 placeholder-slate-400 disabled:opacity-50 resize-none leading-relaxed max-h-[120px] overflow-y-auto"
           />
-          <button type="submit" disabled={isLoading} className="bg-[#005c48] hover:bg-[#004737] text-white font-bold px-4 md:px-6 py-3 rounded-xl text-xs md:text-sm transition shadow-md shrink-0 disabled:opacity-50 tracking-wider">
+          <button type="submit" disabled={isLoading} className="bg-[#005c48] hover:bg-[#004737] text-white font-bold px-4 md:px-6 py-3 rounded-xl text-sm md:text-base transition shadow-md shrink-0 disabled:opacity-50 tracking-wider">
             {isLoading ? '...' : 'KIRIM'}
           </button>
         </form>
       </main>
 
-      {/* SIDEBAR MOBILE - Slide dari kiri seperti ChatGPT */}
+      {/* SIDEBAR MOBILE - Slide dari kiri seperti ChatGPT (tetap ada sebagai akses tambahan) */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
           <div 
@@ -240,46 +251,35 @@ export default function ChatPage() {
                   <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={40} height={40} className="object-contain" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-sm leading-tight text-white">RSUD PASIRIAN</h2>
-                  <p className="text-[11px] text-amber-400 font-semibold tracking-wider uppercase">Virtual Assistant</p>
+                  <h2 className="font-bold text-base leading-tight text-white">RSUD PASIRIAN</h2>
+                  <p className="text-xs text-amber-400 font-semibold tracking-wider uppercase">Virtual Assistant</p>
                 </div>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-200 font-bold p-1 text-lg">✕</button>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-200 font-bold p-1 text-xl">✕</button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-200">🔍 Layanan Informasi</p>
-                <p className="text-[11px] text-emerald-100/70 mt-0.5 italic">Layanan apa yang Anda butuhkan saat ini?</p>
+                <p className="text-sm font-semibold uppercase tracking-wider text-emerald-200">🔍 Layanan Informasi</p>
+                <p className="text-xs text-emerald-100/70 mt-0.5 italic">Layanan apa yang Anda butuhkan saat ini?</p>
               </div>
               <div className="flex flex-col gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => handleTopicClick('Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', 'Memikirkan jawaban jadwal poli klinik...')}
-                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-                >
-                  🩺 Jadwal Pelayanan Poli Klinik
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTopicClick('Apa saja Standar Pelayanan Publik di RSUD Pasirian?', 'Memikirkan jawaban standar pelayanan publik...')}
-                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-                >
-                  📋 Standar Pelayanan Publik
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTopicClick('Bagaimana panduan pendaftaran melalui JKN Mobile?', 'Memikirkan jawaban panduan pendaftaran JKN Mobile...')}
-                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-                >
-                  📝 Panduan Pendaftaran JKN Mobile
-                </button>
+                {topics.map((topic) => (
+                  <button
+                    key={topic.label}
+                    type="button"
+                    onClick={() => handleTopicClick(topic.text, topic.loading)}
+                    className="text-left text-sm bg-[#004737] hover:bg-[#00382b] p-3.5 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
+                  >
+                    {topic.icon} {topic.label}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="bg-[#004737] p-3 rounded-xl flex items-center gap-2 border border-emerald-800/40">
               <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
-              <span className="text-xs font-medium text-emerald-100">Sistem AI Aktif</span>
+              <span className="text-sm font-medium text-emerald-100">Sistem AI Aktif</span>
             </div>
           </div>
         </div>
