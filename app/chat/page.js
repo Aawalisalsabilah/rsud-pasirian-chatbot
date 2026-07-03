@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
@@ -14,6 +14,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Memikirkan jawaban...');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const textareaRef = useRef(null);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -55,10 +56,32 @@ export default function ChatPage() {
     setIsMobileMenuOpen(false);
   };
 
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+    // Auto-resize textarea sesuai isi teks
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoading && textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  }, [isLoading]);
+
   return (
-    <div className="flex h-screen bg-[#f4f7f6] text-slate-800 font-sans overflow-hidden relative">
+    <div className="flex h-[100dvh] bg-[#f4f7f6] text-slate-800 font-sans overflow-hidden relative">
       
-      {/* SISI KIRI: Sidebar (Hijau Tua RSUD Pasirian) */}
+      {/* SISI KIRI: Sidebar Desktop (Hijau Tua RSUD Pasirian) - TIDAK DIUBAH */}
       <aside className="w-80 bg-[#005c48] p-6 flex flex-col justify-between hidden md:flex shadow-xl text-white z-10">
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-[#004737] pb-4">
@@ -109,10 +132,10 @@ export default function ChatPage() {
       </aside>
 
       {/* SISI KANAN: Chat Room */}
-      <main className="flex-1 flex flex-col justify-between bg-[#f4f7f6] overflow-hidden w-full relative">
+      <main className="flex-1 flex flex-col bg-[#f4f7f6] overflow-hidden w-full relative min-h-0">
         
         {/* Header */}
-        <header className="px-4 py-3 md:px-6 md:py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10 gap-2">
+        <header className="px-4 py-3 md:px-6 md:py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10 gap-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -131,7 +154,7 @@ export default function ChatPage() {
         </header>
 
         {/* Area Pesan Chat dengan Pola CSS Grid Dot */}
-        <div className="flex-1 p-3 md:p-6 overflow-y-auto bg-[#f4f7f6] bg-[radial-gradient(#d1d5db_1px,transparent_1px)] [background-size:16px_16px]">
+        <div className="flex-1 min-h-0 p-3 md:p-6 overflow-y-auto bg-[#f4f7f6] bg-[radial-gradient(#d1d5db_1px,transparent_1px)] [background-size:16px_16px]">
           
           <div className="space-y-4 max-w-full lg:max-w-6xl mx-auto w-full px-2 md:px-4">
             {messages.map((msg, index) => (
@@ -157,7 +180,7 @@ export default function ChatPage() {
                       </ReactMarkdown>
                     </div>
                   ) : (
-                    <span className="whitespace-pre-line">{msg.content}</span>
+                    <span className="whitespace-pre-line break-words">{msg.content}</span>
                   )}
                 </div>
 
@@ -186,15 +209,17 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Input Form */}
-        <form onSubmit={handleSendMessage} className="p-3 md:p-4 bg-white border-t border-slate-200 flex gap-2 md:gap-3 items-center shadow-lg z-10">
-          <input
-            type="text"
+        {/* Input Form - fixed di bawah, selalu terlihat */}
+        <form onSubmit={handleSendMessage} className="flex-shrink-0 p-3 md:p-4 bg-white border-t border-slate-200 flex gap-2 md:gap-3 items-end shadow-lg z-10">
+          <textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             disabled={isLoading}
+            rows={1}
             placeholder={isLoading ? "Mohon tunggu..." : "Tulis pertanyaanmu di sini..."}
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs md:text-sm focus:outline-none focus:border-[#005c48] focus:bg-white transition text-slate-800 placeholder-slate-400 disabled:opacity-50"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs md:text-sm focus:outline-none focus:border-[#005c48] focus:bg-white transition text-slate-800 placeholder-slate-400 disabled:opacity-50 resize-none leading-relaxed max-h-[120px] overflow-y-auto"
           />
           <button type="submit" disabled={isLoading} className="bg-[#005c48] hover:bg-[#004737] text-white font-bold px-4 md:px-6 py-3 rounded-xl text-xs md:text-sm transition shadow-md shrink-0 disabled:opacity-50 tracking-wider">
             {isLoading ? '...' : 'KIRIM'}
@@ -202,44 +227,70 @@ export default function ChatPage() {
         </form>
       </main>
 
-      {/* BOTTOM SHEET MENU UNTUK MOBILE */}
+      {/* SIDEBAR MOBILE - Slide dari kiri seperti ChatGPT */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 md:hidden flex flex-col justify-end" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="bg-[#005c48] rounded-t-2xl p-6 space-y-4 max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center border-b border-[#004737] pb-3">
+        <div className="fixed inset-0 bg-black/40 z-50 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <div 
+            className="absolute top-0 left-0 h-full w-[85%] max-w-[320px] bg-[#005c48] p-6 space-y-6 overflow-y-auto shadow-2xl animate-[slideIn_0.25s_ease-out]" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#004737] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1 shadow-md overflow-hidden flex-shrink-0">
+                  <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={40} height={40} className="object-contain" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-sm leading-tight text-white">RSUD PASIRIAN</h2>
+                  <p className="text-[11px] text-amber-400 font-semibold tracking-wider uppercase">Virtual Assistant</p>
+                </div>
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-200 font-bold p-1 text-lg">✕</button>
+            </div>
+
+            <div className="space-y-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-emerald-200">🔍 Layanan Informasi</p>
                 <p className="text-[11px] text-emerald-100/70 mt-0.5 italic">Layanan apa yang Anda butuhkan saat ini?</p>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-200 font-bold p-1 text-base">✕</button>
+              <div className="flex flex-col gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleTopicClick('Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', 'Memikirkan jawaban jadwal poli klinik...')}
+                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
+                >
+                  🩺 Jadwal Pelayanan Poli Klinik
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTopicClick('Apa saja Standar Pelayanan Publik di RSUD Pasirian?', 'Memikirkan jawaban standar pelayanan publik...')}
+                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
+                >
+                  📋 Standar Pelayanan Publik
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTopicClick('Bagaimana panduan pendaftaran melalui JKN Mobile?', 'Memikirkan jawaban panduan pendaftaran JKN Mobile...')}
+                  className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
+                >
+                  📝 Panduan Pendaftaran JKN Mobile
+                </button>
+              </div>
             </div>
-            
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', 'Memikirkan jawaban jadwal poli klinik...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-              >
-                🩺 Jadwal Pelayanan Poli Klinik
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Apa saja Standar Pelayanan Publik di RSUD Pasirian?', 'Memikirkan jawaban standar pelayanan publik...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-              >
-                📋 Standar Pelayanan Publik
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTopicClick('Bagaimana panduan pendaftaran melalui JKN Mobile?', 'Memikirkan jawaban panduan pendaftaran JKN Mobile...')}
-                className="text-left text-xs bg-[#004737] hover:bg-[#00382b] p-3 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-              >
-                📝 Panduan Pendaftaran JKN Mobile
-              </button>
+
+            <div className="bg-[#004737] p-3 rounded-xl flex items-center gap-2 border border-emerald-800/40">
+              <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span className="text-xs font-medium text-emerald-100">Sistem AI Aktif</span>
             </div>
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes slideIn {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
 
     </div>
   );
