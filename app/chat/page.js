@@ -13,7 +13,6 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Memikirkan jawaban...');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const textareaRef = useRef(null);
 
   const topics = [
@@ -59,7 +58,6 @@ export default function ChatPage() {
   const handleTopicClick = (text, label) => {
     setInput(text);
     setLoadingText(label);
-    setIsMobileMenuOpen(false);
   };
 
   const handleInputChange = (e) => {
@@ -130,18 +128,9 @@ export default function ChatPage() {
         
         {/* Header */}
         <header className="px-4 py-3 md:px-6 md:py-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10 gap-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg md:hidden flex items-center justify-center text-lg"
-              type="button"
-            >
-              ☰
-            </button>
-            <h1 className="font-bold text-sm md:text-base tracking-wide text-[#005c48] truncate">
-              PASIRIAN SMART ASSISTANT
-            </h1>
-          </div>
+          <h1 className="font-bold text-sm md:text-base tracking-wide text-[#005c48] truncate">
+            PASIRIAN SMART ASSISTANT
+          </h1>
           <Link href="/" className="bg-amber-500 hover:bg-amber-600 text-white text-xs md:text-sm font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-full transition shadow-sm shrink-0">
             ← <span className="hidden sm:inline">Kembali ke </span>Beranda
           </Link>
@@ -237,60 +226,6 @@ export default function ChatPage() {
           </button>
         </form>
       </main>
-
-      {/* SIDEBAR MOBILE - Slide dari kiri seperti ChatGPT (tetap ada sebagai akses tambahan) */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <div 
-            className="absolute top-0 left-0 h-full w-[85%] max-w-[320px] bg-[#005c48] p-6 space-y-6 overflow-y-auto shadow-2xl animate-[slideIn_0.25s_ease-out]" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-[#004737] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1 shadow-md overflow-hidden flex-shrink-0">
-                  <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={40} height={40} className="object-contain" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-base leading-tight text-white">RSUD PASIRIAN</h2>
-                  <p className="text-xs text-amber-400 font-semibold tracking-wider uppercase">Virtual Assistant</p>
-                </div>
-              </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-200 font-bold p-1 text-xl">✕</button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-emerald-200">🔍 Layanan Informasi</p>
-                <p className="text-xs text-emerald-100/70 mt-0.5 italic">Layanan apa yang Anda butuhkan saat ini?</p>
-              </div>
-              <div className="flex flex-col gap-2 pt-1">
-                {topics.map((topic) => (
-                  <button
-                    key={topic.label}
-                    type="button"
-                    onClick={() => handleTopicClick(topic.text, topic.loading)}
-                    className="text-left text-sm bg-[#004737] hover:bg-[#00382b] p-3.5 rounded-lg border border-emerald-800/50 transition text-emerald-50 font-medium"
-                  >
-                    {topic.icon} {topic.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-[#004737] p-3 rounded-xl flex items-center gap-2 border border-emerald-800/40">
-              <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
-              <span className="text-sm font-medium text-emerald-100">Sistem AI Aktif</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx global>{`
-        @keyframes slideIn {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
 
     </div>
   );
