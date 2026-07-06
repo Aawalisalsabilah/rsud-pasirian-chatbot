@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Fraunces, Inter } from 'next/font/google';
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
@@ -25,7 +25,7 @@ const faktaCepat = [
   { angka: '6', label: 'Layanan utama tersedia' },
 ];
 
-// Data klinik & dokter spesialis, diambil dari materi Layanan Spesialistik RSUD Pasirian.
+// Data klinik & dokter spesialis — dipakai sebagai FALLBACK sebelum data dari /api/poli berhasil diambil.
 const klinikSpesialis = [
   { klinik: 'Klinik Anak', dokter: ['dr. Nurul Yudhi, Sp.A', 'dr. Wigit K, Sp.A'] },
   { klinik: 'Klinik Bedah', dokter: ['dr. Arry Setyo D, Sp.B', 'dr. Hendra S, Sp.B'] },
@@ -402,6 +402,39 @@ function DaftarOnlineModal({ open, onClose }) {
 export default function LandingPage() {
   const [daftarModalOpen, setDaftarModalOpen] = useState(false);
 
+  // klinikData dimulai dari data statis (fallback) lalu diganti begitu fetch ke /api/poli berhasil.
+  const [klinikData, setKlinikData] = useState(klinikSpesialis);
+
+  useEffect(() => {
+    fetch('/api/poli')
+      .then((res) => res.json())
+      .then((res) => {
+        // Sesuaikan "res.data" ini kalau bentuk JSON dari API kamu beda strukturnya.
+        const rows = res.data || [];
+
+        // Kelompokkan data flat per-dokter (nama_poli, nama_dokter, hari, jam)
+        // menjadi bentuk { klinik, dokter: [...] } yang dipakai section #dokter.
+        const grouped = {};
+        rows.forEach((item) => {
+          if (item.is_active === false) return; // lewati yang non-aktif
+          const namaKlinik = item.nama_poli;
+          const baris = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
+          if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
+          grouped[namaKlinik].push(baris);
+        });
+
+        const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
+
+        if (hasil.length > 0) {
+          setKlinikData(hasil);
+        }
+      })
+      .catch((err) => {
+        console.error('[JADWAL DOKTER FETCH ERROR]', err);
+        // Kalau fetch gagal, klinikData tetap pakai fallback statis (klinikSpesialis) — tidak apa-apa.
+      });
+  }, []);
+
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen bg-white text-[#0F2A24]`}>
       {/* Top utility bar */}
@@ -679,12 +712,12 @@ export default function LandingPage() {
               Dokter spesialis kami
             </h3>
             <p className="text-[#0F2A24]/60 text-[15px] mt-3">
-              10 klinik spesialistik dengan dokter berpengalaman. Untuk jam praktik terkini, silakan hubungi kami atau cek saat Daftar Online.
+              Data diambil otomatis dari sistem admin. Untuk jam praktik terkini, silakan hubungi kami atau cek saat Daftar Online.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {klinikSpesialis.map((k) => (
+            {klinikData.map((k) => (
               <div
                 key={k.klinik}
                 className="bg-white border border-black/[0.06] rounded-2xl p-6 hover:shadow-[0_12px_30px_rgba(15,42,36,0.08)] transition"
