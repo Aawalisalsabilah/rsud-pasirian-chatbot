@@ -53,7 +53,7 @@ export async function POST(request) {
             messages: fullMessages,
             model: 'llama-3.1-8b-instant',
             temperature: 0.3,
-            max_tokens: 800,
+            max_tokens: 2000,
         });
 
         reply = chatCompletion.choices[0]?.message?.content || 'Maaf, sistem tidak memberikan respon.';
