@@ -2,6 +2,25 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Fraunces, Inter } from 'next/font/google';
+
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter' });
+
+const INK = '#0B2B24';
+const BRASS = '#C08829';
+const BRASS_SOFT = '#DDB169';
+const CREAM = '#FBF9F4';
+const EMERALD = '#1F6B4F';
+const STEEL = '#2A6C93';
+const CLAY = '#9E3B32';
+const PLUM = '#6B4A8A';
+
+const KATEGORI_INFO = {
+  baseInfo: { label: 'Informasi Umum', color: STEEL },
+  standarPelayananPublik: { label: 'Standar Pelayanan Publik', color: EMERALD },
+  panduanJKN: { label: 'Panduan JKN Mobile', color: PLUM },
+};
 
 // ===== Helper tanggal per minggu (dipakai buat label export JPG/PDF) =====
 const namaBulanID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -38,7 +57,6 @@ function hariKeTanggalExport(hariText, week) {
   return hariText;
 }
 
-// Small inline icons (no extra dependency needed)
 function IconPencil(props) {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -113,8 +131,16 @@ function IconPlus(props) {
   );
 }
 
+function IconMegaphone(props) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 4V5.5L6 9.5H4a1 1 0 0 0-1 1ZM15 8a4 4 0 0 1 0 8M18 5a8 8 0 0 1 0 14" />
+    </svg>
+  );
+}
+
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli'
+  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'pengumuman'
   const router = useRouter();
 
   async function handleLogout() {
@@ -124,38 +150,73 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <img src="/logo-rs.jpeg" alt="Logo RSUD Pasirian Lumajang" style={styles.logoImg} />
-          <h1 style={styles.headerTitle}>Admin RSUD Pasirian</h1>
+    <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen bg-[#FBF9F4] text-[#0B2B24]`}>
+      {}
+      <header className="bg-[#0B2B24]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo-rs.jpeg"
+              alt="Logo RSUD Pasirian Lumajang"
+              className="w-9 h-9 rounded-full object-cover bg-white shrink-0"
+            />
+            <div>
+              <h1 className="font-[var(--font-fraunces)] font-semibold text-[16px] leading-tight text-white">Admin RSUD Pasirian</h1>
+              <p className="text-[11px] text-white/50 tracking-[0.04em] font-medium">Panel Pengelolaan Konten</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="border border-white/25 hover:bg-white/10 text-white/90 text-[13px] font-semibold px-4 py-2 rounded-full transition"
+          >
+            Keluar
+          </button>
         </div>
-        <button onClick={handleLogout} style={styles.logoutBtn}>Keluar</button>
       </header>
 
-      <nav style={styles.tabs}>
-        <button
-          onClick={() => setTab('knowledge')}
-          style={tab === 'knowledge' ? styles.tabActive : styles.tab}
-        >
-          Basis Pengetahuan (FAQ)
-        </button>
-        <button
-          onClick={() => setTab('poli')}
-          style={tab === 'poli' ? styles.tabActive : styles.tab}
-        >
-          Jadwal Dokter
-        </button>
+      {}
+      <nav className="bg-white border-b border-[#0B2B24]/[0.08]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 flex gap-2">
+          <button
+            onClick={() => setTab('knowledge')}
+            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'knowledge'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Basis Pengetahuan (FAQ)
+          </button>
+          <button
+            onClick={() => setTab('poli')}
+            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'poli'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Jadwal Dokter
+          </button>
+          <button
+            onClick={() => setTab('pengumuman')}
+            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'pengumuman'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Papan Pengumuman
+          </button>
+        </div>
       </nav>
 
-      <main style={styles.main}>
-        {tab === 'knowledge' ? <KnowledgeTab /> : <PoliTab />}
+      <main className="max-w-7xl mx-auto px-5 sm:px-6 py-8">
+        {tab === 'knowledge' ? <KnowledgeTab /> : tab === 'poli' ? <PoliTab /> : <AnnouncementTab />}
       </main>
     </div>
   );
 }
 
-// ================= TAB: KNOWLEDGE BASE =================
 function KnowledgeTab() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -208,13 +269,16 @@ function KnowledgeTab() {
     else alert('Gagal menghapus data.');
   }
 
-  if (loading) return <p style={styles.loadingText}>Memuat data...</p>;
+  if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
 
   return (
     <div>
-      <div style={styles.toolbar}>
-        <p style={styles.count}>{items.length} data</p>
-        <button onClick={() => setEditing({})} style={styles.addBtn}>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-[#0B2B24]/55 text-[14px] font-medium">{items.length} data</p>
+        <button
+          onClick={() => setEditing({})}
+          className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
+        >
           <IconPlus /> Tambah Data
         </button>
       </div>
@@ -228,25 +292,48 @@ function KnowledgeTab() {
         />
       )}
 
-      <div style={styles.list}>
-        {items.map((item) => (
-          <div key={item.id} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <span style={styles.badge}>{item.kategori}</span>
-              <div style={styles.actionGroup}>
-                <button onClick={() => setEditing(item)} style={styles.editBtn} title="Edit">
-                  <IconPencil /> Edit
-                </button>
-                <button onClick={() => handleDelete(item.id)} style={styles.deleteBtn} title="Hapus">
-                  <IconTrash /> Hapus
-                </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item) => {
+          const kat = KATEGORI_INFO[item.kategori] || { label: item.kategori, color: STEEL };
+          return (
+            <div
+              key={item.id}
+              className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 flex flex-col h-[340px] hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
+            >
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span
+                  className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: `${kat.color}14`, color: kat.color }}
+                >
+                  {kat.label}
+                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setEditing(item)}
+                    title="Edit"
+                    className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                  >
+                    <IconPencil /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    title="Hapus"
+                    className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                  >
+                    <IconTrash /> Hapus
+                  </button>
+                </div>
               </div>
+              {item.judul && (
+                <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24] mb-1.5">{item.judul}</p>
+              )}
+              <p className="text-[13.5px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap overflow-y-auto flex-1">
+                {item.konten}
+              </p>
             </div>
-            {item.judul && <p style={styles.cardTitle}>{item.judul}</p>}
-            <p style={styles.cardContent}>{item.konten}</p>
-          </div>
-        ))}
-        {items.length === 0 && <p style={styles.emptyText}>Belum ada data.</p>}
+          );
+        })}
+        {items.length === 0 && <p className="text-[#0B2B24]/50 text-[14px] italic">Belum ada data.</p>}
       </div>
     </div>
   );
@@ -258,43 +345,55 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
   const [konten, setKonten] = useState(initial.konten || '');
 
   return (
-    <div style={styles.formCard}>
-      <p style={styles.formTitle}>{initial.id ? 'Edit Data' : 'Tambah Data Baru'}</p>
+    <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+      <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+        {initial.id ? 'Edit Data' : 'Tambah Data Baru'}
+      </p>
 
-      <label style={styles.label}>Kategori</label>
-      <select value={kategori} onChange={(e) => setKategori(e.target.value)} style={styles.input}>
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Kategori</label>
+      <select
+        value={kategori}
+        onChange={(e) => setKategori(e.target.value)}
+        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white mb-4"
+      >
         <option value="baseInfo">Informasi Umum (baseInfo)</option>
         <option value="standarPelayananPublik">Standar Pelayanan Publik</option>
         <option value="panduanJKN">Panduan JKN Mobile</option>
       </select>
 
-      <label style={styles.label}>Judul (opsional)</label>
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Judul (opsional)</label>
       <input
         value={judul}
         onChange={(e) => setJudul(e.target.value)}
-        style={styles.input}
         placeholder="Misal: Jam Besuk Pasien"
+        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 
-      <label style={styles.label}>Konten</label>
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Konten</label>
       <textarea
         value={konten}
         onChange={(e) => setKonten(e.target.value)}
-        style={styles.textarea}
         rows={6}
         placeholder="Isi informasi lengkap di sini..."
+        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition font-[var(--font-inter)]"
       />
 
-      <p style={styles.hint}>
+      <p className="text-[12px] text-[#8a5a12] bg-[#C08829]/10 px-3 py-2 rounded-lg mt-3">
         ⚠️ Setiap konten disimpan, embedding-nya otomatis dibuat ulang (butuh beberapa detik).
       </p>
 
-      <div style={styles.formActions}>
-        <button onClick={onCancel} style={styles.cancelBtn} disabled={saving}>Batal</button>
+      <div className="flex justify-end gap-2.5 mt-5">
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
+        >
+          Batal
+        </button>
         <button
           onClick={() => onSave({ id: initial.id, kategori, judul, konten })}
-          style={styles.saveBtn}
           disabled={saving || !konten.trim()}
+          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
@@ -303,7 +402,6 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
   );
 }
 
-// ================= TAB: POLI DOKTER =================
 function PoliTab() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -430,7 +528,7 @@ function PoliTab() {
     setExpanded((prev) => ({ ...prev, [namaPoli]: !prev[namaPoli] }));
   }
 
-  if (loading) return <p style={styles.loadingText}>Memuat data...</p>;
+  if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
 
   // Filter berdasarkan pencarian (nama poli ATAU nama dokter)
   const keyword = search.trim().toLowerCase();
@@ -450,33 +548,45 @@ function PoliTab() {
   }
   const groupNames = Object.keys(grouped).sort();
 
-  // Kalau lagi searching, buka semua group yang match otomatis
   const isGroupOpen = (namaPoli) => (keyword ? true : Boolean(expanded[namaPoli]));
 
   return (
     <div>
-      <div style={styles.toolbar}>
-        <p style={styles.count}>{items.length} jadwal · {groupNames.length} poli</p>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={handleDownloadJPG} style={styles.exportBtn} disabled={exporting || items.length === 0}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <p className="text-[#0B2B24]/55 text-[14px] font-medium">
+          {items.length} jadwal &middot; {groupNames.length} poli
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleDownloadJPG}
+            disabled={exporting || items.length === 0}
+            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/[0.05] px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
+          >
             <IconDownload /> {exporting ? 'Memproses...' : 'Unduh JPG'}
           </button>
-          <button onClick={handleDownloadPDF} style={styles.exportBtn} disabled={exporting || items.length === 0}>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={exporting || items.length === 0}
+            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/[0.05] px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
+          >
             <IconDownload /> {exporting ? 'Memproses...' : 'Unduh PDF'}
           </button>
-          <button onClick={() => setEditing({})} style={styles.addBtn}>
+          <button
+            onClick={() => setEditing({})}
+            className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
+          >
             <IconPlus /> Tambah Jadwal
           </button>
         </div>
       </div>
 
-      <div style={styles.searchWrap}>
-        <IconSearch style={styles.searchIcon} />
+      <div className="relative mb-5">
+        <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0B2B24]/40" />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama poli atau dokter..."
-          style={styles.searchInput}
+          className="w-full rounded-xl border border-[#0B2B24]/[0.12] pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
         />
       </div>
 
@@ -489,45 +599,79 @@ function PoliTab() {
         />
       )}
 
-      <div style={styles.accordionList}>
+      <div className="flex flex-col gap-2.5">
         {groupNames.map((namaPoli) => {
           const doctors = grouped[namaPoli];
           const activeCount = doctors.filter((d) => d.is_active !== false).length;
           const open = isGroupOpen(namaPoli);
 
           return (
-            <div key={namaPoli} style={styles.accordionGroup}>
-              <button onClick={() => togglePoli(namaPoli)} style={styles.accordionHeader}>
-                <div style={styles.accordionHeaderLeft}>
-                  <IconChevron style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }} />
-                  <span style={styles.accordionTitle}>{namaPoli}</span>
+            <div key={namaPoli} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+              <button
+                onClick={() => togglePoli(namaPoli)}
+                className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left"
+              >
+                <div className="flex items-center gap-2.5 text-[#0B2B24]">
+                  <IconChevron
+                    className="transition-transform"
+                    style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                  />
+                  <span className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{namaPoli}</span>
                 </div>
-                <span style={styles.accordionMeta}>
-                  {doctors.length} dokter · {activeCount} aktif
+                <span className="text-[12.5px] font-semibold text-[#0B2B24]/50 shrink-0">
+                  {doctors.length} dokter &middot; {activeCount} aktif
                 </span>
               </button>
 
               {open && (
-                <div style={styles.accordionBody}>
+                <div className="border-t border-[#0B2B24]/[0.06] px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
                   {doctors.map((item) => {
                     const isActive = item.is_active !== false;
                     return (
-                      <div key={item.id} style={!isActive ? { ...styles.doctorRow, ...styles.doctorRowInactive } : styles.doctorRow}>
-                        <div style={styles.doctorInfo}>
-                          <p style={styles.doctorName}>{item.nama_dokter}</p>
-                          <p style={styles.doctorMeta}>{item.hari} · {item.jam}</p>
+                      <div
+                        key={item.id}
+                        className={`flex flex-wrap items-center justify-between gap-3 bg-white border border-[#0B2B24]/[0.06] rounded-xl px-4 py-3 ${
+                          !isActive ? 'opacity-55' : ''
+                        }`}
+                      >
+                        <div className="min-w-[180px]">
+                          <p className="font-semibold text-[14px] text-[#0B2B24]">{item.nama_dokter}</p>
+                          <p className="text-[12.5px] text-[#0B2B24]/55 mt-0.5">{item.hari} &middot; {item.jam}</p>
                         </div>
-                        <div style={styles.doctorActions}>
-                          <span style={isActive ? styles.statusBadgeActive : styles.statusBadgeInactive}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className="text-[11.5px] font-bold px-2.5 py-1 rounded-full"
+                            style={
+                              isActive
+                                ? { backgroundColor: `${EMERALD}14`, color: EMERALD }
+                                : { backgroundColor: '#0B2B240D', color: '#6B7280' }
+                            }
+                          >
                             {isActive ? 'Aktif' : 'Libur'}
                           </span>
-                          <button onClick={() => handleToggleActive(item)} style={isActive ? styles.pauseBtn : styles.resumeBtn} title={isActive ? 'Set jadwal libur' : 'Aktifkan jadwal'}>
+                          <button
+                            onClick={() => handleToggleActive(item)}
+                            title={isActive ? 'Set jadwal libur' : 'Aktifkan jadwal'}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition ${
+                              isActive
+                                ? 'border-[#C08829] text-[#8a5a12] hover:bg-[#C08829]/[0.06]'
+                                : 'bg-[#1F6B4F] border-[#1F6B4F] text-white hover:bg-[#195a42]'
+                            }`}
+                          >
                             {isActive ? <IconPause /> : <IconPlay />} {isActive ? 'Set Libur' : 'Aktifkan'}
                           </button>
-                          <button onClick={() => setEditing(item)} style={styles.editBtn} title="Edit">
+                          <button
+                            onClick={() => setEditing(item)}
+                            title="Edit"
+                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
                             <IconPencil /> Edit
                           </button>
-                          <button onClick={() => handleDelete(item.id)} style={styles.deleteBtn} title="Hapus">
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            title="Hapus"
+                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
                             <IconTrash /> Hapus
                           </button>
                         </div>
@@ -539,43 +683,45 @@ function PoliTab() {
             </div>
           );
         })}
-        {groupNames.length === 0 && <p style={styles.emptyText}>Tidak ada poli/dokter yang cocok dengan pencarian.</p>}
+        {groupNames.length === 0 && (
+          <p className="text-[#0B2B24]/50 text-[14px] italic">Tidak ada poli/dokter yang cocok dengan pencarian.</p>
+        )}
       </div>
 
-      {/* Template khusus buat di-export ke JPG/PDF — ditaruh off-screen, cuma tampilin jadwal aktif */}
-      <div style={styles.printOffscreen}>
-        <div ref={printRef} style={styles.printSheet}>
-          <div style={styles.printHeader}>
-            <img src="/logo-rs.jpeg" alt="Logo RSUD Pasirian Lumajang" style={styles.printLogoImg} />
+      {}
+      <div style={printStyles.offscreen}>
+        <div ref={printRef} style={printStyles.sheet}>
+          <div style={printStyles.header}>
+            <img src="/logo-rs.jpeg" alt="Logo RSUD Pasirian Lumajang" style={printStyles.logoImg} />
             <div>
-              <p style={styles.printTitle}>RSUD Pasirian Lumajang</p>
-              <p style={styles.printSubtitle}>Jadwal Praktik Dokter</p>
+              <p style={printStyles.title}>RSUD Pasirian Lumajang</p>
+              <p style={printStyles.subtitle}>Jadwal Praktik Dokter</p>
             </div>
           </div>
-          <p style={styles.printDate}>
+          <p style={printStyles.date}>
             Periode: {getWeekInfoForExport().periodeText} · Diperbarui {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          <table style={styles.printTable}>
+          <table style={printStyles.table}>
             <thead>
               <tr>
-                <th style={styles.printTh}>Poli</th>
-                <th style={styles.printTh}>Dokter</th>
-                <th style={styles.printTh}>Hari Praktik</th>
-                <th style={styles.printTh}>Jam</th>
+                <th style={printStyles.th}>Poli</th>
+                <th style={printStyles.th}>Dokter</th>
+                <th style={printStyles.th}>Hari Praktik</th>
+                <th style={printStyles.th}>Jam</th>
               </tr>
             </thead>
             <tbody>
               {items.filter((item) => item.is_active !== false).map((item) => (
                 <tr key={item.id}>
-                  <td style={styles.printTd}>{item.nama_poli}</td>
-                  <td style={styles.printTd}>{item.nama_dokter}</td>
-                  <td style={styles.printTd}>{hariKeTanggalExport(item.hari, getWeekInfoForExport().week)}</td>
-                  <td style={styles.printTd}>{item.jam}</td>
+                  <td style={printStyles.td}>{item.nama_poli}</td>
+                  <td style={printStyles.td}>{item.nama_dokter}</td>
+                  <td style={printStyles.td}>{hariKeTanggalExport(item.hari, getWeekInfoForExport().week)}</td>
+                  <td style={printStyles.td}>{item.jam}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p style={styles.printFooter}>Jadwal dapat berubah sewaktu-waktu. Informasi lebih lanjut hubungi RSUD Pasirian.</p>
+          <p style={printStyles.footer}>Jadwal dapat berubah sewaktu-waktu. Informasi lebih lanjut hubungi RSUD Pasirian.</p>
         </div>
       </div>
     </div>
@@ -590,32 +736,70 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
   const [is_active, setIsActive] = useState(initial.is_active !== false);
 
   return (
-    <div style={styles.formCard}>
-      <p style={styles.formTitle}>{initial.id ? 'Edit Jadwal' : 'Tambah Jadwal Baru'}</p>
+    <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+      <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+        {initial.id ? 'Edit Jadwal' : 'Tambah Jadwal Baru'}
+      </p>
 
-      <label style={styles.label}>Nama Poli</label>
-      <input value={nama_poli} onChange={(e) => setNamaPoli(e.target.value)} style={styles.input} placeholder="Poli Spesialis Anak" />
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Nama Poli</label>
+      <input
+        value={nama_poli}
+        onChange={(e) => setNamaPoli(e.target.value)}
+        placeholder="Poli Spesialis Anak"
+        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+      />
 
-      <label style={styles.label}>Nama Dokter</label>
-      <input value={nama_dokter} onChange={(e) => setNamaDokter(e.target.value)} style={styles.input} placeholder="dr. Nama, Sp.A" />
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Nama Dokter</label>
+      <input
+        value={nama_dokter}
+        onChange={(e) => setNamaDokter(e.target.value)}
+        placeholder="dr. Nama, Sp.A"
+        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+      />
 
-      <label style={styles.label}>Hari Praktik</label>
-      <input value={hari} onChange={(e) => setHari(e.target.value)} style={styles.input} placeholder="Senin-Jumat" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-1">
+        <div>
+          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Hari Praktik</label>
+          <input
+            value={hari}
+            onChange={(e) => setHari(e.target.value)}
+            placeholder="Senin-Jumat"
+            className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Jam Praktik</label>
+          <input
+            value={jam}
+            onChange={(e) => setJam(e.target.value)}
+            placeholder="08.00-12.00"
+            className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+          />
+        </div>
+      </div>
 
-      <label style={styles.label}>Jam Praktik</label>
-      <input value={jam} onChange={(e) => setJam(e.target.value)} style={styles.input} placeholder="08.00-12.00" />
-
-      <label style={styles.checkboxRow}>
-        <input type="checkbox" checked={is_active} onChange={(e) => setIsActive(e.target.checked)} style={styles.checkbox} />
+      <label className="flex items-center gap-2 mt-4 text-[13px] font-semibold text-[#0B2B24]/70 cursor-pointer w-fit">
+        <input
+          type="checkbox"
+          checked={is_active}
+          onChange={(e) => setIsActive(e.target.checked)}
+          className="w-4 h-4 accent-[#C08829] cursor-pointer"
+        />
         Jadwal aktif (tampilkan ke pasien di chatbot)
       </label>
 
-      <div style={styles.formActions}>
-        <button onClick={onCancel} style={styles.cancelBtn} disabled={saving}>Batal</button>
+      <div className="flex justify-end gap-2.5 mt-5">
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
+        >
+          Batal
+        </button>
         <button
           onClick={() => onSave({ id: initial.id, nama_poli, nama_dokter, hari, jam, is_active })}
-          style={styles.saveBtn}
           disabled={saving || !nama_poli.trim() || !nama_dokter.trim()}
+          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
@@ -624,213 +808,125 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
   );
 }
 
-// ================= DESIGN TOKENS (matched to chatbot palette) =================
-const colors = {
-  greenDark: '#0B3D2E',   // header / sidebar dark green from chatbot
-  greenDarker: '#082B20', // hover state for green elements
-  green: '#146354',       // secondary green accent (edit button)
-  greenSoft: '#E4F1EC',   // soft green background (badge)
-  orange: '#F5821F',      // primary CTA orange from chatbot
-  orangeHover: '#DD720F',
-  orangeSoft: '#FFF1E0',
-  red: '#DC2626',
-  redSoft: '#FDECEC',
-  bg: '#F7F8F6',
-  border: '#E2E8DE',
-  textMain: '#0F2E22',
-  textMuted: '#5B6B63',
-};
+function AnnouncementTab() {
+  const [message, setMessage] = useState('');
+  const [isActive, setIsActive] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savedOk, setSavedOk] = useState(false);
 
-// ================= STYLES =================
-const styles = {
-  page: { minHeight: '100vh', background: colors.bg, fontFamily: 'system-ui, sans-serif' },
-  header: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '16px 24px', background: colors.greenDark, color: '#fff',
-  },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: '10px' },
-  logoImg: {
-    width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
-    background: '#fff',
-  },
-  headerTitle: { fontSize: '18px', margin: 0, fontWeight: 600 },
-  logoutBtn: {
-    background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: '#fff',
-    padding: '7px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
-  },
-  tabs: { display: 'flex', gap: '4px', padding: '16px 24px 0', background: '#fff', borderBottom: `1px solid ${colors.border}` },
-  tab: {
-    padding: '12px 18px', border: 'none', background: 'transparent',
-    color: colors.textMuted, cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-    borderBottom: '3px solid transparent', marginBottom: '-1px',
-  },
-  tabActive: {
-    padding: '12px 18px', border: 'none', background: 'transparent',
-    color: colors.greenDark, cursor: 'pointer', fontWeight: 700, fontSize: '14px',
-    borderBottom: `3px solid ${colors.orange}`, marginBottom: '-1px',
-  },
-  main: { padding: '24px', maxWidth: '1400px', margin: '0 auto' },
-  toolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' },
-  count: { color: colors.textMuted, fontSize: '14px', margin: 0, fontWeight: 500 },
-  addBtn: {
-    display: 'flex', alignItems: 'center', gap: '6px',
-    background: colors.orange, color: '#fff', border: 'none', padding: '9px 18px',
-    borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
-    boxShadow: '0 2px 6px rgba(245,130,31,0.35)',
-  },
-  list: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '12px',
-  },
-  card: {
-    background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '18px',
-    boxShadow: '0 1px 3px rgba(15,46,34,0.06)',
-    display: 'flex', flexDirection: 'column', height: '340px',
-  },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' },
-  badge: {
-    background: colors.greenSoft, color: colors.green, fontSize: '12px', padding: '4px 10px',
-    borderRadius: '999px', fontWeight: 700, letterSpacing: '0.2px',
-  },
-  actionGroup: { display: 'flex', gap: '8px' },
-  editBtn: {
-    display: 'flex', alignItems: 'center', gap: '5px',
-    background: '#fff', color: colors.green, border: `1px solid ${colors.green}`,
-    padding: '6px 12px', borderRadius: '7px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
-  },
-  deleteBtn: {
-    display: 'flex', alignItems: 'center', gap: '5px',
-    background: '#fff', color: colors.red, border: `1px solid ${colors.red}`,
-    padding: '6px 12px', borderRadius: '7px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
-  },
-  cardTitle: { fontWeight: 700, margin: '4px 0', color: colors.textMain },
-  cardContent: {
-    color: '#374a40', fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0, lineHeight: 1.5,
-    overflowY: 'auto', flex: 1, paddingTop: '4px',
-  },
-  formCard: {
-    background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '12px',
-    padding: '22px', marginBottom: '18px', boxShadow: '0 2px 8px rgba(15,46,34,0.08)',
-  },
-  formTitle: { fontWeight: 700, marginBottom: '12px', color: colors.textMain, fontSize: '15px' },
-  label: { display: 'block', fontSize: '13px', fontWeight: 600, color: colors.textMuted, marginBottom: '4px', marginTop: '12px' },
-  input: {
-    width: '100%', padding: '9px 11px', borderRadius: '8px', border: `1px solid ${colors.border}`,
-    fontSize: '14px', boxSizing: 'border-box', outline: 'none',
-  },
-  textarea: {
-    width: '100%', padding: '9px 11px', borderRadius: '8px', border: `1px solid ${colors.border}`,
-    fontSize: '14px', boxSizing: 'border-box', fontFamily: 'inherit', outline: 'none',
-  },
-  hint: { fontSize: '12px', color: '#B45309', marginTop: '10px', background: colors.orangeSoft, padding: '8px 10px', borderRadius: '7px' },
-  formActions: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' },
-  cancelBtn: {
-    padding: '9px 18px', borderRadius: '8px', border: `1px solid ${colors.border}`,
-    background: '#fff', cursor: 'pointer', fontWeight: 600, color: colors.textMuted, fontSize: '14px',
-  },
-  saveBtn: {
-    padding: '9px 20px', borderRadius: '8px', border: 'none',
-    background: colors.greenDark, color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
-  },
-  tableWrap: {
-    background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '12px',
-    overflow: 'hidden', boxShadow: '0 1px 3px rgba(15,46,34,0.06)',
-  },
+  async function loadData() {
+    setLoading(true);
+    const res = await fetch('/api/admin/announcement');
+    const json = await res.json();
+    setMessage(json.data?.message || '');
+    setIsActive(json.data?.is_active || false);
+    setUpdatedAt(json.data?.updated_at || null);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function handleSave() {
+    setSaving(true);
+    setSavedOk(false);
+    const res = await fetch('/api/admin/announcement', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, is_active: isActive }),
+    });
+    setSaving(false);
+
+    if (res.ok) {
+      const json = await res.json();
+      setUpdatedAt(json.data?.updated_at || null);
+      setSavedOk(true);
+      setTimeout(() => setSavedOk(false), 2500);
+    } else {
+      const json = await res.json();
+      alert('Gagal menyimpan: ' + (json.error || 'unknown error'));
+    }
+  }
+
+  if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-[#0B2B24]/55 text-[14px] font-medium">
+          {isActive ? 'Sedang tampil ke pengunjung' : 'Sedang tidak tampil'}
+          {updatedAt && (
+            <span className="text-[#0B2B24]/40"> &middot; terakhir diubah {new Date(updatedAt).toLocaleString('id-ID')}</span>
+          )}
+        </p>
+        <span
+          className="inline-flex items-center gap-1.5 text-[11.5px] font-bold px-2.5 py-1 rounded-full"
+          style={
+            isActive
+              ? { backgroundColor: `${EMERALD}14`, color: EMERALD }
+              : { backgroundColor: '#0B2B240D', color: '#6B7280' }
+          }
+        >
+          <IconMegaphone /> {isActive ? 'Aktif' : 'Nonaktif'}
+        </span>
+      </div>
+
+      <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 max-w-xl shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+        <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+          Papan Pengumuman
+        </p>
+
+        <label className="flex items-center gap-2.5 mb-4 text-[13.5px] font-semibold text-[#0B2B24]/70 cursor-pointer w-fit">
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            className="w-4 h-4 accent-[#C08829] cursor-pointer"
+          />
+          Tampilkan pengumuman ke pengunjung
+        </label>
+
+        <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Isi pengumuman</label>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          placeholder="Misal: Layanan Poli Gigi tutup sementara 8-10 Juli 2026 karena pemeliharaan alat."
+          className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+        />
+
+        <p className="text-[12px] text-[#0B2B24]/45 mt-2.5">
+          Pengunjung yang sudah menutup pengumuman ini di sesi browser mereka tidak akan melihatnya lagi sampai isi pesan berubah.
+        </p>
+
+        <div className="flex items-center justify-end gap-3 mt-5">
+          {savedOk && <span className="text-[12.5px] font-semibold text-[#1F6B4F]">Tersimpan.</span>}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const printStyles = {
+  offscreen: { position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' },
+  sheet: { width: '800px', background: '#ffffff', padding: '40px', fontFamily: 'system-ui, sans-serif' },
+  header: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' },
+  logoImg: { width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#fff' },
+  title: { fontSize: '20px', fontWeight: 800, color: INK, margin: 0 },
+  subtitle: { fontSize: '14px', color: '#5B6B63', margin: '2px 0 0' },
+  date: { fontSize: '12.5px', color: '#5B6B63', margin: '14px 0 18px' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: {
-    textAlign: 'left', padding: '12px 16px', fontSize: '12.5px', color: '#fff',
-    background: colors.greenDark, fontWeight: 600,
-  },
-  td: { padding: '12px 16px', fontSize: '14px', borderBottom: `1px solid ${colors.border}`, color: '#374a40' },
-  loadingText: { color: colors.textMuted, fontSize: '14px' },
-  emptyText: { color: colors.textMuted, fontSize: '14px', fontStyle: 'italic' },
-  trInactive: { opacity: 0.5, background: '#FAFAF9' },
-  statusBadgeActive: {
-    background: colors.greenSoft, color: colors.green, fontSize: '12px', padding: '4px 10px',
-    borderRadius: '999px', fontWeight: 700,
-  },
-  statusBadgeInactive: {
-    background: '#F1F1EF', color: '#6B7280', fontSize: '12px', padding: '4px 10px',
-    borderRadius: '999px', fontWeight: 700,
-  },
-  pauseBtn: {
-    display: 'flex', alignItems: 'center', gap: '5px',
-    background: '#fff', color: '#B45309', border: '1px solid #B45309',
-    padding: '6px 12px', borderRadius: '7px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
-  },
-  resumeBtn: {
-    display: 'flex', alignItems: 'center', gap: '5px',
-    background: colors.green, color: '#fff', border: `1px solid ${colors.green}`,
-    padding: '6px 12px', borderRadius: '7px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600,
-  },
-  checkboxRow: {
-    display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px',
-    fontSize: '13px', color: colors.textMuted, fontWeight: 600, cursor: 'pointer',
-  },
-  checkbox: { width: '16px', height: '16px', cursor: 'pointer' },
-  exportBtn: {
-    display: 'flex', alignItems: 'center', gap: '6px',
-    background: '#fff', color: colors.greenDark, border: `1px solid ${colors.greenDark}`,
-    padding: '9px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '13.5px',
-  },
-  printOffscreen: {
-    position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none',
-  },
-  printSheet: {
-    width: '800px', background: '#ffffff', padding: '40px', fontFamily: 'system-ui, sans-serif',
-  },
-  printHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' },
-  printLogoImg: {
-    width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
-    background: '#fff',
-  },
-  printTitle: { fontSize: '20px', fontWeight: 800, color: colors.greenDark, margin: 0 },
-  printSubtitle: { fontSize: '14px', color: colors.textMuted, margin: '2px 0 0' },
-  printDate: { fontSize: '12.5px', color: colors.textMuted, margin: '14px 0 18px' },
-  printTable: { width: '100%', borderCollapse: 'collapse' },
-  printTh: {
-    textAlign: 'left', padding: '10px 14px', fontSize: '13px', color: '#fff',
-    background: colors.greenDark, fontWeight: 700,
-  },
-  printTd: {
-    padding: '10px 14px', fontSize: '13.5px', color: colors.textMain,
-    borderBottom: `1px solid ${colors.border}`,
-  },
-  printFooter: { fontSize: '11.5px', color: colors.textMuted, marginTop: '20px', fontStyle: 'italic' },
-
-  searchWrap: { position: 'relative', marginBottom: '16px' },
-  searchIcon: { position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: colors.textMuted },
-  searchInput: {
-    width: '100%', padding: '10px 14px 10px 40px', borderRadius: '10px',
-    border: `1px solid ${colors.border}`, fontSize: '14px', boxSizing: 'border-box',
-    outline: 'none', background: '#fff',
-  },
-
-  accordionList: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  accordionGroup: {
-    background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '12px',
-    overflow: 'hidden', boxShadow: '0 1px 3px rgba(15,46,34,0.06)',
-  },
-  accordionHeader: {
-    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '14px 18px', background: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left',
-  },
-  accordionHeaderLeft: { display: 'flex', alignItems: 'center', gap: '10px', color: colors.greenDark },
-  accordionTitle: { fontWeight: 700, fontSize: '15px', color: colors.textMain },
-  accordionMeta: { fontSize: '12.5px', color: colors.textMuted, fontWeight: 600 },
-  accordionBody: {
-    borderTop: `1px solid ${colors.border}`, padding: '10px 14px 14px',
-    display: 'flex', flexDirection: 'column', gap: '8px', background: colors.bg,
-  },
-  doctorRow: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
-    background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '10px',
-    padding: '12px 14px', flexWrap: 'wrap',
-  },
-  doctorRowInactive: { opacity: 0.55 },
-  doctorInfo: { minWidth: '180px' },
-  doctorName: { fontWeight: 700, fontSize: '14px', color: colors.textMain, margin: 0 },
-  doctorMeta: { fontSize: '12.5px', color: colors.textMuted, margin: '2px 0 0' },
-  doctorActions: { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' },
+  th: { textAlign: 'left', padding: '10px 14px', fontSize: '13px', color: '#fff', background: INK, fontWeight: 700 },
+  td: { padding: '10px 14px', fontSize: '13.5px', color: INK, borderBottom: '1px solid #E2E8DE' },
+  footer: { fontSize: '11.5px', color: '#5B6B63', marginTop: '20px', fontStyle: 'italic' },
 };

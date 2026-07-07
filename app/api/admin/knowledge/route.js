@@ -7,7 +7,6 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// GET -> ambil semua data knowledge_base (tanpa kolom embedding, biar response ringan)
 export async function GET() {
   const { data, error } = await supabase
     .from('knowledge_base')
@@ -21,7 +20,6 @@ export async function GET() {
   return NextResponse.json({ data });
 }
 
-// POST -> tambah data baru, otomatis generate embedding (dengan retry)
 export async function POST(request) {
   try {
     const { kategori, judul, konten } = await request.json();

@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-
-// Proteksi semua route /admin/* dan /api/admin/*
-// kecuali halaman login itu sendiri.
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 

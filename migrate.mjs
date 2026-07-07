@@ -1,20 +1,11 @@
-// migrate.mjs
-// Script SEKALI JALAN buat migrasi data dari Vercel Blob (knowledge.json)
-// + daftarPoli hardcoded -> Supabase (knowledge_base & poli_dokter)
-// sekaligus generate embedding pakai Gemini.
-//
-// Cara jalanin: node migrate.mjs
 
 import { list } from '@vercel/blob';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
-// PENTING: dotenv defaultnya baca file ".env", bukan ".env.local".
-// Next.js otomatis baca .env.local, tapi script Node biasa (ini) harus di-set manual.
 dotenv.config({ path: '.env.local' });
 
-// ===== SETUP CLIENTS =====
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SECRET_KEY
@@ -23,13 +14,11 @@ const supabase = createClient(
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const embeddingModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 
-// ===== HELPER: generate embedding buat satu teks =====
 async function embedText(text) {
   const result = await embeddingModel.embedContent(text);
   return result.embedding.values; // array of 768 numbers
 }
 
-// ===== DATA JADWAL DOKTER (copy dari knowledge.js lama) =====
 const daftarPoli = [
   { nama: 'Poli Spesialis Bedah', dokter: [{ nama: 'dr. Hendra Setiawan, Sp.B', hari: 'Senin-Jumat', jam: '10.00-13.00' }, { nama: 'dr. Prima Budi Prayogi, Sp.B', hari: 'Jumat', jam: '12.00-15.00' }] },
   { nama: 'Poli Spesialis Ortopedi & Traumatologi', dokter: [{ nama: 'dr. Rosihan Effendi, Sp.OT', hari: 'Senin-Jumat', jam: '09.00-12.00' }] },
@@ -48,7 +37,6 @@ const daftarPoli = [
   { nama: 'Layanan Konsultasi Gizi', dokter: [{ nama: 'Nur Rizqi Intan Syaputri, S.ST', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
 ];
 
-// ===== AMBIL knowledge.json DARI VERCEL BLOB =====
 async function getBlobData() {
   const { blobs } = await list();
   const file = blobs.find((b) => b.pathname === 'knowledge.json');
@@ -70,8 +58,6 @@ async function getBlobData() {
   return await response.json();
 }
 
-// ===== HELPER: chunking teks panjang jadi potongan lebih kecil =====
-// Biar retrieval lebih presisi, potong per paragraf (pisah \n\n)
 function chunkText(text, maxLength = 800) {
   if (!text) return [];
   const paragraphs = text.split('\n\n').map((p) => p.trim()).filter(Boolean);
@@ -91,7 +77,6 @@ function chunkText(text, maxLength = 800) {
   return chunks.length > 0 ? chunks : [text];
 }
 
-// ===== MIGRASI knowledge_base =====
 async function migrateKnowledgeBase() {
   console.log('\n📥 Mengambil data dari Vercel Blob...');
   const data = await getBlobData();
@@ -134,7 +119,6 @@ async function migrateKnowledgeBase() {
         totalInserted++;
       }
 
-      // Jeda kecil biar ga kena rate limit Gemini
       await new Promise((r) => setTimeout(r, 300));
     }
   }
@@ -142,7 +126,6 @@ async function migrateKnowledgeBase() {
   console.log(`\n✅ Selesai migrasi knowledge_base. Total ${totalInserted} baris masuk.`);
 }
 
-// ===== MIGRASI poli_dokter =====
 async function migratePoliDokter() {
   console.log('\n📥 Migrasi data jadwal dokter (poli_dokter)...');
   let totalInserted = 0;
@@ -167,7 +150,6 @@ async function migratePoliDokter() {
   console.log(`✅ Selesai migrasi poli_dokter. Total ${totalInserted} baris masuk.`);
 }
 
-// ===== RUN =====
 async function main() {
   console.log('🚀 Mulai migrasi data ke Supabase...\n');
 

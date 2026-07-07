@@ -6,7 +6,6 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// GET -> ambil semua jadwal dokter
 export async function GET() {
   const { data, error } = await supabase
     .from('poli_dokter')
@@ -20,7 +19,6 @@ export async function GET() {
   return NextResponse.json({ data });
 }
 
-// POST -> tambah jadwal dokter baru
 export async function POST(request) {
   try {
     const { nama_poli, nama_dokter, hari, jam, is_active } = await request.json();
@@ -39,7 +37,6 @@ export async function POST(request) {
         nama_dokter,
         hari,
         jam,
-        // kalau tidak dikirim, biarkan default kolom (true) yang jalan
         is_active: is_active !== undefined ? is_active : true,
       })
       .select()

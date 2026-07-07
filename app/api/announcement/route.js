@@ -8,10 +8,10 @@ const supabase = createClient(
 
 export async function GET() {
   const { data, error } = await supabase
-    .from('poli_dokter')
-    .select('*')
-    .eq('is_active', true)
-    .order('nama_poli');
+    .from('announcement')
+    .select('message, is_active')
+    .eq('id', 1)
+    .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

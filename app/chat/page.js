@@ -10,7 +10,6 @@ import { Fraunces, Inter } from 'next/font/google';
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter' });
 
-// Token warna — disamakan persis dengan landing page RSUD Pasirian.
 const INK = '#0B2B24';
 const BRASS = '#C08829';
 const BRASS_SOFT = '#DDB169';
@@ -32,7 +31,6 @@ export default function ChatPage() {
     { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', text: 'Bagaimana panduan pendaftaran melalui JKN Mobile?', loading: 'Mencari panduan pendaftaran...' },
   ];
 
-  // FUNGSI UTAMA PENGIRIMAN PESAN
   const sendMessage = async (messageContent, label = 'Sedang menyusun jawaban...') => {
     if (!messageContent.trim() || isLoading) return;
 
@@ -99,7 +97,7 @@ export default function ChatPage() {
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] flex h-[100dvh] bg-[${CREAM}] text-[#0B2B24] overflow-hidden relative`} style={{ backgroundColor: CREAM }}>
-      {/* SISI KIRI */}
+      {}
       <aside className="w-80 bg-[#0B2B24] p-6 flex flex-col justify-between hidden md:flex shadow-xl text-white z-10">
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">
@@ -133,7 +131,7 @@ export default function ChatPage() {
         </div>
       </aside>
 
-      {/* SISI KANAN */}
+      {}
       <main className="flex-1 flex flex-col bg-[#FBF9F4] overflow-hidden w-full relative min-h-0">
         <header className="px-4 py-3 md:px-6 md:py-4 bg-white/95 backdrop-blur-md border-b border-[#C08829]/15 flex items-center justify-between shadow-[0_1px_0_rgba(11,43,36,0.04)] z-10 gap-2 flex-shrink-0">
           <h1 className="font-[var(--font-fraunces)] font-semibold text-sm md:text-base tracking-tight text-[#0B2B24] truncate">

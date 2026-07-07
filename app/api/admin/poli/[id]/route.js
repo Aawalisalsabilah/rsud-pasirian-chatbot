@@ -6,7 +6,6 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// PUT -> update jadwal dokter
 export async function PUT(request, { params }) {
   try {
     const { id } = await params; // ✅ fix
@@ -34,7 +33,6 @@ export async function PUT(request, { params }) {
         nama_dokter,
         hari,
         jam,
-        // kalau is_active tidak dikirim (misal dari form lama), default tetap true
         is_active: is_active !== undefined ? is_active : true,
       })
       .eq('id', id)
@@ -52,7 +50,6 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE -> hapus jadwal dokter
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params; // ✅ fix

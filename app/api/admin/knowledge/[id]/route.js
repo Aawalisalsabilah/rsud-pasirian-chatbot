@@ -7,7 +7,6 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// PUT -> update data, WAJIB re-generate embedding karena konten berubah
 export async function PUT(request, { params }) {
   try {
     const { id } = await params; // ✅ fix: params sekarang Promise di Next.js 15
@@ -48,7 +47,6 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE -> hapus data
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params; // ✅ fix yang sama

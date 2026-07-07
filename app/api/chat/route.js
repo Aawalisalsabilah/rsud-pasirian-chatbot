@@ -9,8 +9,6 @@ const groq = new Groq({
 
 export async function POST(request) {
     let incomingMessages;
-
-    // --- 1. PARSE REQUEST BODY ---
     try {
         const body = await request.json();
         incomingMessages = body.messages;
@@ -23,7 +21,6 @@ export async function POST(request) {
         return NextResponse.json({ reply: 'Format permintaan tidak valid.' }, { status: 400 });
     }
 
-    // --- 2. BANGUN SYSTEM PROMPT (termasuk ambil data dari Vercel Blob) ---
     let dynamicSystemPrompt;
     try {
         const lastUserMessage = [...incomingMessages].reverse().find((m) => m.role === 'user');
@@ -40,7 +37,6 @@ export async function POST(request) {
         );
     }
 
-    // --- 3. PANGGIL GROQ API ---
     let reply;
     try {
         const recentMessages = incomingMessages.slice(-6);
@@ -58,7 +54,6 @@ export async function POST(request) {
 
         reply = chatCompletion.choices[0]?.message?.content || 'Maaf, sistem tidak memberikan respon.';
     } catch (groqError) {
-        // groq-sdk biasanya melampirkan status & error body asli di sini
         console.error('[GROQ API ERROR]', {
             message: groqError.message,
             status: groqError.status,
@@ -70,7 +65,6 @@ export async function POST(request) {
         );
     }
 
-    // --- 4. SIMPAN LOG KE VERCEL BLOB (gagal di sini TIDAK membatalkan respon ke user) ---
     try {
         const timestamp = new Date().toISOString();
         const fileName = `chat-logs/chat-${timestamp}.json`;

@@ -2,17 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Fraunces, Inter } from 'next/font/google';
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter' });
 
-// ---------------------------------------------------------------------------
-// TOKEN WARNA — dipertahankan sedikit, diperdalam agar terasa premium & tenang.
-// Ink emerald sebagai dasar, brass gold sebagai aksen utama, warna fungsional
-// (merah/biru/hijau/ungu) dipakai lebih hemat & bermakna, bukan dekorasi.
-// ---------------------------------------------------------------------------
 const INK = '#0B2B24';
 const BRASS = '#C08829';
 const BRASS_SOFT = '#DDB169';
@@ -22,7 +17,6 @@ const STEEL = '#2A6C93';
 const CLAY = '#9E3B32';
 const PLUM = '#6B4A8A';
 
-// Layanan diambil langsung dari papan petunjuk asli di gerbang RSUD Pasirian.
 const layanan = [
   { label: 'IGD 24 Jam', desc: 'Respon cepat untuk kondisi darurat, siaga sepanjang hari.', icon: 'M12 2v20M2 12h20', color: CLAY },
   { label: 'Persalinan 24 Jam', desc: 'Layanan ibu & bayi dengan ruang perinatologi.', icon: 'M12 21c-4-3-7-6.5-7-10a7 7 0 0 1 14 0c0 3.5-3 7-7 10Z', color: BRASS },
@@ -32,14 +26,12 @@ const layanan = [
   { label: 'Klinik Spesialis', desc: 'Penyakit Dalam, Anak, Kandungan, Bedah, dan lainnya.', icon: 'M4.5 9.5v3a7.5 7.5 0 0 0 15 0v-3M8 4v3M16 4v3M12 20v-2.5', color: EMERALD },
 ];
 
-// Fakta singkat yang menunjukkan kredibilitas rumah sakit di hero.
 const faktaCepat = [
   { angka: '10+', label: 'Tahun melayani Pasirian' },
   { angka: '24', label: 'Jam siaga, setiap hari' },
   { angka: '6', label: 'Layanan utama tersedia' },
 ];
 
-// Riwayat singkat RSUD Pasirian, dari Perda pendirian sampai naik kelas C.
 const sejarahRS = [
   { tahun: '2015', judul: 'Perda Pendirian', desc: 'Perda Kabupaten Lumajang No. 4/2015 menetapkan Susunan Organisasi dan Tata Kerja RSUD Pasirian, dikembangkan dari Puskesmas Pasirian.', color: STEEL },
   { tahun: '2016', judul: 'Direktur Pertama', desc: 'Perbup No. 17/2016 menetapkan dr. Wawan Arwijanto sebagai direktur pertama, dilantik 17 Juni 2016.', color: EMERALD },
@@ -49,13 +41,11 @@ const sejarahRS = [
   { tahun: '2022', judul: 'Naik Kelas C', desc: 'Izin operasional diperpanjang dan status naik menjadi Kelas C lewat sistem OSS pada 4 Maret 2022, berlaku 5 tahun.', color: CLAY },
 ];
 
-// Visi & misi diambil dari dokumen resmi RSUD Pasirian.
 const visiMisi = {
   visi: 'Mewujudkan masyarakat Lumajang yang berdaya saing, sejahtera, dan bermartabat.',
   misi: 'Memenuhi kebutuhan layanan kesehatan dasar untuk mendorong masyarakat yang lebih sejahtera dan mandiri.',
 };
 
-// Poin legalitas — ditampilkan sebagai badge kredibilitas.
 const legalitas = [
   'Izin operasional resmi dari Bupati Lumajang sejak 15 Agustus 2017',
   'UPT Dinas Kesehatan Kabupaten Lumajang sejak 2018',
@@ -63,14 +53,12 @@ const legalitas = [
   'Terakreditasi Kelas C, diperpanjang via OSS pada 4 Maret 2022',
 ];
 
-// Kepemimpinan saat ini.
 const kepemimpinan = {
   nama: 'dr. Wawan Arwijanto',
   jabatan: 'Direktur RSUD Pasirian',
   sejak: 'Menjabat sejak 17 Juni 2016',
 };
 
-// Data klinik & dokter spesialis — dipakai sebagai FALLBACK sebelum data dari /api/poli berhasil diambil.
 const klinikSpesialis = [
   { klinik: 'Klinik Anak', dokter: ['dr. Nurul Yudhi, Sp.A', 'dr. Wigit K, Sp.A'] },
   { klinik: 'Klinik Bedah', dokter: ['dr. Arry Setyo D, Sp.B', 'dr. Hendra S, Sp.B'] },
@@ -84,14 +72,12 @@ const klinikSpesialis = [
   { klinik: 'Pelayanan Laboratorium', dokter: ['dr. Dwita Riadini, Sp.PK'] },
 ];
 
-// Inisial dipakai sebagai avatar placeholder karena foto dokter belum tersedia sebagai aset web.
 function inisial(nama) {
   const bersih = nama.replace(/^(dr\.|drg\.)\s*/i, '');
   const parts = bersih.split(' ').filter(Boolean);
   return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
 }
 
-// Kategori layanan lengkap, dari slide "Layanan RSUD Pasirian".
 const kategoriLayanan = [
   {
     nama: 'Rawat Jalan',
@@ -115,7 +101,6 @@ const kategoriLayanan = [
   },
 ];
 
-// Ruang rawat inap beserta kapasitas tempat tidur (TT), dari slide "Ruang Rawat Inap".
 const ruangRawatInap = [
   { nama: 'Mutiara', kelas: 'VIP', ruang: 9, tt: 9, color: BRASS },
   { nama: 'Berlian', kelas: 'Kelas I', ruang: 6, tt: 12, color: STEEL },
@@ -128,7 +113,6 @@ const ruangRawatInap = [
   { nama: 'Permata', kelas: 'Kelas III', ruang: 5, tt: 10, color: PLUM },
 ];
 
-// Kapasitas tempat tidur (TT), dari slide ringkasan "Layanan Rawat Inap" & "Layanan IGD 24 Jam".
 const kapasitasRawatInap = [
   { ruang: 'Intensif', tt: 10 },
   { ruang: 'VIP', tt: 9 },
@@ -142,6 +126,15 @@ const kapasitasIgd = [
   { ruang: 'Isolasi', tt: 2 },
   { ruang: 'Ponek', tt: 2 },
   { ruang: 'Transit', tt: 2 },
+];
+
+const panduanJknMobile = [
+  { langkah: 1, judul: 'Unduh Aplikasi', gambar: null, desc: 'Unduh Mobile JKN dari Play Store atau App Store, lalu buat akun baru.' },
+  { langkah: 2, judul: 'Login', gambar: null, desc: 'Masuk menggunakan NIK dan kata sandi yang sudah didaftarkan.' },
+  { langkah: 3, judul: 'Pilih Menu Pendaftaran', gambar: null, desc: 'Buka menu "Pendaftaran Pelayanan" pada halaman utama aplikasi.' },
+  { langkah: 4, judul: 'Pilih RSUD Pasirian', gambar: null, desc: 'Cari dan pilih RSUD Pasirian sebagai fasilitas kesehatan tujuan.' },
+  { langkah: 5, judul: 'Pilih Poli & Jadwal', gambar: null, desc: 'Pilih poli tujuan serta tanggal dan jam kontrol yang tersedia.' },
+  { langkah: 6, judul: 'Dapatkan Nomor Antrean', gambar: null, desc: 'Simpan bukti pendaftaran berisi nomor antrean untuk ditunjukkan saat tiba.' },
 ];
 
 function BedIcon({ color }) {
@@ -160,10 +153,6 @@ function ServiceIcon({ d, color }) {
   );
 }
 
-// SIGNATURE ELEMENT — siluet punggungan Gunung Semeru, dipakai sebagai garis
-// pembatas antar-section. RSUD Pasirian berada tepat di kaki Semeru, Lumajang,
-// jadi motif ini menggantikan hairline lurus generik dengan sesuatu yang
-// benar-benar milik tempat ini.
 function SemeruRidge({ tone = INK, bg = 'transparent', flip = false, className = '' }) {
   return (
     <div className={`w-full leading-[0] ${flip ? 'rotate-180' : ''} ${className}`} aria-hidden="true">
@@ -178,14 +167,11 @@ function SemeruRidge({ tone = INK, bg = 'transparent', flip = false, className =
   );
 }
 
-// Nomor WhatsApp untuk pendaftaran pasien umum.
 const WA_NOMOR_UMUM = '6285230703508';
-// Link resmi aplikasi Mobile JKN untuk pendaftaran pasien BPJS.
 const MOBILE_JKN_LINK = 'https://play.google.com/store/apps/details?id=app.bpjs.mobile';
 
 const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-// Ubah "2026-07-03" (format input date HTML) menjadi "3 Juli 2026".
 function formatTanggalIndo(isoDate) {
   if (!isoDate) return '';
   const [tahun, bulan, tanggal] = isoDate.split('-');
@@ -206,7 +192,6 @@ const FORM_KOSONG = {
   poliTujuan: '',
 };
 
-// Susun form menjadi format pesan resmi pendaftaran, biar pasien tidak perlu isi 2 kali.
 function susunPesanPendaftaran(f) {
   const baris = [
     `Format pengisian pendaftaran pasien : ${f.namaLengkap}`,
@@ -255,7 +240,6 @@ function LabeledSelect({ label, options, ...props }) {
   );
 }
 
-// Daftar poliklinik RSUD Pasirian (nama, dokter, jadwal) — dipakai untuk dropdown Poli Tujuan di form pendaftaran.
 const daftarPoli = [
   { nama: 'Poli Spesialis Bedah', dokter: [{ nama: 'dr. Hendra Setiawan, Sp.B', hari: 'Senin-Jumat', jam: '10.00-13.00' }, { nama: 'dr. Prima Budi Prayogi, Sp.B', hari: 'Jumat', jam: '12.00-15.00' }] },
   { nama: 'Poli Spesialis Ortopedi & Traumatologi', dokter: [{ nama: 'dr. Rosihan Effendi, Sp.OT', hari: 'Senin-Jumat', jam: '09.00-12.00' }] },
@@ -274,19 +258,16 @@ const daftarPoli = [
   { nama: 'Layanan Konsultasi Gizi', dokter: [{ nama: 'Nur Rizqi Intan Syaputri, S.ST', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
 ];
 
-// Untuk dropdown Poli Tujuan, cukup ambil namanya saja.
 const POLI_OPTIONS = daftarPoli.map((p) => p.nama);
 
-// Cari tanggal ISO (YYYY-MM-DD) untuk H-1 dari hari ini, dipakai sebagai batas minimal pendaftaran.
 function tanggalMinimalDaftar() {
   const besok = new Date();
   besok.setDate(besok.getDate() + 1);
   return besok.toISOString().split('T')[0];
 }
 
-// Modal pilihan jenis pendaftaran: BPJS (via Mobile JKN) atau Umum (form → WhatsApp terisi otomatis).
 function DaftarOnlineModal({ open, onClose }) {
-  const [step, setStep] = useState('pilih'); // 'pilih' | 'form-umum'
+  const [step, setStep] = useState('pilih'); 
   const [form, setForm] = useState(FORM_KOSONG);
 
   if (!open) return null;
@@ -350,7 +331,7 @@ function DaftarOnlineModal({ open, onClose }) {
             </p>
 
             <div className="mt-6 space-y-3.5">
-              {/* Opsi BPJS */}
+              {}
               <a
                 href={MOBILE_JKN_LINK}
                 target="_blank"
@@ -462,24 +443,47 @@ function DaftarOnlineModal({ open, onClose }) {
   );
 }
 
+function MegaphoneIcon({ className = 'w-4 h-4' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 4V5.5L6 9.5H4a1 1 0 0 0-1 1ZM15 8a4 4 0 0 1 0 8M18 5a8 8 0 0 1 0 14" />
+    </svg>
+  );
+}
+
 export default function LandingPage() {
   const [daftarModalOpen, setDaftarModalOpen] = useState(false);
 
-  // klinikData dimulai dari data statis (fallback) lalu diganti begitu fetch ke /api/poli berhasil.
   const [klinikData, setKlinikData] = useState(klinikSpesialis);
+  const [announcement, setAnnouncement] = useState(null);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(76);
+
+  useEffect(() => {
+    fetch('/api/announcement')
+      .then((res) => res.json())
+      .then((json) => {
+        const ann = json.data;
+        if (ann?.is_active && ann?.message) setAnnouncement(ann);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, [announcement]);
 
   useEffect(() => {
     fetch('/api/poli')
       .then((res) => res.json())
       .then((res) => {
-        // Sesuaikan "res.data" ini kalau bentuk JSON dari API kamu beda strukturnya.
         const rows = res.data || [];
 
-        // Kelompokkan data flat per-dokter (nama_poli, nama_dokter, hari, jam)
-        // menjadi bentuk { klinik, dokter: [...] } yang dipakai section #dokter.
         const grouped = {};
         rows.forEach((item) => {
-          if (item.is_active === false) return; // lewati yang non-aktif
+          if (item.is_active === false) return; 
           const namaKlinik = item.nama_poli;
           const baris = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
           if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
@@ -494,13 +498,12 @@ export default function LandingPage() {
       })
       .catch((err) => {
         console.error('[JADWAL DOKTER FETCH ERROR]', err);
-        // Kalau fetch gagal, klinikData tetap pakai fallback statis (klinikSpesialis) — tidak apa-apa.
       });
   }, []);
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen bg-white text-[#0B2B24]`}>
-      {/* Top utility bar */}
+      {}
       <div className="bg-[#0B2B24] text-[#F2E4C4] text-[12px]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-2 flex items-center justify-between">
           <div className="flex items-center gap-5">
@@ -517,8 +520,8 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* GLOBAL NAVBAR */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#C08829]/15 shadow-[0_1px_0_rgba(11,43,36,0.04)]">
+      {}
+      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#C08829]/15 shadow-[0_1px_0_rgba(11,43,36,0.04)]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0">
@@ -540,6 +543,7 @@ export default function LandingPage() {
             <a href="#tentang" className="hover:text-[#C08829] transition">Tentang</a>
             <a href="#layanan" className="hover:text-[#C08829] transition">Layanan</a>
             <a href="#dokter" className="hover:text-[#C08829] transition">Jadwal Dokter</a>
+            <a href="#panduan-jkn" className="hover:text-[#C08829] transition">Panduan JKN</a>
             <a href="#kontak" className="hover:text-[#C08829] transition">Kontak</a>
           </nav>
 
@@ -550,11 +554,21 @@ export default function LandingPage() {
             Daftar Online
           </button>
         </div>
+
+        {}
+        {announcement && (
+          <div className="bg-[#C08829] text-[#0B2B24]">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 py-2 flex items-center justify-center gap-2 text-center">
+              <MegaphoneIcon className="w-4 h-4 shrink-0" />
+              <p className="text-[12.5px] sm:text-[13px] font-semibold leading-snug">{announcement.message}</p>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* HERO SECTION */}
+      {}
       <section className="relative w-full overflow-hidden bg-[#0B2B24]">
-        <div className="relative h-[580px] sm:h-[620px] md:h-[660px] w-full pt-[76px]">
+        <div className="relative h-[580px] sm:h-[620px] md:h-[660px] w-full" style={{ paddingTop: headerHeight }}>
           <Image
             src="/rsud-gedung.jpg"
             alt="Gedung RSUD Pasirian Lumajang"
@@ -564,11 +578,11 @@ export default function LandingPage() {
             sizes="100vw"
             className="object-cover object-center"
           />
-          {/* Duotone ink-emerald overlay — lebih kaya dari gradasi hitam polos */}
+          {}
           <div className="absolute inset-0 bg-gradient-to-r from-[#0B2B24]/95 via-[#0B2B24]/75 to-[#0B2B24]/35" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#04140f]/70 via-transparent to-transparent" />
 
-          {/* Watermark siluet Semeru — samar, mengisi ruang kosong sisi kanan hero */}
+          {}
           <svg viewBox="0 0 500 260" className="absolute right-0 bottom-0 w-[60%] max-w-[560px] opacity-[0.14] pointer-events-none" aria-hidden="true">
             <path d="M0,260 L0,210 L90,150 L150,190 L230,60 L270,110 L330,20 L380,90 L440,140 L500,110 L500,260 Z" fill="#F2E4C4" />
           </svg>
@@ -610,10 +624,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Garis punggungan Semeru menutup hero — pengganti hairline lurus */}
+        {}
         <SemeruRidge tone="#FBF9F4" />
 
-        {/* Trust strip */}
+        {}
         <div className="relative bg-[#FBF9F4]">
           <div className="max-w-7xl mx-auto px-5 sm:px-6">
             <div className="-mt-11 sm:-mt-12 bg-white rounded-2xl shadow-[0_20px_50px_rgba(11,43,36,0.14)] ring-1 ring-[#C08829]/10 grid grid-cols-3 divide-x divide-[#0B2B24]/[0.06]">
@@ -628,7 +642,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Tentang */}
+      {}
       <section id="tentang" className="bg-[#FBF9F4]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -641,7 +655,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Sejarah */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
             {sejarahRS.map((s) => (
               <div key={s.tahun} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition">
@@ -657,7 +671,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Visi Misi + Kepemimpinan */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
             <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-7">
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Visi</span>
@@ -686,7 +700,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Legalitas */}
+          {}
           <div className="bg-[#0B2B24] rounded-2xl p-7 sm:p-8 ring-1 ring-[#DDB169]/20">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#DDB169]">Legalitas</span>
             <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
@@ -703,7 +717,7 @@ export default function LandingPage() {
 
       <SemeruRidge tone="#ffffff" bg="#FBF9F4" />
 
-      {/* Layanan */}
+      {}
       <section id="layanan" className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
         <div className="text-center max-w-xl mx-auto mb-12">
           <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Layanan Kami</span>
@@ -733,7 +747,7 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* Kategori layanan lengkap */}
+        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#6B4A8A]">Selengkapnya</span>
@@ -762,7 +776,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Kapasitas tempat tidur */}
+        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Kapasitas</span>
@@ -818,7 +832,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Ruang Rawat Inap */}
+        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Fasilitas Kamar</span>
@@ -853,7 +867,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Jadwal Dokter / Klinik Spesialis */}
+      {}
       <section id="dokter" className="relative bg-[#0B2B24] py-16 sm:py-20">
         <svg viewBox="0 0 500 260" className="absolute left-0 top-0 w-[40%] max-w-[420px] opacity-[0.06] pointer-events-none" aria-hidden="true">
           <path d="M0,0 L0,50 L90,110 L150,70 L230,200 L270,150 L330,240 L380,170 L440,120 L500,150 L500,0 Z" fill="#F2E4C4" />
@@ -892,7 +906,73 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Profil video + kontak */}
+      {}
+      <section id="panduan-jkn" className="bg-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#2A6C93]">Pasien BPJS</span>
+            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+              Panduan Mobile JKN
+            </h3>
+            <p className="text-[#0B2B24]/60 text-[15px] mt-3">
+              Langkah-langkah mendaftar pemeriksaan lewat aplikasi Mobile JKN, khusus pasien BPJS.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {panduanJknMobile.map((p) => (
+              <div
+                key={p.langkah}
+                className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden hover:border-[#2A6C93]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition"
+              >
+                <div className="relative w-full aspect-[9/16] bg-[#FBF9F4] flex items-center justify-center">
+                  {p.gambar ? (
+                    <Image
+                      src={p.gambar}
+                      alt={`Panduan Mobile JKN langkah ${p.langkah}: ${p.judul}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-contain"
+                    />
+                  ) : (
+                    
+                    <div className="flex flex-col items-center gap-2 text-[#0B2B24]/25">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="m21 15-5-5L5 21" />
+                      </svg>
+                      <span className="text-[11px] font-medium">Screenshot menyusul</span>
+                    </div>
+                  )}
+                  <span className="absolute top-3 left-3 w-7 h-7 rounded-full bg-[#2A6C93] text-white text-[12px] font-bold flex items-center justify-center shadow">
+                    {p.langkah}
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h4 className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{p.judul}</h4>
+                  <p className="text-[12.5px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">{p.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <a
+              href={MOBILE_JKN_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#2A6C93] hover:bg-[#255d80] text-white font-[var(--font-fraunces)] font-bold px-6 py-3.5 rounded-full transition"
+            >
+              Unduh Mobile JKN <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <SemeruRidge tone="#FBF9F4" bg="#ffffff" />
+
+      {}
       <section id="kontak" className="bg-[#FBF9F4]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-10">
@@ -969,7 +1049,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {}
       <footer className="bg-[#0B2B24] text-white/65">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-[13.5px]">
           <div>
@@ -982,6 +1062,7 @@ export default function LandingPage() {
               <li><a href="#tentang" className="hover:text-[#DDB169] transition">Tentang</a></li>
               <li><a href="#layanan" className="hover:text-[#DDB169] transition">Layanan</a></li>
               <li><a href="#dokter" className="hover:text-[#DDB169] transition">Jadwal Dokter</a></li>
+              <li><a href="#panduan-jkn" className="hover:text-[#DDB169] transition">Panduan JKN</a></li>
               <li><a href="#kontak" className="hover:text-[#DDB169] transition">Kontak</a></li>
               <li><Link href="/chat" className="hover:text-[#DDB169] transition">Chat dengan Kami</Link></li>
             </ul>
@@ -997,7 +1078,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Floating chat button */}
+      {}
       <Link
         href="/chat"
         className="fixed bottom-6 right-6 z-50 group"
@@ -1011,7 +1092,7 @@ export default function LandingPage() {
         </span>
       </Link>
 
-      {/* Modal Daftar Online */}
+      {}
       <DaftarOnlineModal open={daftarModalOpen} onClose={() => setDaftarModalOpen(false)} />
 
       <style jsx global>{`
