@@ -9,7 +9,7 @@ const supabase = createClient(
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params; // ✅ fix: params sekarang Promise di Next.js 15
+    const { id } = await params; 
     const { kategori, judul, konten } = await request.json();
 
     if (!id) {
@@ -49,7 +49,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = await params; // ✅ fix yang sama
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(

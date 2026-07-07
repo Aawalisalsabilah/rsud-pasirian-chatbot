@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params; // ✅ fix
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(

@@ -220,7 +220,7 @@ export default function AdminDashboard() {
 function KnowledgeTab() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); // null = tidak edit, {} = tambah baru, {...item} = edit
+  const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
   async function loadData() {
@@ -409,7 +409,7 @@ function PoliTab() {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState({}); // { [namaPoli]: true/false }
+  const [expanded, setExpanded] = useState({}); 
   const printRef = useRef(null);
 
   async function loadData() {
@@ -897,11 +897,7 @@ function AnnouncementTab() {
           placeholder="Misal: Layanan Poli Gigi tutup sementara 8-10 Juli 2026 karena pemeliharaan alat."
           className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
         />
-
-        <p className="text-[12px] text-[#0B2B24]/45 mt-2.5">
-          Pengunjung yang sudah menutup pengumuman ini di sesi browser mereka tidak akan melihatnya lagi sampai isi pesan berubah.
-        </p>
-
+        
         <div className="flex items-center justify-end gap-3 mt-5">
           {savedOk && <span className="text-[12.5px] font-semibold text-[#1F6B4F]">Tersimpan.</span>}
           <button
