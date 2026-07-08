@@ -128,6 +128,44 @@ const kapasitasIgd = [
   { ruang: 'Transit', tt: 2 },
 ];
 
+// Jam pelayanan — sesuaikan lagi jamnya kalau ada perubahan kebijakan
+const jamPelayanan = [
+  { layanan: 'IGD', jam: '24 Jam, setiap hari termasuk libur', nonstop: true, color: CLAY },
+  { layanan: 'Rawat Inap', jam: '24 Jam, setiap hari', nonstop: true, color: PLUM },
+  { layanan: 'Laboratorium', jam: '24 Jam, setiap hari', nonstop: true, color: STEEL },
+  { layanan: 'Radiologi', jam: '24 Jam, setiap hari', nonstop: true, color: EMERALD },
+  { layanan: 'Farmasi & Sehat Ekspres', jam: '24 Jam, setiap hari', nonstop: true, color: STEEL },
+  { layanan: 'Pendaftaran & Loket Rawat Jalan', jam: 'Senin–Jumat, 08.00–14.30', nonstop: false, color: BRASS },
+  { layanan: 'Poliklinik Spesialis', jam: 'Senin–Jumat, sesuai jadwal dokter', nonstop: false, color: EMERALD },
+];
+
+// Testimoni — CONTOH placeholder, ganti dengan testimoni pasien asli
+// (bisa ambil dari ulasan Google Maps dengan izin penulisnya, atau kumpulkan langsung)
+const testimoni = [
+  {
+    nama: 'Nama Pasien',
+    asal: 'Pasirian',
+    rating: 5,
+    isi: 'Pelayanan IGD cepat tanggap, perawat dan dokternya ramah serta komunikatif saat menjelaskan kondisi.',
+  },
+  {
+    nama: 'Nama Pasien',
+    asal: 'Candipuro',
+    rating: 5,
+    isi: 'Proses pendaftaran BPJS lewat Mobile JKN mudah diikuti berkat panduan di website ini, jadi tidak perlu antre lama.',
+  },
+  {
+    nama: 'Nama Pasien',
+    asal: 'Tempeh',
+    rating: 4,
+    isi: 'Ruang rawat inap bersih dan nyaman, layanan Sehat Ekspres juga sangat membantu keluarga di rumah.',
+  },
+];
+
+const ALAMAT_LENGKAP = 'RSUD Pasirian, Jl. Raya Pasirian No. 225A, Kebonan, Pasirian, Lumajang 67372';
+const GOOGLE_MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ALAMAT_LENGKAP)}&output=embed`;
+const GOOGLE_MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ALAMAT_LENGKAP)}`;
+
 const panduanJknMobile = [
   { langkah: 1, judul: 'Unduh Aplikasi', gambar: null, desc: 'Unduh Mobile JKN dari Play Store atau App Store, lalu buat akun baru.' },
   { langkah: 2, judul: 'Login', gambar: null, desc: 'Masuk menggunakan NIK dan kata sandi yang sudah didaftarkan.' },
@@ -443,6 +481,25 @@ function DaftarOnlineModal({ open, onClose }) {
   );
 }
 
+function BintangRating({ rating = 5 }) {
+  return (
+    <div className="flex items-center gap-0.5" aria-label={`Rating ${rating} dari 5`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 24 24"
+          className="w-3.5 h-3.5"
+          fill={i < rating ? '#C08829' : 'none'}
+          stroke="#C08829"
+          strokeWidth="1.5"
+        >
+          <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8Z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 function MegaphoneIcon({ className = 'w-4 h-4' }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -546,10 +603,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-[13.5px] font-semibold text-[#0B2B24]/80">
+          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-[#0B2B24]/80">
             <a href="#tentang" className="hover:text-[#C08829] transition">Tentang</a>
             <a href="#layanan" className="hover:text-[#C08829] transition">Layanan</a>
+            <a href="#jam-pelayanan" className="hover:text-[#C08829] transition">Jam Pelayanan</a>
             <a href="#dokter" className="hover:text-[#C08829] transition">Jadwal Dokter</a>
+            <a href="#testimoni" className="hover:text-[#C08829] transition">Testimoni</a>
             <a href="#panduan-jkn" className="hover:text-[#C08829] transition">Panduan JKN</a>
             <a href="#kontak" className="hover:text-[#C08829] transition">Kontak</a>
           </nav>
@@ -574,8 +633,14 @@ export default function LandingPage() {
           <a href="#layanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Layanan
           </a>
+          <a href="#jam-pelayanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Jam Pelayanan
+          </a>
           <a href="#dokter" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Jadwal Dokter
+          </a>
+          <a href="#testimoni" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Testimoni
           </a>
           <a href="#panduan-jkn" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Panduan JKN
@@ -898,6 +963,44 @@ export default function LandingPage() {
       </section>
 
       {}
+      <section id="jam-pelayanan" className="bg-[#FBF9F4]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Jam Pelayanan</span>
+            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+              Kapan bisa datang ke RSUD Pasirian?
+            </h3>
+            <p className="text-[#0B2B24]/60 text-[15px] mt-3">
+              Sebagian layanan siaga 24 jam penuh, sebagian lain mengikuti jam kerja dan jadwal dokter.
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden divide-y divide-[#0B2B24]/[0.06]">
+            {jamPelayanan.map((j) => (
+              <div key={j.layanan} className="flex items-center justify-between gap-4 px-5 sm:px-7 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: j.color }} />
+                  <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-[#0B2B24]">{j.layanan}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {j.nonstop && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#1F6B4F]/10 text-[#1F6B4F]">
+                      24 Jam
+                    </span>
+                  )}
+                  <p className="text-[12.5px] sm:text-[13px] text-[#0B2B24]/65 text-right">{j.jam}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-[12.5px] text-[#0B2B24]/50 mt-6 max-w-xl mx-auto leading-relaxed">
+            Jam poliklinik spesialis dapat berubah sewaktu-waktu mengikuti jadwal dokter. Untuk kepastian jadwal, hubungi kami di (0334) 5761114 atau cek saat Daftar Online.
+          </p>
+        </div>
+      </section>
+
+      {}
       <section id="dokter" className="relative bg-[#0B2B24] py-16 sm:py-20">
         <svg viewBox="0 0 500 260" className="absolute left-0 top-0 w-[40%] max-w-[420px] opacity-[0.06] pointer-events-none" aria-hidden="true">
           <path d="M0,0 L0,50 L90,110 L150,70 L230,200 L270,150 L330,240 L380,170 L440,120 L500,150 L500,0 Z" fill="#F2E4C4" />
@@ -933,6 +1036,46 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {}
+      <section id="testimoni" className="bg-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Testimoni</span>
+            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+              Kata mereka yang pernah berobat
+            </h3>
+            <p className="text-[#0B2B24]/60 text-[15px] mt-3">
+              Cerita singkat dari pasien dan keluarga yang pernah menggunakan layanan kami.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {testimoni.map((t, i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition flex flex-col"
+              >
+                <BintangRating rating={t.rating} />
+                <p className="text-[13.5px] text-[#0B2B24]/75 leading-relaxed mt-3 flex-1">&ldquo;{t.isi}&rdquo;</p>
+                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-[#0B2B24]/[0.06]">
+                  <span className="w-9 h-9 shrink-0 rounded-full bg-[#0B2B24] text-[#DDB169] text-[12px] font-bold flex items-center justify-center">
+                    {inisial(t.nama)}
+                  </span>
+                  <div>
+                    <p className="font-[var(--font-fraunces)] font-semibold text-[13.5px] text-[#0B2B24]">{t.nama}</p>
+                    <p className="text-[11.5px] text-[#0B2B24]/50">{t.asal}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-[11.5px] text-[#0B2B24]/40 mt-8 max-w-xl mx-auto leading-relaxed">
+            *Testimoni di atas adalah contoh tampilan. Hubungi admin untuk mengganti dengan testimoni pasien asli.
+          </p>
         </div>
       </section>
 
@@ -1076,6 +1219,32 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+
+          {}
+          <div className="mt-6 bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden ring-1 ring-[#C08829]/10">
+            <div className="relative w-full aspect-[16/9] sm:aspect-[21/9]">
+              <iframe
+                src={GOOGLE_MAPS_EMBED_SRC}
+                title="Peta lokasi RSUD Pasirian"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="absolute inset-0 w-full h-full border-0"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 sm:px-6 py-4">
+              <p className="text-[12.5px] text-[#0B2B24]/60 leading-relaxed">
+                Jl. Raya Pasirian No. 225A, Kebonan, Pasirian, Lumajang 67372
+              </p>
+              <a
+                href={GOOGLE_MAPS_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 shrink-0 bg-[#0B2B24] hover:bg-[#153b31] text-white text-[12.5px] font-[var(--font-fraunces)] font-bold px-4 py-2.5 rounded-full transition whitespace-nowrap"
+              >
+                Buka di Google Maps <span>↗</span>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1091,7 +1260,9 @@ export default function LandingPage() {
             <ul className="space-y-1.5">
               <li><a href="#tentang" className="hover:text-[#DDB169] transition">Tentang</a></li>
               <li><a href="#layanan" className="hover:text-[#DDB169] transition">Layanan</a></li>
+              <li><a href="#jam-pelayanan" className="hover:text-[#DDB169] transition">Jam Pelayanan</a></li>
               <li><a href="#dokter" className="hover:text-[#DDB169] transition">Jadwal Dokter</a></li>
+              <li><a href="#testimoni" className="hover:text-[#DDB169] transition">Testimoni</a></li>
               <li><a href="#panduan-jkn" className="hover:text-[#DDB169] transition">Panduan JKN</a></li>
               <li><a href="#kontak" className="hover:text-[#DDB169] transition">Kontak</a></li>
               <li><Link href="/chat" className="hover:text-[#DDB169] transition">Chat dengan Kami</Link></li>
