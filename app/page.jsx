@@ -469,10 +469,17 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
+  // Ukur tinggi header setiap kali kontennya berubah (mis. saat pengumuman muncul),
+  // dan juga saat ukuran layar berubah (mis. rotasi HP).
   useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
   }, [announcement]);
 
   useEffect(() => {
@@ -554,6 +561,29 @@ export default function LandingPage() {
             Daftar Online
           </button>
         </div>
+
+        {}
+        {/* Nav mobile: strip pill horizontal, selalu tampil (tanpa hamburger), bisa discroll ke samping */}
+        <nav
+          className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="Navigasi utama"
+        >
+          <a href="#tentang" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Tentang
+          </a>
+          <a href="#layanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Layanan
+          </a>
+          <a href="#dokter" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Jadwal Dokter
+          </a>
+          <a href="#panduan-jkn" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Panduan JKN
+          </a>
+          <a href="#kontak" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+            Kontak
+          </a>
+        </nav>
 
         {}
         {announcement && (
