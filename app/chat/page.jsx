@@ -16,6 +16,21 @@ const BRASS_SOFT = '#DDB169';
 const CREAM = '#FBF9F4';
 const EMERALD = '#1F6B4F';
 
+// Komponen kustom buat render link markdown jadi tombol brass,
+// biar link "Daftar Sekarang" / "Download Mobile JKN" dari AI kelihatan jelas & bisa diklik.
+function MarkdownLink({ href, children }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 mt-1 mb-1 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 py-2 rounded-full text-sm no-underline shadow-[0_6px_16px_rgba(192,136,41,0.3)] transition"
+    >
+      {children} →
+    </a>
+  );
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Selamat datang di Layanan Asisten Virtual RSUD Pasirian Lumajang. Dengan senang hati saya akan membantu Anda. Silakan sampaikan pertanyaan seputar jadwal dokter, standar pelayanan, atau prosedur pendaftaran yang ingin Anda ketahui.' }
@@ -163,7 +178,12 @@ export default function ChatPage() {
                 >
                   {msg.role === 'assistant' ? (
                     <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
-                      <ReactMarkdown remarkPlugins={[remarkBreaks]}>{msg.content}</ReactMarkdown>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkBreaks]}
+                        components={{ a: MarkdownLink }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
                   ) : (
                     <span className="whitespace-pre-line break-words font-medium">{msg.content}</span>
