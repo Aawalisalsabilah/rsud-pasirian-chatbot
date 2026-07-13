@@ -8,8 +8,6 @@ const groq = new Groq({
 });
 
 // ==== KONFIGURASI LINK PENDAFTARAN ====
-// Link ini mengarah ke halaman utama (/) dengan query param, yang dibaca oleh
-// app/page.jsx untuk otomatis membuka modal "Daftar Online" ke step yang sesuai.
 const LINK_DAFTAR_UMUM = '/?openDaftar=umum';
 const LINK_MOBILE_JKN_ANDROID = 'https://play.google.com/store/apps/details?id=com.telkom.mobile.jkn';
 const LINK_MOBILE_JKN_IOS = 'https://apps.apple.com/id/app/mobile-jkn/id1237601115';
@@ -18,8 +16,6 @@ const KEYWORDS_PENDAFTARAN = ['daftar', 'pendaftaran', 'mendaftar', 'booking', '
 const KEYWORDS_BPJS = ['bpjs', 'jkn'];
 const KEYWORDS_UMUM = ['umum'];
 
-// Nempelin link yang sudah pasti benar (bukan hasil karangan AI) di akhir reply,
-// kalau konteks percakapan (pesan user ATAU jawaban AI) memang soal pendaftaran.
 function appendRegistrationLink(reply, lastUserContent) {
     const lowerUser = (lastUserContent || '').toLowerCase();
     const lowerReply = (reply || '').toLowerCase();
@@ -30,7 +26,6 @@ function appendRegistrationLink(reply, lastUserContent) {
     const mentionsBPJS = KEYWORDS_BPJS.some((k) => lowerUser.includes(k) || lowerReply.includes(k));
     const mentionsUmum = KEYWORDS_UMUM.some((k) => lowerUser.includes(k) || lowerReply.includes(k));
 
-    // Kalau dua-duanya kesebut atau dua-duanya nggak jelas, jangan nebak — biarkan bot nanya dulu.
     if (mentionsBPJS && !mentionsUmum) {
         return `${reply}\n\n[📲 Download Mobile JKN (Android)](${LINK_MOBILE_JKN_ANDROID})\n[📲 Download Mobile JKN (iOS)](${LINK_MOBILE_JKN_IOS})`;
     }
@@ -42,25 +37,40 @@ function appendRegistrationLink(reply, lastUserContent) {
     return reply;
 }
 
+// Normalisasi nama sebelum dibandingkan — buang prefix "dr." dan buang gelar
+// spesialis (Sp.A, Sp.An-Ti, dst) setelah koma pertama, biar format "dr. Nama"
+// (dari reply LLM) vs "dr. Nama, Sp.X" (dari database) tetap match.
+function normalizeDoctorName(str) {
+    return str
+        .toLowerCase()
+        .replace(/\bdr\.?\s*/g, '')   // buang semua kemunculan prefix "dr."/"dr "
+        .split(',')[0]                 // buang gelar spesialis setelah koma pertama
+        .replace(/[.]/g, '')
+        .trim();
+}
+
 // Cek apakah reply menyebut nama dokter yang TIDAK ada di daftar dokter valid.
 // Kalau iya, kemungkinan besar itu hasil manipulasi/prompt injection, bukan data asli.
 function containsUnknownDoctor(replyText, validNames) {
-    if (!validNames || validNames.length === 0) return false; // gagal fetch, skip verifikasi (fail-open untuk hindari false block total)
+    if (!validNames || validNames.length === 0) return false; // gagal fetch, skip verifikasi (fail-open)
 
-    // Cari semua pola "dr. Nama Nama" atau "Dr. Nama Nama" di reply
     const doctorMentionRegex = /\bdr\.?\s+([A-Z][a-zA-Z.]*(?:\s+[A-Z][a-zA-Z.]*){0,3})/gi;
     const mentions = [...replyText.matchAll(doctorMentionRegex)].map((m) => m[0].trim());
 
     if (mentions.length === 0) return false;
 
-    const normalizedValidNames = validNames.map((n) => n.toLowerCase());
+    const normalizedValidNames = validNames.map(normalizeDoctorName);
+
+    // DEBUG: lihat persis apa yang dibandingkan — hapus blok ini kalau sudah beres
+    console.log('[DEBUG] validNames mentah:', validNames);
+    console.log('[DEBUG] validNames dinormalisasi:', normalizedValidNames);
 
     for (const mention of mentions) {
-        const normalizedMention = mention.toLowerCase();
-        // valid kalau nama yang disebut adalah substring dari salah satu nama asli, atau sebaliknya
+        const normalizedMention = normalizeDoctorName(mention);
         const isKnown = normalizedValidNames.some(
             (validName) => validName.includes(normalizedMention) || normalizedMention.includes(validName)
         );
+        console.log(`[DEBUG] mention="${mention}" -> normalized="${normalizedMention}" -> isKnown=${isKnown}`);
         if (!isKnown) return true; // ketemu nama dokter yang tidak dikenal
     }
 
@@ -123,9 +133,7 @@ export async function POST(request) {
         }
         // ===== END VERIFIKASI =====
 
-        // ===== AUTO-ATTACH LINK PENDAFTARAN (fixed, bukan hasil generate AI) =====
         reply = appendRegistrationLink(reply, lastUserMessage?.content);
-        // ===== END AUTO-ATTACH LINK =====
 
     } catch (groqError) {
         console.error('[GROQ API ERROR]', {
