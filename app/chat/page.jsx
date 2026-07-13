@@ -41,12 +41,15 @@ export default function ChatPage() {
   const textareaRef = useRef(null);
 
   const topics = [
-    { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', text: 'Poli apa saja yang tersedia di RSUD Pasirian? Tampilkan daftar poliklinik.', loading: 'Mencari jadwal poli klinik...' },
+    { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', isPoliPicker: true },
     { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', text: 'Apa saja Standar Pelayanan Publik di RSUD Pasirian?', loading: 'Menyusun standar pelayanan publik...' },
     { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', text: 'Bagaimana panduan pendaftaran melalui JKN Mobile?', loading: 'Mencari panduan pendaftaran...' },
   ];
 
-  const sendMessage = async (messageContent, label = 'Sedang menyusun jawaban...') => {
+  // selectedPoli (opsional): dikirim ke backend saat user KLIK tombol poli
+  // spesifik, supaya backend bisa filter data jadwal secara EKSAK tanpa
+  // harus nebak-nebak dari kata kunci di dalam teks pesan.
+  const sendMessage = async (messageContent, label = 'Sedang menyusun jawaban...', selectedPoli = null) => {
     if (!messageContent.trim() || isLoading) return;
 
     setLoadingText(label);
@@ -61,7 +64,7 @@ export default function ChatPage() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages }),
+        body: JSON.stringify({ messages: updatedMessages, selectedPoli }),
       });
 
       const data = await response.json();
@@ -85,8 +88,56 @@ export default function ChatPage() {
     sendMessage(input);
   };
 
-  const handleTopicClick = (text, label) => {
-    sendMessage(text, label);
+  // Tahap 1: user klik "Jadwal Pelayanan Poli Klinik" -> ambil daftar nama poli
+  // LANGSUNG dari database (endpoint /api/poli-list), TANPA lewat Groq/LLM.
+  // Ini instan, gratis, dan gak makan jatah token TPM Groq sama sekali.
+  const handleShowPoliList = async () => {
+    if (isLoading) return;
+
+    setMessages((prev) => [...prev, { role: 'user', content: 'Jadwal Pelayanan Poli Klinik' }]);
+    setIsLoading(true);
+    setLoadingText('Mengambil daftar poliklinik...');
+
+    try {
+      const res = await fetch('/api/poli-list');
+      const data = await res.json();
+      const polis = data.polis || [];
+
+      if (polis.length === 0) {
+        setMessages((prev) => [...prev, { role: 'assistant', content: 'Maaf, daftar poliklinik belum tersedia saat ini. Silakan coba lagi nanti.' }]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            type: 'poli-buttons',
+            polis,
+            content: 'Berikut poliklinik yang tersedia di RSUD Pasirian. Silakan pilih salah satu untuk melihat jadwal dokter dan jam praktiknya:',
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Maaf, gagal memuat daftar poliklinik. Silakan periksa koneksi Anda.' }]);
+    } finally {
+      setIsLoading(false);
+      setLoadingText('Sedang menyusun jawaban...');
+    }
+  };
+
+  // Tahap 2: user klik salah satu nama poli -> baru di sini kita panggil
+  // Groq, dengan selectedPoli persis biar backend gak perlu nebak dan
+  // prompt yang dibangun cuma berisi data poli ini aja (kecil, hemat token).
+  const handlePoliSelect = (namaPoli) => {
+    sendMessage(`Jadwal dan dokter untuk ${namaPoli}`, `Mencari jadwal ${namaPoli}...`, namaPoli);
+  };
+
+  const handleTopicClick = (topic) => {
+    if (topic.isPoliPicker) {
+      handleShowPoliList();
+    } else {
+      sendMessage(topic.text, topic.loading);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -131,7 +182,7 @@ export default function ChatPage() {
                 <button
                   key={topic.label}
                   type="button"
-                  onClick={() => handleTopicClick(topic.text, topic.loading)}
+                  onClick={() => handleTopicClick(topic)}
                   className="text-left text-[13px] bg-white/[0.04] hover:bg-white/[0.08] hover:border-[#DDB169]/40 p-3.5 rounded-xl border border-white/10 transition text-white/85 font-medium"
                 >
                   <span className="mr-1.5">{topic.icon}</span>{topic.label}
@@ -176,7 +227,24 @@ export default function ChatPage() {
                       : 'bg-white text-[#0B2B24] border-[#0B2B24]/[0.06] rounded-tl-none'
                   }`}
                 >
-                  {msg.role === 'assistant' ? (
+                  {msg.type === 'poli-buttons' ? (
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-[#0B2B24]">{msg.content}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {msg.polis.map((namaPoli) => (
+                          <button
+                            key={namaPoli}
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => handlePoliSelect(namaPoli)}
+                            className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {namaPoli}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : msg.role === 'assistant' ? (
                     <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
                       <ReactMarkdown
                         remarkPlugins={[remarkBreaks]}
@@ -210,7 +278,7 @@ export default function ChatPage() {
               <button
                 key={topic.label}
                 type="button"
-                onClick={() => handleTopicClick(topic.text, topic.loading)}
+                onClick={() => handleTopicClick(topic)}
                 className="flex-shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
               >
                 <span>{topic.icon}</span> <span>{topic.shortLabel}</span>

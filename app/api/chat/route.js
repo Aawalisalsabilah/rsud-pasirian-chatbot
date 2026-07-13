@@ -82,6 +82,7 @@ export async function POST(request) {
     try {
         const body = await request.json();
         incomingMessages = body.messages;
+        var selectedPoli = body.selectedPoli || null; // dikirim frontend saat user klik tombol poli spesifik
 
         if (!incomingMessages || !Array.isArray(incomingMessages)) {
             return NextResponse.json({ reply: 'Format data chat tidak valid.' }, { status: 400 });
@@ -95,7 +96,7 @@ export async function POST(request) {
     let validDoctorNames;
     const lastUserMessage = [...incomingMessages].reverse().find((m) => m.role === 'user');
     try {
-        dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '');
+        dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '', selectedPoli);
         validDoctorNames = await getValidDoctorNames();
     } catch (knowledgeError) {
         console.error('[KNOWLEDGE/BLOB ERROR]', {
@@ -112,16 +113,24 @@ export async function POST(request) {
     let reply;
     try {
         const recentMessages = incomingMessages.slice(-4);
+        // PENTING: Groq API strict -- cuma terima {role, content} di tiap
+        // message. Pesan dari frontend yang berupa tombol pilihan poli punya
+        // field ekstra (type, polis) yang bikin Groq nolak seluruh request
+        // dengan error 400. Sanitize dulu di sini, ambil role & content aja.
+        const sanitizedMessages = recentMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+        }));
         const fullMessages = [
             { role: 'system', content: dynamicSystemPrompt },
-            ...recentMessages,
+            ...sanitizedMessages,
         ];
 
         const chatCompletion = await groq.chat.completions.create({
             messages: fullMessages,
             model: 'llama-3.1-8b-instant',
             temperature: 0.3,
-            max_tokens: 2048,
+            max_tokens: 1024, // turun dari 2048 -- ini ikut dihitung sbg "requested tokens" oleh Groq TPM limit
         });
 
         reply = chatCompletion.choices[0]?.message?.content || 'Maaf, sistem tidak memberikan respon.';
