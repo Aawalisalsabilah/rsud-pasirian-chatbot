@@ -167,12 +167,15 @@ const GOOGLE_MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponen
 const GOOGLE_MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ALAMAT_LENGKAP)}`;
 
 const panduanJknMobile = [
-  { langkah: 1, judul: 'Unduh Aplikasi', gambar: null, desc: 'Unduh Mobile JKN dari Play Store atau App Store, lalu buat akun baru.' },
-  { langkah: 2, judul: 'Login', gambar: null, desc: 'Masuk menggunakan NIK dan kata sandi yang sudah didaftarkan.' },
-  { langkah: 3, judul: 'Pilih Menu Pendaftaran', gambar: null, desc: 'Buka menu "Pendaftaran Pelayanan" pada halaman utama aplikasi.' },
-  { langkah: 4, judul: 'Pilih RSUD Pasirian', gambar: null, desc: 'Cari dan pilih RSUD Pasirian sebagai fasilitas kesehatan tujuan.' },
-  { langkah: 5, judul: 'Pilih Poli & Jadwal', gambar: null, desc: 'Pilih poli tujuan serta tanggal dan jam kontrol yang tersedia.' },
-  { langkah: 6, judul: 'Dapatkan Nomor Antrean', gambar: null, desc: 'Simpan bukti pendaftaran berisi nomor antrean untuk ditunjukkan saat tiba.' },
+  { langkah: 1, judul: 'Buka Aplikasi', gambar: '/1.png', desc: 'Belum punya akun? Tekan "Daftar". Jika sudah punya akun, langsung ke langkah "Masuk".' },
+  { langkah: 2, judul: 'Isi Data Pendaftaran', gambar: '/2.png', desc: 'Isi NIK, nama lengkap, tanggal lahir, dan captcha, lalu tekan "Verifikasi Data".' },
+  { langkah: 3, judul: 'Tekan Masuk', gambar: '/3.png', desc: 'Kembali ke halaman awal, lalu tekan tombol "Masuk" untuk login ke akun Anda.' },
+  { langkah: 4, judul: 'Login Akun', gambar: '/4.png', desc: 'Isi NIK, password Mobile JKN, dan captcha, lalu tekan "Masuk".' },
+  { langkah: 5, judul: 'Ambil Antrean', gambar: '/5.png', desc: 'Pada halaman utama, tekan tombol "Ambil Antrean" di bagian Antrean Online.' },
+  { langkah: 6, judul: 'Pilih Jenis Antrean', gambar: '/6.png', desc: 'Pilih "Faskes Rujukan Tingkat Lanjut" karena RSUD Pasirian adalah faskes rujukan.' },
+  { langkah: 7, judul: 'Pilih RSUD Pasirian', gambar: '/7.png', desc: 'Pada daftar rujukan yang tersedia, tekan "Ambil Antrean" di RSUD Pasirian Lumajang.' },
+  { langkah: 8, judul: 'Pilih Tanggal & Dokter', gambar: '/8.png', desc: 'Periksa info rujukan, pilih tanggal kunjungan dan dokter, lalu tekan "Daftar pelayanan".' },
+  { langkah: 9, judul: 'Antrean Berhasil', gambar: '/9.png', desc: 'Nomor antrean poliklinik dan kode booking Anda muncul. Simpan untuk ditunjukkan saat datang.' },
 ];
 
 function BedIcon({ color }) {
@@ -1092,39 +1095,39 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 max-w-4xl mx-auto">
             {panduanJknMobile.map((p) => (
               <div
                 key={p.langkah}
                 className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden hover:border-[#2A6C93]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition"
               >
-                <div className="relative w-full aspect-[9/16] bg-[#FBF9F4] flex items-center justify-center">
+                <div className="relative w-full aspect-[3/4] bg-[#FBF9F4] flex items-center justify-center">
                   {p.gambar ? (
                     <Image
                       src={p.gambar}
                       alt={`Panduan Mobile JKN langkah ${p.langkah}: ${p.judul}`}
                       fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="(max-width: 768px) 50vw, 25vw"
                       className="object-contain"
                     />
                   ) : (
                     
                     <div className="flex flex-col items-center gap-2 text-[#0B2B24]/25">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-9 h-9">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
                         <circle cx="8.5" cy="8.5" r="1.5" />
                         <path d="m21 15-5-5L5 21" />
                       </svg>
-                      <span className="text-[11px] font-medium">Screenshot menyusul</span>
+                      <span className="text-[10px] font-medium">Screenshot menyusul</span>
                     </div>
                   )}
-                  <span className="absolute top-3 left-3 w-7 h-7 rounded-full bg-[#2A6C93] text-white text-[12px] font-bold flex items-center justify-center shadow">
+                  <span className="absolute top-2 left-2 w-6 h-6 rounded-full bg-[#2A6C93] text-white text-[11px] font-bold flex items-center justify-center shadow">
                     {p.langkah}
                   </span>
                 </div>
-                <div className="p-5">
-                  <h4 className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{p.judul}</h4>
-                  <p className="text-[12.5px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">{p.desc}</p>
+                <div className="p-4">
+                  <h4 className="font-[var(--font-fraunces)] font-semibold text-[13.5px] text-[#0B2B24]">{p.judul}</h4>
+                  <p className="text-[11.5px] text-[#0B2B24]/60 mt-1 leading-relaxed">{p.desc}</p>
                 </div>
               </div>
             ))}
