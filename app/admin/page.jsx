@@ -142,8 +142,49 @@ function IconMegaphone(props) {
   );
 }
 
+// ===== MODAL KONFIRMASI LOGOUT =====
+// Muncul sebelum benar-benar logout, biar nggak kepencet nggak sengaja.
+// Klik area gelap di luar modal atau tombol "Batal" akan menutup modal
+// tanpa logout; hanya tombol "Keluar" di dalam modal yang memicu logout asli.
+function LogoutConfirmModal({ onConfirm, onCancel }) {
+  return (
+    <div
+      className="fixed inset-0 bg-[#0B2B24]/40 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+      onClick={onCancel}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl p-6 max-w-[340px] w-full shadow-[0_20px_50px_rgba(11,43,36,0.25)]"
+      >
+        <p className="font-[var(--font-fraunces)] font-semibold text-[17px] text-[#0B2B24] mb-2">
+          Anda ingin logout?
+        </p>
+        <p className="text-[13.5px] text-[#0B2B24]/60 mb-5">
+          Anda perlu login kembali untuk mengakses panel admin.
+        </p>
+        <div className="flex justify-end gap-2.5">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-5 py-2.5 rounded-full bg-[#9E3B32] hover:bg-[#832f28] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition"
+          >
+            Keluar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+// ===== END MODAL KONFIRMASI LOGOUT =====
+
 export default function AdminDashboard() {
   const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'pengumuman'
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
 
   async function handleLogout() {
@@ -169,13 +210,20 @@ export default function AdminDashboard() {
             </div>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="border border-white/25 hover:bg-white/10 text-white/90 text-[13px] font-semibold px-4 py-2 rounded-full transition"
           >
             Keluar
           </button>
         </div>
       </header>
+
+      {showLogoutConfirm && (
+        <LogoutConfirmModal
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogoutConfirm(false)}
+        />
+      )}
 
       {}
       <nav className="bg-white border-b border-[#0B2B24]/[0.08]">

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-export function middleware(request) {
+import { isValidAdminSession } from '@/lib/admin-session';
+
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   const isLoginPage = pathname === '/admin/login';
@@ -13,9 +15,22 @@ export function middleware(request) {
   const isProtectedApi = pathname.startsWith('/api/admin');
 
   if (isProtectedPage || isProtectedApi) {
-    const session = request.cookies.get('admin_session')?.value;
+    const token = request.cookies.get('admin_session')?.value;
 
-    if (!session || session !== process.env.ADMIN_SESSION_SECRET) {
+    // ===== VALIDASI TOKEN LEWAT REDIS (BUKAN BANDING KE 1 SECRET STATIS) =====
+    let valid = false;
+    try {
+      valid = await isValidAdminSession(token);
+    } catch (redisError) {
+      console.error('[SESSION VALIDATION ERROR]', redisError.message);
+      // Fail-closed sengaja di sini (beda dari rate limit yang fail-open) --
+      // untuk validasi AUTH, kalau Redis lagi down lebih aman anggap sesi
+      // tidak valid daripada malah meloloskan akses admin tanpa verifikasi.
+      valid = false;
+    }
+    // ===== END VALIDASI =====
+
+    if (!valid) {
       if (isProtectedApi) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }

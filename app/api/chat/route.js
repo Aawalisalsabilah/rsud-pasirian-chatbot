@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { buildSystemPrompt, getValidDoctorNames } from '@/lib/knowledge';
+import { chatRateLimit, getClientIp } from '@/lib/rate-limit';
 import { put } from '@vercel/blob';
 
 const groq = new Groq({
@@ -15,6 +16,10 @@ const LINK_MOBILE_JKN_IOS = 'https://apps.apple.com/id/app/mobile-jkn/id12376011
 const KEYWORDS_PENDAFTARAN = ['daftar', 'pendaftaran', 'mendaftar', 'booking', 'cara periksa', 'cara berobat'];
 const KEYWORDS_BPJS = ['bpjs', 'jkn'];
 const KEYWORDS_UMUM = ['umum'];
+
+// Batas panjang pesan user, biar nggak ada yang sengaja kirim teks raksasa
+// buat bikin prompt membengkak dan kena limit TPM Groq.
+const MAX_MESSAGE_LENGTH = 1000;
 
 function appendRegistrationLink(reply, lastUserContent) {
     const lowerUser = (lastUserContent || '').toLowerCase();
@@ -37,22 +42,17 @@ function appendRegistrationLink(reply, lastUserContent) {
     return reply;
 }
 
-// Normalisasi nama sebelum dibandingkan — buang prefix "dr." dan buang gelar
-// spesialis (Sp.A, Sp.An-Ti, dst) setelah koma pertama, biar format "dr. Nama"
-// (dari reply LLM) vs "dr. Nama, Sp.X" (dari database) tetap match.
 function normalizeDoctorName(str) {
     return str
         .toLowerCase()
-        .replace(/\bdr\.?\s*/g, '')   // buang semua kemunculan prefix "dr."/"dr "
-        .split(',')[0]                 // buang gelar spesialis setelah koma pertama
+        .replace(/\bdr\.?\s*/g, '')
+        .split(',')[0]
         .replace(/[.]/g, '')
         .trim();
 }
 
-// Cek apakah reply menyebut nama dokter yang TIDAK ada di daftar dokter valid.
-// Kalau iya, kemungkinan besar itu hasil manipulasi/prompt injection, bukan data asli.
 function containsUnknownDoctor(replyText, validNames) {
-    if (!validNames || validNames.length === 0) return false; // gagal fetch, skip verifikasi (fail-open)
+    if (!validNames || validNames.length === 0) return false;
 
     const doctorMentionRegex = /\bdr\.?\s+([A-Z][a-zA-Z.]*(?:\s+[A-Z][a-zA-Z.]*){0,3})/gi;
     const mentions = [...replyText.matchAll(doctorMentionRegex)].map((m) => m[0].trim());
@@ -61,32 +61,65 @@ function containsUnknownDoctor(replyText, validNames) {
 
     const normalizedValidNames = validNames.map(normalizeDoctorName);
 
-    // DEBUG: lihat persis apa yang dibandingkan — hapus blok ini kalau sudah beres
-    console.log('[DEBUG] validNames mentah:', validNames);
-    console.log('[DEBUG] validNames dinormalisasi:', normalizedValidNames);
-
     for (const mention of mentions) {
         const normalizedMention = normalizeDoctorName(mention);
         const isKnown = normalizedValidNames.some(
             (validName) => validName.includes(normalizedMention) || normalizedMention.includes(validName)
         );
-        console.log(`[DEBUG] mention="${mention}" -> normalized="${normalizedMention}" -> isKnown=${isKnown}`);
-        if (!isKnown) return true; // ketemu nama dokter yang tidak dikenal
+        if (!isKnown) return true;
     }
 
     return false;
 }
 
 export async function POST(request) {
+    // ===== RATE LIMITING =====
+    // Dibungkus try-catch: kalau Upstash lagi down/misconfigured, JANGAN
+    // sampai seluruh chatbot ikut down. Fail-open (izinkan request) supaya
+    // fitur utama tetap jalan meskipun proteksi rate limit sedang bermasalah.
+    try {
+        const ip = getClientIp(request);
+        const { success, limit, remaining, reset } = await chatRateLimit.limit(ip);
+
+        if (!success) {
+            console.warn('[RATE LIMIT EXCEEDED]', { ip, limit, remaining });
+            return NextResponse.json(
+                { reply: 'Terlalu banyak permintaan dalam waktu singkat. Mohon tunggu sebentar sebelum mengirim pesan lagi ya.' },
+                {
+                    status: 429,
+                    headers: {
+                        'X-RateLimit-Limit': limit.toString(),
+                        'X-RateLimit-Remaining': remaining.toString(),
+                        'X-RateLimit-Reset': reset.toString(),
+                    },
+                }
+            );
+        }
+    } catch (rateLimitError) {
+        console.error('[RATE LIMIT ERROR - FAIL OPEN]', rateLimitError.message);
+    }
+    // ===== END RATE LIMITING =====
+
     let incomingMessages;
     try {
         const body = await request.json();
         incomingMessages = body.messages;
-        var selectedPoli = body.selectedPoli || null; // dikirim frontend saat user klik tombol poli spesifik
+        var selectedPoli = body.selectedPoli || null;
 
         if (!incomingMessages || !Array.isArray(incomingMessages)) {
             return NextResponse.json({ reply: 'Format data chat tidak valid.' }, { status: 400 });
         }
+
+        // ===== VALIDASI PANJANG PESAN =====
+        const lastMsg = [...incomingMessages].reverse().find((m) => m.role === 'user');
+        if (lastMsg?.content && lastMsg.content.length > MAX_MESSAGE_LENGTH) {
+            return NextResponse.json(
+                { reply: `Pesan terlalu panjang. Mohon persingkat pertanyaan Anda (maksimal ${MAX_MESSAGE_LENGTH} karakter).` },
+                { status: 400 }
+            );
+        }
+        // ===== END VALIDASI PANJANG PESAN =====
+
     } catch (parseError) {
         console.error('[REQUEST PARSE ERROR]', parseError);
         return NextResponse.json({ reply: 'Format permintaan tidak valid.' }, { status: 400 });
@@ -113,10 +146,6 @@ export async function POST(request) {
     let reply;
     try {
         const recentMessages = incomingMessages.slice(-4);
-        // PENTING: Groq API strict -- cuma terima {role, content} di tiap
-        // message. Pesan dari frontend yang berupa tombol pilihan poli punya
-        // field ekstra (type, polis) yang bikin Groq nolak seluruh request
-        // dengan error 400. Sanitize dulu di sini, ambil role & content aja.
         const sanitizedMessages = recentMessages.map((m) => ({
             role: m.role,
             content: m.content,
@@ -130,17 +159,15 @@ export async function POST(request) {
             messages: fullMessages,
             model: 'llama-3.1-8b-instant',
             temperature: 0.3,
-            max_tokens: 1024, // turun dari 2048 -- ini ikut dihitung sbg "requested tokens" oleh Groq TPM limit
+            max_tokens: 1024,
         });
 
         reply = chatCompletion.choices[0]?.message?.content || 'Maaf, sistem tidak memberikan respon.';
 
-        // ===== VERIFIKASI: cek apakah reply menyebut dokter yang tidak ada di database =====
         if (containsUnknownDoctor(reply, validDoctorNames)) {
             console.warn('[INJECTION SUSPECTED] Reply menyebut nama dokter tidak dikenal:', reply);
             reply = 'Maaf, saya tidak dapat memverifikasi informasi tersebut. Untuk data dokter dan jadwal poli yang akurat, silakan hubungi bagian informasi RSUD Pasirian secara langsung.';
         }
-        // ===== END VERIFIKASI =====
 
         reply = appendRegistrationLink(reply, lastUserMessage?.content);
 
