@@ -22,6 +22,9 @@ const KATEGORI_INFO = {
   panduanJKN: { label: 'Panduan JKN Mobile', color: PLUM },
 };
 
+// Pola judul yang dianggap "bagian" dari satu topik, misal: "Standar Pelayanan Publik (bagian 3)"
+const BAGIAN_REGEX = /^(.*?)\s*\(bagian\s*(\d+)\)\s*$/i;
+
 // ===== Helper tanggal per minggu (dipakai buat label export JPG/PDF) =====
 const namaBulanID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
@@ -222,6 +225,8 @@ function KnowledgeTab() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [search, setSearch] = useState('');
 
   async function loadData() {
     setLoading(true);
@@ -269,18 +274,66 @@ function KnowledgeTab() {
     else alert('Gagal menghapus data.');
   }
 
+  function toggleGroup(key) {
+    setExpandedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
+
+  // Filter berdasarkan pencarian (judul, isi konten, atau nama kategori)
+  const keyword = search.trim().toLowerCase();
+  const filteredItems = keyword
+    ? items.filter((it) => {
+        const kat = KATEGORI_INFO[it.kategori] || { label: it.kategori };
+        return (
+          (it.judul && it.judul.toLowerCase().includes(keyword)) ||
+          (it.konten && it.konten.toLowerCase().includes(keyword)) ||
+          kat.label.toLowerCase().includes(keyword)
+        );
+      })
+    : items;
+
+  // Kelompokkan semua item (hasil filter) berdasarkan kategori
+  const byKategori = {};
+  filteredItems.forEach((item) => {
+    const key = item.kategori || 'lainnya';
+    if (!byKategori[key]) byKategori[key] = [];
+    byKategori[key].push(item);
+  });
+
+  // Urutan kategori: yang dikenal (KATEGORI_INFO) dulu, sisanya diurutkan alfabet
+  const knownOrder = Object.keys(KATEGORI_INFO);
+  const otherKeys = Object.keys(byKategori)
+    .filter((k) => !knownOrder.includes(k))
+    .sort();
+  const kategoriOrder = [...knownOrder, ...otherKeys].filter(
+    (k) => byKategori[k] && byKategori[k].length > 0
+  );
+
+  const isGroupOpen = (groupKey) => (keyword ? true : Boolean(expandedGroups[groupKey]));
 
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <p className="text-[#0B2B24]/55 text-[14px] font-medium">{items.length} data</p>
+        <p className="text-[#0B2B24]/55 text-[14px] font-medium">
+          {filteredItems.length} data{keyword ? ` dari ${items.length}` : ''}
+        </p>
         <button
           onClick={() => setEditing({})}
           className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
         >
           <IconPlus /> Tambah Data
         </button>
+      </div>
+
+      <div className="relative mb-5">
+        <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0B2B24]/40" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari judul, isi konten, atau kategori..."
+          className="w-full rounded-xl border border-[#0B2B24]/[0.12] pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+        />
       </div>
 
       {editing && (
@@ -292,47 +345,147 @@ function KnowledgeTab() {
         />
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {items.map((item) => {
-          const kat = KATEGORI_INFO[item.kategori] || { label: item.kategori, color: STEEL };
+      <div className="flex flex-col gap-7">
+        {kategoriOrder.map((kategoriKey) => {
+          const kat = KATEGORI_INFO[kategoriKey] || { label: kategoriKey, color: STEEL };
+          const list = byKategori[kategoriKey];
+
+          // Pisahkan yang punya pola "(bagian N)" ke dalam grup, sisanya standalone
+          const groups = {};
+          const standalone = [];
+          list.forEach((item) => {
+            const match = item.judul && item.judul.match(BAGIAN_REGEX);
+            if (match) {
+              const base = match[1].trim() || kat.label;
+              if (!groups[base]) groups[base] = [];
+              groups[base].push({ ...item, _bagianNum: parseInt(match[2], 10) || 0 });
+            } else {
+              standalone.push(item);
+            }
+          });
+          Object.values(groups).forEach((g) => g.sort((a, b) => a._bagianNum - b._bagianNum));
+          const groupBaseTitles = Object.keys(groups).sort();
+
           return (
-            <div
-              key={item.id}
-              className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 flex flex-col h-[340px] hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
-            >
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span
-                  className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
-                  style={{ backgroundColor: `${kat.color}14`, color: kat.color }}
-                >
-                  {kat.label}
-                </span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => setEditing(item)}
-                    title="Edit"
-                    className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
-                  >
-                    <IconPencil /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    title="Hapus"
-                    className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
-                  >
-                    <IconTrash /> Hapus
-                  </button>
-                </div>
+            <div key={kategoriKey}>
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: kat.color }} />
+                <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-[#0B2B24]">{kat.label}</p>
+                <span className="text-[12px] text-[#0B2B24]/40 font-medium">{list.length} data</span>
               </div>
-              {item.judul && (
-                <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24] mb-1.5">{item.judul}</p>
+
+              {groupBaseTitles.length > 0 && (
+                <div className="flex flex-col gap-2.5 mb-3">
+                  {groupBaseTitles.map((baseTitle) => {
+                    const groupKey = `${kategoriKey}::${baseTitle}`;
+                    const groupItems = groups[baseTitle];
+                    const open = isGroupOpen(groupKey);
+                    return (
+                      <div key={groupKey} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+                        <button
+                          onClick={() => toggleGroup(groupKey)}
+                          className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left"
+                        >
+                          <div className="flex items-center gap-2.5 text-[#0B2B24]">
+                            <IconChevron
+                              className="transition-transform"
+                              style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                            />
+                            <span className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{baseTitle}</span>
+                          </div>
+                          <span className="text-[12.5px] font-semibold text-[#0B2B24]/50 shrink-0">
+                            {groupItems.length} bagian
+                          </span>
+                        </button>
+
+                        {open && (
+                          <div className="border-t border-[#0B2B24]/[0.06] px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
+                            {groupItems.map((item) => (
+                              <div
+                                key={item.id}
+                                className="bg-white border border-[#0B2B24]/[0.06] rounded-xl px-4 py-3.5"
+                              >
+                                <div className="flex items-start justify-between gap-3 mb-2">
+                                  <span className="text-[11.5px] font-bold text-[#0B2B24]/45 uppercase tracking-wide shrink-0 pt-1">
+                                    Bagian {item._bagianNum}
+                                  </span>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                      onClick={() => setEditing(item)}
+                                      title="Edit"
+                                      className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                                    >
+                                      <IconPencil /> Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(item.id)}
+                                      title="Hapus"
+                                      className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                                    >
+                                      <IconTrash /> Hapus
+                                    </button>
+                                  </div>
+                                </div>
+                                <p className="text-[13px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap max-h-[140px] overflow-y-auto">
+                                  {item.konten}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-              <p className="text-[13.5px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap overflow-y-auto flex-1">
-                {item.konten}
-              </p>
+
+              {standalone.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {standalone.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 flex flex-col h-[340px] hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span
+                          className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
+                          style={{ backgroundColor: `${kat.color}14`, color: kat.color }}
+                        >
+                          {kat.label}
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => setEditing(item)}
+                            title="Edit"
+                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
+                            <IconPencil /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            title="Hapus"
+                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
+                            <IconTrash /> Hapus
+                          </button>
+                        </div>
+                      </div>
+                      {item.judul && (
+                        <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24] mb-1.5">{item.judul}</p>
+                      )}
+                      <p className="text-[13.5px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap overflow-y-auto flex-1">
+                        {item.konten}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
+        {kategoriOrder.length === 0 && keyword && (
+          <p className="text-[#0B2B24]/50 text-[14px] italic">Tidak ada data yang cocok dengan pencarian.</p>
+        )}
         {items.length === 0 && <p className="text-[#0B2B24]/50 text-[14px] italic">Belum ada data.</p>}
       </div>
     </div>
@@ -361,11 +514,13 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
         <option value="panduanJKN">Panduan JKN Mobile</option>
       </select>
 
-      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Judul (opsional)</label>
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">
+        Judul (opsional — tulis "Nama Topik (bagian N)" kalau ini pecahan dari topik panjang, biar otomatis dikelompokkan)
+      </label>
       <input
         value={judul}
         onChange={(e) => setJudul(e.target.value)}
-        placeholder="Misal: Jam Besuk Pasien"
+        placeholder="Misal: Standar Pelayanan Publik (bagian 2)"
         className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 

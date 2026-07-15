@@ -31,6 +31,121 @@ function MarkdownLink({ href, children }) {
   );
 }
 
+// ===== KONTEN STATIS: CARA DAFTAR PASIEN BPJS & UMUM =====
+// PENTING: Konten ini SENGAJA di-hardcode di frontend (BUKAN lewat Groq/LLM,
+// BUKAN lewat RAG search). Alasannya:
+// 1. Info prosedural ini jarang berubah -> gak butuh "kecerdasan" AI buat jawab.
+// 2. Harus SAKLEK/konsisten setiap kali diklik -- kalau lewat LLM, jawaban bisa
+//    sedikit beda tiap request dan berisiko halusinasi (contoh kasus URL kemarin).
+// 3. Instan & gratis, gak makan jatah token TPM Groq sama sekali.
+// Kalau suatu saat syarat/alur pendaftaran BPJS atau umum berubah, edit teks
+// di bawah ini langsung -- TIDAK perlu ubah apapun di knowledge_base/Supabase.
+const STATIC_CONTENT = {
+  bpjs: `**Syarat Sebelum Mendaftar:**
+- Aplikasi **Mobile JKN** sudah terinstal dan akun sudah terverifikasi
+- **Surat Rujukan** dari Puskesmas/Klinik (Faskes 1) atau Surat Kontrol yang masih berlaku
+
+**Langkah-Langkah Mendaftar:**
+1. Buka aplikasi **Mobile JKN** di smartphone Anda
+2. Masuk ke akun Anda dengan menggunakan nomor kartu BPJS dan password
+3. Pilih menu "Rujukan" atau "Surat Rujukan"
+4. Isi data rujukan yang diminta, seperti nama pasien, tanggal lahir, dan alasan rujukan
+5. Unggah **Surat Rujukan** yang masih berlaku
+6. Pilih RSUD Pasirian sebagai tujuan rujukan
+7. Konfirmasi data rujukan dan kirimkan permohonan rujukan
+
+**Setelah Berhasil Mendaftar:**
+- Anda akan menerima kode rujukan yang dapat digunakan untuk mendaftar di RSUD Pasirian
+- Bawa kode rujukan dan **Surat Rujukan** asli ke RSUD Pasirian untuk mendaftar sebagai pasien
+
+**Catatan Penting:**
+- Pastikan Anda memiliki **Surat Rujukan** yang masih berlaku dan lengkap
+- Jika Anda mengalami kesulitan dalam mendaftar, silakan hubungi Call Center BPJS atau kunjungi website resmi BPJS untuk bantuan lebih lanjut.
+
+[📱 Download Mobile JKN (Android)](https://play.google.com/store/apps/details?id=app.bpjs.mobile)
+[📱 Download Mobile JKN (iOS)](https://apps.apple.com/id/app/mobile-jkn/id1237601115)`,
+
+  umum: `**Syarat Sebelum Mendaftar:**
+- Tidak ada syarat khusus untuk mendaftar sebagai pasien umum
+
+**Langkah-Langkah Mendaftar:**
+1. Klik tombol "Daftar Online" di halaman Beranda
+2. Pilih "Pasien Umum" sebagai jenis pasien
+3. Isi data yang diminta, seperti nama, tanggal lahir, alamat, dan nomor telepon
+4. Pilih tanggal dan waktu kunjungan yang diinginkan
+5. Konfirmasi data dan kirimkan permohonan mendaftar
+
+**Setelah Berhasil Mendaftar:**
+- Anda akan menerima kode registrasi yang dapat digunakan untuk mendaftar di RSUD Pasirian
+- Bawa kode registrasi asli ke RSUD Pasirian untuk mendaftar sebagai pasien
+
+**Catatan Penting:**
+- Pastikan Anda memiliki data yang lengkap dan akurat
+- Jika Anda mengalami kesulitan dalam mendaftar, silakan hubungi Info Layanan RSUD Pasirian untuk bantuan lebih lanjut.
+
+Atau, Anda juga dapat mendaftar sebagai pasien umum secara offline dengan datang langsung ke RSUD Pasirian dan mengisi formulir pendaftaran yang tersedia di loket informasi.
+
+[📝 Daftar Sekarang](/)`,
+
+  standarIntro: `RSUD Pasirian Lumajang berkomitmen memberikan pelayanan transparan, akuntabel, dan berkualitas sesuai **UU No. 25 Tahun 2009** tentang Pelayanan Publik. Terdapat 3 kategori utama:
+
+1. **Pelayanan Pendaftaran Pasien Rawat Jalan**
+2. **Pelayanan Gawat Darurat (IGD)**
+3. **Penanganan Pengaduan, Saran, dan Masukan**
+
+Silakan pilih layanan yang Anda butuhkan untuk mengetahui informasi lebih lanjut.`,
+
+  standarPendaftaran: `**Persyaratan:**
+- Pasien Baru: **Kartu Identitas (KTP/KK)**
+- Pasien Lama: **Kartu Berobat**
+- Pasien BPJS: **Kartu BPJS aktif** & **Surat Rujukan** (jika ada)
+
+**Prosedur:**
+- Mengambil nomor antrean
+- Menuju loket pendaftaran saat nomor dipanggil
+- Petugas memverifikasi data
+- Pasien menerima berkas dan diarahkan ke poliklinik tujuan
+
+**Jangka Waktu:**
+- Rata-rata **5-10 menit** per pasien (di luar waktu tunggu antrean)
+
+**Biaya/Tarif:**
+- Sesuai Peraturan Daerah (Perda) Kabupaten Lumajang tentang Tarif Layanan Kesehatan
+- **Gratis** bagi peserta BPJS aktif sesuai ketentuan`,
+
+  standarIgd: `**Persyaratan:**
+- Pasien atau pengantar pasien mendaftar di **triase IGD**
+- Identitas pasien dapat dilengkapi kemudian
+
+**Prosedur:**
+- Pasien masuk ke ruang triase untuk dinilai tingkat kegawatannya
+- Pasien dengan kondisi gawat darurat akan langsung ditangani
+- Petugas melakukan stabilisasi dan tindakan medis yang diperlukan
+- Keputusan untuk rawat inap atau rawat jalan dibuat setelah kondisi stabil
+
+**Jangka Waktu:**
+- Waktu tanggap (response time) di triase **kurang dari 5 menit**
+
+**Biaya/Tarif:**
+- Sesuai Peraturan Daerah (Perda) tentang Tarif Layanan Kesehatan
+- **Ditanggung BPJS** untuk kasus gawat darurat sesuai ketentuan`,
+
+  standarPengaduan: `Jika pasien menemukan pelayanan yang tidak sesuai standar, dapat menyampaikan melalui:
+- Kotak saran yang tersedia di area rumah sakit
+- Menghubungi bagian **Humas atau Manajemen**
+- Email resmi: **rsud.pasirian@gmail.com**
+- Telepon: **(0334) 5761044**`,
+};
+// ===== END KONTEN STATIS =====
+
+// Daftar kategori untuk tombol tahap-2 Standar Pelayanan Publik.
+// contentKey merujuk ke key di STATIC_CONTENT di atas.
+const STANDAR_KATEGORI = [
+  { contentKey: 'standarPendaftaran', label: 'Pelayanan Pendaftaran Pasien Rawat Jalan' },
+  { contentKey: 'standarIgd', label: 'Pelayanan Gawat Darurat (IGD)' },
+  { contentKey: 'standarPengaduan', label: 'Penanganan Pengaduan, Saran, dan Masukan' },
+];
+
 export default function ChatPage() {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Selamat datang di Layanan Asisten Virtual RSUD Pasirian Lumajang. Dengan senang hati saya akan membantu Anda. Silakan sampaikan pertanyaan seputar jadwal dokter, standar pelayanan, atau prosedur pendaftaran yang ingin Anda ketahui.' }
@@ -42,8 +157,10 @@ export default function ChatPage() {
 
   const topics = [
     { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', isPoliPicker: true },
-    { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', text: 'Apa saja Standar Pelayanan Publik di RSUD Pasirian?', loading: 'Menyusun standar pelayanan publik...' },
-    { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', text: 'Bagaimana panduan pendaftaran melalui JKN Mobile?', loading: 'Mencari panduan pendaftaran...' },
+    { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', isStaticList: true },
+    { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', isLink: true, href: '/#panduan-jkn' },
+    { icon: '🪪', label: 'Cara Daftar Pasien BPJS', shortLabel: 'Daftar Pasien BPJS', isStatic: true, staticKey: 'bpjs' },
+    { icon: '🧾', label: 'Cara Daftar Pasien Umum', shortLabel: 'Daftar Pasien Umum', isStatic: true, staticKey: 'umum' },
   ];
 
   // selectedPoli (opsional): dikirim ke backend saat user KLIK tombol poli
@@ -132,9 +249,52 @@ export default function ChatPage() {
     sendMessage(`Jadwal dan dokter untuk ${namaPoli}`, `Mencari jadwal ${namaPoli}...`, namaPoli);
   };
 
+  // Tahap 1 (statis, instan): user klik "Standar Pelayanan Publik" -> langsung
+  // tampilkan teks pengantar + 3 tombol kategori. TANPA fetch/Groq sama sekali,
+  // karena daftar 3 kategori ini fixed dan gak berubah-ubah.
+  const handleShowStandarPelayanan = () => {
+    if (isLoading) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: 'Standar Pelayanan Publik' },
+      { role: 'assistant', type: 'standar-buttons', content: STATIC_CONTENT.standarIntro },
+    ]);
+  };
+
+  // Tahap 2 (statis, instan): user klik salah satu kategori -> tampilkan detail
+  // kategori tersebut dari STATIC_CONTENT. Juga TANPA fetch/Groq.
+  const handleStandarSelect = (contentKey, label) => {
+    if (isLoading) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: label },
+      { role: 'assistant', content: STATIC_CONTENT[contentKey] },
+    ]);
+  };
+
+  // Handler untuk section STATIS (Cara Daftar Pasien BPJS / Umum).
+  // TIDAK memanggil /api/chat sama sekali -- langsung push pertanyaan user
+  // dan jawaban tetap dari STATIC_CONTENT ke state messages. Instan, dan
+  // jawabannya dijamin SAMA PERSIS setiap kali diklik (gak lewat LLM).
+  const handleShowStatic = (staticKey, label) => {
+    if (isLoading) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: label },
+      { role: 'assistant', content: STATIC_CONTENT[staticKey] },
+    ]);
+  };
+
   const handleTopicClick = (topic) => {
     if (topic.isPoliPicker) {
       handleShowPoliList();
+    } else if (topic.isStaticList) {
+      handleShowStandarPelayanan();
+    } else if (topic.isStatic) {
+      handleShowStatic(topic.staticKey, topic.label);
     } else {
       sendMessage(topic.text, topic.loading);
     }
@@ -178,16 +338,26 @@ export default function ChatPage() {
           <div className="space-y-3">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#DDB169]/80">Layanan Informasi</p>
             <div className="flex flex-col gap-2.5 pt-1">
-              {topics.map((topic) => (
-                <button
-                  key={topic.label}
-                  type="button"
-                  onClick={() => handleTopicClick(topic)}
-                  className="text-left text-[13px] bg-white/[0.04] hover:bg-white/[0.08] hover:border-[#DDB169]/40 p-3.5 rounded-xl border border-white/10 transition text-white/85 font-medium"
-                >
-                  <span className="mr-1.5">{topic.icon}</span>{topic.label}
-                </button>
-              ))}
+              {topics.map((topic) =>
+                topic.isLink ? (
+                  <Link
+                    key={topic.label}
+                    href={topic.href}
+                    className="text-left text-[13px] bg-white/[0.04] hover:bg-white/[0.08] hover:border-[#DDB169]/40 p-3.5 rounded-xl border border-white/10 transition text-white/85 font-medium"
+                  >
+                    <span className="mr-1.5">{topic.icon}</span>{topic.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={topic.label}
+                    type="button"
+                    onClick={() => handleTopicClick(topic)}
+                    className="text-left text-[13px] bg-white/[0.04] hover:bg-white/[0.08] hover:border-[#DDB169]/40 p-3.5 rounded-xl border border-white/10 transition text-white/85 font-medium"
+                  >
+                    <span className="mr-1.5">{topic.icon}</span>{topic.label}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -244,6 +414,27 @@ export default function ChatPage() {
                         ))}
                       </div>
                     </div>
+                  ) : msg.type === 'standar-buttons' ? (
+                    <div className="space-y-3">
+                      <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
+                        <ReactMarkdown remarkPlugins={[remarkBreaks]} components={{ a: MarkdownLink }}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {STANDAR_KATEGORI.map((kat) => (
+                          <button
+                            key={kat.contentKey}
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => handleStandarSelect(kat.contentKey, kat.label)}
+                            className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {kat.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ) : msg.role === 'assistant' ? (
                     <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
                       <ReactMarkdown
@@ -274,16 +465,26 @@ export default function ChatPage() {
 
         <div className="flex-shrink-0 md:hidden px-3 pt-2 bg-[#FBF9F4] overflow-x-auto">
           <div className="flex gap-2 pb-2 w-max">
-            {topics.map((topic) => (
-              <button
-                key={topic.label}
-                type="button"
-                onClick={() => handleTopicClick(topic)}
-                className="flex-shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
-              >
-                <span>{topic.icon}</span> <span>{topic.shortLabel}</span>
-              </button>
-            ))}
+            {topics.map((topic) =>
+              topic.isLink ? (
+                <Link
+                  key={topic.label}
+                  href={topic.href}
+                  className="flex-shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
+                >
+                  <span>{topic.icon}</span> <span>{topic.shortLabel}</span>
+                </Link>
+              ) : (
+                <button
+                  key={topic.label}
+                  type="button"
+                  onClick={() => handleTopicClick(topic)}
+                  className="flex-shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
+                >
+                  <span>{topic.icon}</span> <span>{topic.shortLabel}</span>
+                </button>
+              )
+            )}
           </div>
         </div>
 
