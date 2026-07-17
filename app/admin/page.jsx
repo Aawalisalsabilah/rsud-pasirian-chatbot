@@ -154,9 +154,9 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-6 max-w-[340px] w-full shadow-[0_20px_50px_rgba(11,43,36,0.25)]"
+        className="bg-white rounded-2xl p-6 max-w-85 w-full shadow-[0_20px_50px_rgba(11,43,36,0.25)]"
       >
-        <p className="font-[var(--font-fraunces)] font-semibold text-[17px] text-[#0B2B24] mb-2">
+        <p className="font-(family-name:--font-fraunces) font-semibold text-[17px] text-[#0B2B24] mb-2">
           Anda ingin logout?
         </p>
         <p className="text-[13.5px] text-[#0B2B24]/60 mb-5">
@@ -165,13 +165,13 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
         <div className="flex justify-end gap-2.5">
           <button
             onClick={onCancel}
-            className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition"
+            className="px-4 py-2.5 rounded-full border border-[#0B2B24]/12 text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition"
           >
             Batal
           </button>
           <button
             onClick={onConfirm}
-            className="px-5 py-2.5 rounded-full bg-[#9E3B32] hover:bg-[#832f28] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition"
+            className="px-5 py-2.5 rounded-full bg-[#9E3B32] hover:bg-[#832f28] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition"
           >
             Keluar
           </button>
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen bg-[#FBF9F4] text-[#0B2B24]`}>
+    <div className={`${fraunces.variable} ${inter.variable} font-(family-name:--font-inter) min-h-screen bg-[#FBF9F4] text-[#0B2B24]`}>
       {}
       <header className="bg-[#0B2B24]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
               className="w-9 h-9 rounded-full object-cover bg-white shrink-0"
             />
             <div>
-              <h1 className="font-[var(--font-fraunces)] font-semibold text-[16px] leading-tight text-white">Admin RSUD Pasirian</h1>
+              <h1 className="font-(family-name:--font-fraunces) font-semibold text-[16px] leading-tight text-white">Admin RSUD Pasirian</h1>
               <p className="text-[11px] text-white/50 tracking-[0.04em] font-medium">Panel Pengelolaan Konten</p>
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
       )}
 
       {}
-      <nav className="bg-white border-b border-[#0B2B24]/[0.08]">
+      <nav className="bg-white border-b border-[#0B2B24]/8">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex gap-2">
           <button
             onClick={() => setTab('knowledge')}
@@ -368,7 +368,7 @@ function KnowledgeTab() {
         </p>
         <button
           onClick={() => setEditing({})}
-          className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
+          className="inline-flex items-center gap-2 bg-linear-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-(family-name:--font-fraunces) font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
         >
           <IconPlus /> Tambah Data
         </button>
@@ -380,7 +380,7 @@ function KnowledgeTab() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari judul, isi konten, atau kategori..."
-          className="w-full rounded-xl border border-[#0B2B24]/[0.12] pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+          className="w-full rounded-xl border border-[#0B2B24]/12 pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
         />
       </div>
 
@@ -418,7 +418,7 @@ function KnowledgeTab() {
             <div key={kategoriKey}>
               <div className="flex items-center gap-2.5 mb-3">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: kat.color }} />
-                <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-[#0B2B24]">{kat.label}</p>
+                <p className="font-(family-name:--font-fraunces) font-semibold text-[14.5px] text-[#0B2B24]">{kat.label}</p>
                 <span className="text-[12px] text-[#0B2B24]/40 font-medium">{list.length} data</span>
               </div>
 
@@ -429,7 +429,7 @@ function KnowledgeTab() {
                     const groupItems = groups[baseTitle];
                     const open = isGroupOpen(groupKey);
                     return (
-                      <div key={groupKey} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+                      <div key={groupKey} className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
                         <button
                           onClick={() => toggleGroup(groupKey)}
                           className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left"
@@ -439,7 +439,7 @@ function KnowledgeTab() {
                               className="transition-transform"
                               style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
                             />
-                            <span className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{baseTitle}</span>
+                            <span className="font-(family-name:--font-fraunces) font-semibold text-[15px] text-[#0B2B24]">{baseTitle}</span>
                           </div>
                           <span className="text-[12.5px] font-semibold text-[#0B2B24]/50 shrink-0">
                             {groupItems.length} bagian
@@ -447,11 +447,11 @@ function KnowledgeTab() {
                         </button>
 
                         {open && (
-                          <div className="border-t border-[#0B2B24]/[0.06] px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
+                          <div className="border-t border-[#0B2B24]/6 px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
                             {groupItems.map((item) => (
                               <div
                                 key={item.id}
-                                className="bg-white border border-[#0B2B24]/[0.06] rounded-xl px-4 py-3.5"
+                                className="bg-white border border-[#0B2B24]/6 rounded-xl px-4 py-3.5"
                               >
                                 <div className="flex items-start justify-between gap-3 mb-2">
                                   <span className="text-[11.5px] font-bold text-[#0B2B24]/45 uppercase tracking-wide shrink-0 pt-1">
@@ -461,20 +461,20 @@ function KnowledgeTab() {
                                     <button
                                       onClick={() => setEditing(item)}
                                       title="Edit"
-                                      className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                                      className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                                     >
                                       <IconPencil /> Edit
                                     </button>
                                     <button
                                       onClick={() => handleDelete(item.id)}
                                       title="Hapus"
-                                      className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                                      className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                                     >
                                       <IconTrash /> Hapus
                                     </button>
                                   </div>
                                 </div>
-                                <p className="text-[13px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap max-h-[140px] overflow-y-auto">
+                                <p className="text-[13px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap max-h-35 overflow-y-auto">
                                   {item.konten}
                                 </p>
                               </div>
@@ -492,7 +492,7 @@ function KnowledgeTab() {
                   {standalone.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 flex flex-col h-[340px] hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
+                      className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 flex flex-col h-85 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
                     >
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <span
@@ -505,21 +505,21 @@ function KnowledgeTab() {
                           <button
                             onClick={() => setEditing(item)}
                             title="Edit"
-                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                           >
                             <IconPencil /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
                             title="Hapus"
-                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                           >
                             <IconTrash /> Hapus
                           </button>
                         </div>
                       </div>
                       {item.judul && (
-                        <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24] mb-1.5">{item.judul}</p>
+                        <p className="font-(family-name:--font-fraunces) font-semibold text-[15px] text-[#0B2B24] mb-1.5">{item.judul}</p>
                       )}
                       <p className="text-[13.5px] text-[#0B2B24]/70 leading-relaxed whitespace-pre-wrap overflow-y-auto flex-1">
                         {item.konten}
@@ -546,8 +546,8 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
   const [konten, setKonten] = useState(initial.konten || '');
 
   return (
-    <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
-      <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+    <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+      <p className="font-(family-name:--font-fraunces) font-semibold text-[16px] text-[#0B2B24] mb-4">
         {initial.id ? 'Edit Data' : 'Tambah Data Baru'}
       </p>
 
@@ -555,7 +555,7 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
       <select
         value={kategori}
         onChange={(e) => setKategori(e.target.value)}
-        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white mb-4"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white mb-4"
       >
         <option value="baseInfo">Informasi Umum (baseInfo)</option>
         <option value="standarPelayananPublik">Standar Pelayanan Publik</option>
@@ -569,7 +569,7 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
         value={judul}
         onChange={(e) => setJudul(e.target.value)}
         placeholder="Misal: Standar Pelayanan Publik (bagian 2)"
-        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 
       <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Konten</label>
@@ -578,7 +578,7 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
         onChange={(e) => setKonten(e.target.value)}
         rows={6}
         placeholder="Isi informasi lengkap di sini..."
-        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition font-[var(--font-inter)]"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition font-(family-name:--font-inter)"
       />
 
       <p className="text-[12px] text-[#8a5a12] bg-[#C08829]/10 px-3 py-2 rounded-lg mt-3">
@@ -589,14 +589,14 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
         <button
           onClick={onCancel}
           disabled={saving}
-          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
+          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/12 text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
         >
           Batal
         </button>
         <button
           onClick={() => onSave({ id: initial.id, kategori, judul, konten })}
           disabled={saving || !konten.trim()}
-          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
+          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
@@ -763,20 +763,20 @@ function PoliTab() {
           <button
             onClick={handleDownloadJPG}
             disabled={exporting || items.length === 0}
-            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/[0.05] px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
+            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/5 px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
           >
             <IconDownload /> {exporting ? 'Memproses...' : 'Unduh JPG'}
           </button>
           <button
             onClick={handleDownloadPDF}
             disabled={exporting || items.length === 0}
-            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/[0.05] px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
+            className="inline-flex items-center gap-2 border border-[#0B2B24] text-[#0B2B24] hover:bg-[#0B2B24]/5 px-4 py-2.5 rounded-full text-[13px] font-semibold transition disabled:opacity-40"
           >
             <IconDownload /> {exporting ? 'Memproses...' : 'Unduh PDF'}
           </button>
           <button
             onClick={() => setEditing({})}
-            className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
+            className="inline-flex items-center gap-2 bg-linear-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-(family-name:--font-fraunces) font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
           >
             <IconPlus /> Tambah Jadwal
           </button>
@@ -789,7 +789,7 @@ function PoliTab() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama poli atau dokter..."
-          className="w-full rounded-xl border border-[#0B2B24]/[0.12] pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+          className="w-full rounded-xl border border-[#0B2B24]/12 pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
         />
       </div>
 
@@ -809,7 +809,7 @@ function PoliTab() {
           const open = isGroupOpen(namaPoli);
 
           return (
-            <div key={namaPoli} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+            <div key={namaPoli} className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
               <button
                 onClick={() => togglePoli(namaPoli)}
                 className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left"
@@ -819,7 +819,7 @@ function PoliTab() {
                     className="transition-transform"
                     style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
                   />
-                  <span className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{namaPoli}</span>
+                  <span className="font-(family-name:--font-fraunces) font-semibold text-[15px] text-[#0B2B24]">{namaPoli}</span>
                 </div>
                 <span className="text-[12.5px] font-semibold text-[#0B2B24]/50 shrink-0">
                   {doctors.length} dokter &middot; {activeCount} aktif
@@ -827,17 +827,17 @@ function PoliTab() {
               </button>
 
               {open && (
-                <div className="border-t border-[#0B2B24]/[0.06] px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
+                <div className="border-t border-[#0B2B24]/6 px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
                   {doctors.map((item) => {
                     const isActive = item.is_active !== false;
                     return (
                       <div
                         key={item.id}
-                        className={`flex flex-wrap items-center justify-between gap-3 bg-white border border-[#0B2B24]/[0.06] rounded-xl px-4 py-3 ${
+                        className={`flex flex-wrap items-center justify-between gap-3 bg-white border border-[#0B2B24]/6 rounded-xl px-4 py-3 ${
                           !isActive ? 'opacity-55' : ''
                         }`}
                       >
-                        <div className="min-w-[180px]">
+                        <div className="min-w-45">
                           <p className="font-semibold text-[14px] text-[#0B2B24]">{item.nama_dokter}</p>
                           <p className="text-[12.5px] text-[#0B2B24]/55 mt-0.5">{item.hari} &middot; {item.jam}</p>
                         </div>
@@ -857,7 +857,7 @@ function PoliTab() {
                             title={isActive ? 'Set jadwal libur' : 'Aktifkan jadwal'}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition ${
                               isActive
-                                ? 'border-[#C08829] text-[#8a5a12] hover:bg-[#C08829]/[0.06]'
+                                ? 'border-[#C08829] text-[#8a5a12] hover:bg-[#C08829]/6'
                                 : 'bg-[#1F6B4F] border-[#1F6B4F] text-white hover:bg-[#195a42]'
                             }`}
                           >
@@ -866,14 +866,14 @@ function PoliTab() {
                           <button
                             onClick={() => setEditing(item)}
                             title="Edit"
-                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                           >
                             <IconPencil /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
                             title="Hapus"
-                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/[0.06] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
                           >
                             <IconTrash /> Hapus
                           </button>
@@ -939,8 +939,8 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
   const [is_active, setIsActive] = useState(initial.is_active !== false);
 
   return (
-    <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
-      <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+    <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+      <p className="font-(family-name:--font-fraunces) font-semibold text-[16px] text-[#0B2B24] mb-4">
         {initial.id ? 'Edit Jadwal' : 'Tambah Jadwal Baru'}
       </p>
 
@@ -949,7 +949,7 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
         value={nama_poli}
         onChange={(e) => setNamaPoli(e.target.value)}
         placeholder="Poli Spesialis Anak"
-        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 
       <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Nama Dokter</label>
@@ -957,7 +957,7 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
         value={nama_dokter}
         onChange={(e) => setNamaDokter(e.target.value)}
         placeholder="dr. Nama, Sp.A"
-        className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-1">
@@ -967,7 +967,7 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
             value={hari}
             onChange={(e) => setHari(e.target.value)}
             placeholder="Senin-Jumat"
-            className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
           />
         </div>
         <div>
@@ -976,7 +976,7 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
             value={jam}
             onChange={(e) => setJam(e.target.value)}
             placeholder="08.00-12.00"
-            className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
           />
         </div>
       </div>
@@ -995,14 +995,14 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
         <button
           onClick={onCancel}
           disabled={saving}
-          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/[0.12] text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
+          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/12 text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
         >
           Batal
         </button>
         <button
           onClick={() => onSave({ id: initial.id, nama_poli, nama_dokter, hari, jam, is_active })}
           disabled={saving || !nama_poli.trim() || !nama_dokter.trim()}
-          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
+          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
@@ -1077,8 +1077,8 @@ function AnnouncementTab() {
         </span>
       </div>
 
-      <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 max-w-xl shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
-        <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mb-4">
+      <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 max-w-xl shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+        <p className="font-(family-name:--font-fraunces) font-semibold text-[16px] text-[#0B2B24] mb-4">
           Papan Pengumuman
         </p>
 
@@ -1098,7 +1098,7 @@ function AnnouncementTab() {
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="Misal: Layanan Poli Gigi tutup sementara 8-10 Juli 2026 karena pemeliharaan alat."
-          className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+          className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
         />
         
         <div className="flex items-center justify-end gap-3 mt-5">
@@ -1106,7 +1106,7 @@ function AnnouncementTab() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-[var(--font-fraunces)] font-bold text-[13.5px] transition disabled:opacity-50"
+            className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
           >
             {saving ? 'Menyimpan...' : 'Simpan'}
           </button>

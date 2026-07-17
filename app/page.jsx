@@ -206,6 +206,16 @@ function SemeruRidge({ tone = INK, bg = 'transparent', flip = false, className =
   );
 }
 
+const NAV_ITEMS = [
+  { id: 'tentang', label: 'Tentang' },
+  { id: 'layanan', label: 'Layanan' },
+  { id: 'jam-pelayanan', label: 'Jam Pelayanan' },
+  { id: 'dokter', label: 'Jadwal Dokter' },
+  { id: 'testimoni', label: 'Testimoni' },
+  { id: 'panduan-jkn', label: 'Panduan JKN' },
+  { id: 'kontak', label: 'Kontak' },
+];
+
 const WA_NOMOR_UMUM = '6285230703508';
 const MOBILE_JKN_LINK = 'https://play.google.com/store/apps/details?id=app.bpjs.mobile';
 
@@ -513,6 +523,7 @@ export default function LandingPage() {
   const [daftarModalOpen, setDaftarModalOpen] = useState(false);
   const [klinikData, setKlinikData] = useState(klinikSpesialis);
   const [announcement, setAnnouncement] = useState(null);
+  const [activeSection, setActiveSection] = useState('tentang');
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(76);
 
@@ -540,6 +551,34 @@ export default function LandingPage() {
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
   }, [announcement]);
+
+  // Scroll-spy: pantau section mana yang lagi keliatan di layar,
+  // lalu highlight menu navbar yang sesuai (kayak hover otomatis).
+  useEffect(() => {
+    const sectionIds = NAV_ITEMS.map((n) => n.id);
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: `-${headerHeight + 20}px 0px -60% 0px`,
+        threshold: 0,
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [headerHeight]);
 
   useEffect(() => {
     fetch('/api/poli')
@@ -601,13 +640,17 @@ export default function LandingPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-[#0B2B24]/80">
-            <a href="#tentang" className="hover:text-[#C08829] transition">Tentang</a>
-            <a href="#layanan" className="hover:text-[#C08829] transition">Layanan</a>
-            <a href="#jam-pelayanan" className="hover:text-[#C08829] transition">Jam Pelayanan</a>
-            <a href="#dokter" className="hover:text-[#C08829] transition">Jadwal Dokter</a>
-            <a href="#testimoni" className="hover:text-[#C08829] transition">Testimoni</a>
-            <a href="#panduan-jkn" className="hover:text-[#C08829] transition">Panduan JKN</a>
-            <a href="#kontak" className="hover:text-[#C08829] transition">Kontak</a>
+            {NAV_ITEMS.map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={`transition ${
+                  activeSection === item.id ? 'text-[#C08829]' : 'hover:text-[#C08829]'
+                }`}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
           <button
@@ -623,27 +666,19 @@ export default function LandingPage() {
           className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Navigasi utama"
         >
-          <a href="#tentang" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Tentang
-          </a>
-          <a href="#layanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Layanan
-          </a>
-          <a href="#jam-pelayanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Jam Pelayanan
-          </a>
-          <a href="#dokter" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Jadwal Dokter
-          </a>
-          <a href="#testimoni" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Testimoni
-          </a>
-          <a href="#panduan-jkn" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Panduan JKN
-          </a>
-          <a href="#kontak" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
-            Kontak
-          </a>
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`shrink-0 text-[12.5px] font-semibold px-3.5 py-1.5 rounded-full transition whitespace-nowrap ${
+                activeSection === item.id
+                  ? 'bg-[#C08829]/15 text-[#C08829]'
+                  : 'text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15'
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
         {announcement && (
@@ -805,7 +840,6 @@ export default function LandingPage() {
             Fasilitas lengkap, siap melayani Anda
           </h3>
           <p className="text-[#0B2B24]/60 text-[15px] mt-3">
-            Layanan ini mencerminkan papan petunjuk yang ada langsung di gerbang RSUD Pasirian.
           </p>
         </div>
 
@@ -917,7 +951,6 @@ export default function LandingPage() {
               Ruang rawat inap
             </h4>
             <p className="text-[#0B2B24]/60 text-[14px] mt-3">
-              Total 100 tempat tidur rawat inap, ditambah 13 tempat tidur di IGD 24 Jam.
             </p>
           </div>
 
@@ -976,7 +1009,7 @@ export default function LandingPage() {
           </div>
 
           <p className="text-center text-[12.5px] text-[#0B2B24]/50 mt-6 max-w-xl mx-auto leading-relaxed">
-            Jam poliklinik spesialis dapat berubah sewaktu-waktu mengikuti jadwal dokter. Untuk kepastian jadwal, hubungi kami di (0334) 5761114 atau cek saat Daftar Online.
+            Jam poliklinik spesialis dapat berubah sewaktu-waktu mengikuti jadwal dokter. Untuk kepastian jadwal, dapat melihat di Jadwal Dokter atau bisa langsung klik "Chat dengan kami".
           </p>
         </div>
       </section>
@@ -992,7 +1025,6 @@ export default function LandingPage() {
               Dokter spesialis kami
             </h3>
             <p className="text-white/55 text-[15px] mt-3">
-              Data diambil otomatis dari sistem admin. Untuk jam praktik terkini, silakan hubungi kami atau cek saat Daftar Online.
             </p>
           </div>
 
@@ -1053,7 +1085,6 @@ export default function LandingPage() {
           </div>
 
           <p className="text-center text-[11.5px] text-[#0B2B24]/40 mt-8 max-w-xl mx-auto leading-relaxed">
-            *Testimoni di atas adalah contoh tampilan. Hubungi admin untuk mengganti dengan testimoni pasien asli.
           </p>
         </div>
       </section>
