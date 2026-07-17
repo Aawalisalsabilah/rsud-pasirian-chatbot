@@ -128,7 +128,6 @@ const kapasitasIgd = [
   { ruang: 'Transit', tt: 2 },
 ];
 
-// Jam pelayanan — sesuaikan lagi jamnya kalau ada perubahan kebijakan
 const jamPelayanan = [
   { layanan: 'IGD', jam: '24 Jam, setiap hari termasuk libur', nonstop: true, color: CLAY },
   { layanan: 'Rawat Inap', jam: '24 Jam, setiap hari', nonstop: true, color: PLUM },
@@ -139,26 +138,25 @@ const jamPelayanan = [
   { layanan: 'Poliklinik Spesialis', jam: 'Senin–Jumat, sesuai jadwal dokter', nonstop: false, color: EMERALD },
 ];
 
-// Testimoni — CONTOH placeholder, ganti dengan testimoni pasien asli
-// (bisa ambil dari ulasan Google Maps dengan izin penulisnya, atau kumpulkan langsung)
+// Testimoni placeholder — ganti dengan testimoni pasien asli
 const testimoni = [
   {
-    nama: 'Nama Pasien',
+    nama: 'Aris Junitasari',
     asal: 'Pasirian',
     rating: 5,
-    isi: 'Pelayanan IGD cepat tanggap, perawat dan dokternya ramah serta komunikatif saat menjelaskan kondisi.',
+    isi: 'Pelayanan diruang bayi Sangat bagus dalam menjelasankan ke pasien sangat detail dan mudah dimengerti',
   },
   {
-    nama: 'Nama Pasien',
+    nama: 'Ayasa',
     asal: 'Candipuro',
     rating: 5,
-    isi: 'Proses pendaftaran BPJS lewat Mobile JKN mudah diikuti berkat panduan di website ini, jadi tidak perlu antre lama.',
+    isi: 'Pelayanan baik, mulai dari petugas ambil antrean menyambut dengan ramah dan mengarahkan dengan jelas, dan dokter dan perawatnya juga melayani dengan baik, Saran saya lebih dilengkapi lagi poli spesialisnya',
   },
   {
-    nama: 'Nama Pasien',
+    nama: 'Vicha Devinta Anggrianna',
     asal: 'Tempeh',
     rating: 4,
-    isi: 'Ruang rawat inap bersih dan nyaman, layanan Sehat Ekspres juga sangat membantu keluarga di rumah.',
+    isi: 'Rumah sakitnya bersih, tenaga medisnya ramah, puas dengan pelayanan yang ada',
   },
 ];
 
@@ -196,8 +194,8 @@ function ServiceIcon({ d, color }) {
 
 function SemeruRidge({ tone = INK, bg = 'transparent', flip = false, className = '' }) {
   return (
-    <div className={`w-full leading-[0] ${flip ? 'rotate-180' : ''} ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="w-full h-[34px] sm:h-[46px]">
+    <div className={`w-full leading-0 ${flip ? 'rotate-180' : ''} ${className}`} aria-hidden="true">
+      <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="w-full h-8.5 sm:h-11.5">
         <rect width="1200" height="60" fill={bg} />
         <path
           d="M0,60 L0,44 L140,26 L210,38 L300,10 L340,22 L430,4 L470,20 L560,30 L640,14 L700,32 L780,24 L860,40 L960,20 L1040,34 L1120,12 L1200,30 L1200,60 Z"
@@ -258,7 +256,8 @@ function LabeledInput({ label, ...props }) {
       <span className="text-[12.5px] font-semibold text-[#0B2B24]/70">{label}</span>
       <input
         {...props}
-        className="mt-1.5 w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+        className="mt-1.5 w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+        style={{ colorScheme: 'light' }}
       />
     </label>
   );
@@ -270,7 +269,8 @@ function LabeledSelect({ label, options, ...props }) {
       <span className="text-[12.5px] font-semibold text-[#0B2B24]/70">{label}</span>
       <select
         {...props}
-        className="mt-1.5 w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+        className="mt-1.5 w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+        style={{ colorScheme: 'light' }}
       >
         <option value="" disabled>Pilih poli tujuan</option>
         {options.map((o) => (
@@ -308,7 +308,7 @@ function tanggalMinimalDaftar() {
 }
 
 function DaftarOnlineModal({ open, onClose }) {
-  const [step, setStep] = useState('pilih'); 
+  const [step, setStep] = useState('pilih');
   const [form, setForm] = useState(FORM_KOSONG);
 
   if (!open) return null;
@@ -338,7 +338,7 @@ function DaftarOnlineModal({ open, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8"
+      className="fixed inset-0 z-100 flex items-center justify-center px-4 py-8"
       role="dialog"
       aria-modal="true"
       aria-labelledby="daftar-online-title"
@@ -364,7 +364,7 @@ function DaftarOnlineModal({ open, onClose }) {
             <span className="inline-flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#C08829] bg-[#C08829]/10 rounded-full px-3 py-1.5 w-fit">
               Daftar Online
             </span>
-            <h3 id="daftar-online-title" className="font-[var(--font-fraunces)] font-semibold text-2xl tracking-tight mt-3 text-[#0B2B24]">
+            <h3 id="daftar-online-title" className="font-fraunces font-semibold text-2xl tracking-tight mt-3 text-[#0B2B24]">
               Anda pasien apa?
             </h3>
             <p className="text-[13.5px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">
@@ -372,12 +372,11 @@ function DaftarOnlineModal({ open, onClose }) {
             </p>
 
             <div className="mt-6 space-y-3.5">
-              {}
               <a
                 href={MOBILE_JKN_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-start gap-4 rounded-2xl border border-[#0B2B24]/[0.08] p-4 hover:border-[#2A6C93]/40 hover:bg-[#2A6C93]/[0.04] transition"
+                className="group flex items-start gap-4 rounded-2xl border border-[#0B2B24]/8 p-4 hover:border-[#2A6C93]/40 hover:bg-[#2A6C93]/4 transition"
               >
                 <div className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center bg-[#2A6C93]/10">
                   <svg viewBox="0 0 24 24" fill="none" stroke="#2A6C93" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -385,7 +384,7 @@ function DaftarOnlineModal({ open, onClose }) {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">Pasien BPJS</p>
+                  <p className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">Pasien BPJS</p>
                   <p className="text-[12.5px] text-[#0B2B24]/60 mt-0.5 leading-relaxed">
                     Pendaftaran dilakukan lewat aplikasi Mobile JKN.
                   </p>
@@ -395,10 +394,9 @@ function DaftarOnlineModal({ open, onClose }) {
                 </div>
               </a>
 
-              {/* Opsi Umum */}
               <button
                 onClick={() => setStep('form-umum')}
-                className="group w-full flex items-start gap-4 rounded-2xl border border-[#0B2B24]/[0.08] p-4 hover:border-[#25D366]/50 hover:bg-[#25D366]/[0.05] transition text-left"
+                className="group w-full flex items-start gap-4 rounded-2xl border border-[#0B2B24]/8 p-4 hover:border-[#25D366]/50 hover:bg-[#25D366]/5 transition text-left"
               >
                 <div className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center bg-[#25D366]/10">
                   <svg viewBox="0 0 24 24" fill="#25D366" className="w-5 h-5">
@@ -406,7 +404,7 @@ function DaftarOnlineModal({ open, onClose }) {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">Pasien Umum</p>
+                  <p className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">Pasien Umum</p>
                   <p className="text-[12.5px] text-[#0B2B24]/60 mt-0.5 leading-relaxed">
                     Isi data sekali, langsung terkirim rapi ke WhatsApp kami.
                   </p>
@@ -432,7 +430,7 @@ function DaftarOnlineModal({ open, onClose }) {
             <span className="inline-flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#25D366] bg-[#25D366]/10 rounded-full px-3 py-1.5 w-fit">
               Pasien Umum
             </span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-2xl tracking-tight mt-3 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-2xl tracking-tight mt-3 text-[#0B2B24]">
               Formulir Pendaftaran
             </h3>
             <p className="text-[13px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">
@@ -470,7 +468,7 @@ function DaftarOnlineModal({ open, onClose }) {
             <button
               onClick={kirimWhatsApp}
               disabled={!wajibTerisi}
-              className="mt-6 w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] disabled:bg-[#0B2B24]/15 disabled:cursor-not-allowed text-white font-[var(--font-fraunces)] font-bold py-3.5 rounded-full transition"
+              className="mt-6 w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] disabled:bg-[#0B2B24]/15 disabled:cursor-not-allowed text-white font-fraunces font-bold py-3.5 rounded-full transition"
             >
               Kirim ke WhatsApp <span>↗</span>
             </button>
@@ -513,7 +511,6 @@ function MegaphoneIcon({ className = 'w-4 h-4' }) {
 
 export default function LandingPage() {
   const [daftarModalOpen, setDaftarModalOpen] = useState(false);
-
   const [klinikData, setKlinikData] = useState(klinikSpesialis);
   const [announcement, setAnnouncement] = useState(null);
   const headerRef = useRef(null);
@@ -529,12 +526,14 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
-  // Ukur tinggi header setiap kali kontennya berubah (mis. saat pengumuman muncul),
-  // dan juga saat ukuran layar berubah (mis. rotasi HP).
+  // Ukur tinggi header tiap kali kontennya berubah (mis. saat pengumuman muncul) atau layar di-resize,
+  // lalu pakai nilainya sebagai scroll-padding-top supaya klik menu anchor tidak ketutup header fixed.
   useEffect(() => {
     const updateHeight = () => {
       if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
+        const h = headerRef.current.offsetHeight;
+        setHeaderHeight(h);
+        document.documentElement.style.scrollPaddingTop = `${h + 12}px`;
       }
     };
     updateHeight();
@@ -547,18 +546,15 @@ export default function LandingPage() {
       .then((res) => res.json())
       .then((res) => {
         const rows = res.data || [];
-
         const grouped = {};
         rows.forEach((item) => {
-          if (item.is_active === false) return; 
+          if (item.is_active === false) return;
           const namaKlinik = item.nama_poli;
           const baris = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
           if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
           grouped[namaKlinik].push(baris);
         });
-
         const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
-
         if (hasil.length > 0) {
           setKlinikData(hasil);
         }
@@ -569,8 +565,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen bg-white text-[#0B2B24]`}>
-      {}
+    <div className={`${fraunces.variable} ${inter.variable} font-(--font-inter) min-h-screen bg-white text-[#0B2B24]`} style={{ colorScheme: 'light' }}>
       <div className="bg-[#0B2B24] text-[#F2E4C4] text-[12px]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-2 flex items-center justify-between">
           <div className="flex items-center gap-5">
@@ -587,7 +582,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {}
       <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#C08829]/15 shadow-[0_1px_0_rgba(11,43,36,0.04)]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -601,7 +595,7 @@ export default function LandingPage() {
               />
             </div>
             <div>
-              <h1 className="font-[var(--font-fraunces)] font-semibold text-[15px] leading-tight tracking-tight text-[#0B2B24]">RSUD Pasirian</h1>
+              <h1 className="font-fraunces font-semibold text-[15px] leading-tight tracking-tight text-[#0B2B24]">RSUD Pasirian</h1>
               <p className="text-[11px] text-[#0B2B24]/60 tracking-[0.04em] font-medium">Lumajang, Jawa Timur</p>
             </div>
           </div>
@@ -618,42 +612,40 @@ export default function LandingPage() {
 
           <button
             onClick={() => setDaftarModalOpen(true)}
-            className="bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] px-4 sm:px-5 py-2.5 rounded-full text-[13px] font-[var(--font-fraunces)] font-bold transition shadow-[0_8px_20px_rgba(192,136,41,0.35)] whitespace-nowrap"
+            className="bg-linear-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] px-4 sm:px-5 py-2.5 rounded-full text-[13px] font-fraunces font-bold transition shadow-[0_8px_20px_rgba(192,136,41,0.35)] whitespace-nowrap"
           >
             Daftar Online
           </button>
         </div>
 
-        {}
-        {/* Nav mobile: strip pill horizontal, selalu tampil (tanpa hamburger), bisa discroll ke samping */}
+        {/* Nav mobile: strip pill horizontal, bisa discroll ke samping */}
         <nav
-          className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Navigasi utama"
         >
-          <a href="#tentang" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#tentang" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Tentang
           </a>
-          <a href="#layanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#layanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Layanan
           </a>
-          <a href="#jam-pelayanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#jam-pelayanan" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Jam Pelayanan
           </a>
-          <a href="#dokter" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#dokter" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Jadwal Dokter
           </a>
-          <a href="#testimoni" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#testimoni" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Testimoni
           </a>
-          <a href="#panduan-jkn" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#panduan-jkn" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Panduan JKN
           </a>
-          <a href="#kontak" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/[0.04] hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
+          <a href="#kontak" className="shrink-0 text-[12.5px] font-semibold text-[#0B2B24]/70 bg-[#0B2B24]/4 hover:bg-[#C08829]/10 hover:text-[#C08829] active:bg-[#C08829]/15 px-3.5 py-1.5 rounded-full transition whitespace-nowrap">
             Kontak
           </a>
         </nav>
 
-        {}
         {announcement && (
           <div className="bg-[#C08829] text-[#0B2B24]">
             <div className="max-w-7xl mx-auto px-5 sm:px-6 py-2 flex items-center justify-center gap-2 text-center">
@@ -664,9 +656,8 @@ export default function LandingPage() {
         )}
       </header>
 
-      {}
       <section className="relative w-full overflow-hidden bg-[#0B2B24]">
-        <div className="relative h-[580px] sm:h-[620px] md:h-[660px] w-full" style={{ paddingTop: headerHeight }}>
+        <div className="relative h-145 sm:h-155 md:h-165 w-full" style={{ paddingTop: headerHeight }}>
           <Image
             src="/rsud-gedung.jpg"
             alt="Gedung RSUD Pasirian Lumajang"
@@ -676,12 +667,10 @@ export default function LandingPage() {
             sizes="100vw"
             className="object-cover object-center"
           />
-          {}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B2B24]/95 via-[#0B2B24]/75 to-[#0B2B24]/35" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#04140f]/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-[#0B2B24]/95 via-[#0B2B24]/75 to-[#0B2B24]/35" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#04140f]/70 via-transparent to-transparent" />
 
-          {}
-          <svg viewBox="0 0 500 260" className="absolute right-0 bottom-0 w-[60%] max-w-[560px] opacity-[0.14] pointer-events-none" aria-hidden="true">
+          <svg viewBox="0 0 500 260" className="absolute right-0 bottom-0 w-[60%] max-w-140 opacity-[0.14] pointer-events-none" aria-hidden="true">
             <path d="M0,260 L0,210 L90,150 L150,190 L230,60 L270,110 L330,20 L380,90 L440,140 L500,110 L500,260 Z" fill="#F2E4C4" />
           </svg>
 
@@ -692,7 +681,7 @@ export default function LandingPage() {
                 Siaga 24 Jam &middot; Pasirian, Lumajang
               </span>
 
-              <h2 className="font-[var(--font-fraunces)] font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight mt-6 text-white">
+              <h2 className="font-fraunces font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight mt-6 text-white">
                 Selamat Datang di
                 <br />
                 <span className="italic text-[#DDB169]">RSUD Pasirian.</span>
@@ -707,7 +696,7 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-3.5 pt-7">
                 <Link
                   href="/chat"
-                  className="inline-flex items-center gap-2 bg-gradient-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-[var(--font-fraunces)] font-bold px-6 py-3.5 rounded-full shadow-[0_14px_30px_rgba(192,136,41,0.35)] transition"
+                  className="inline-flex items-center gap-2 bg-linear-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-fraunces font-bold px-6 py-3.5 rounded-full shadow-[0_14px_30px_rgba(192,136,41,0.35)] transition"
                 >
                   Chat dengan Kami
                 </Link>
@@ -722,16 +711,14 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {}
         <SemeruRidge tone="#FBF9F4" />
 
-        {}
         <div className="relative bg-[#FBF9F4]">
           <div className="max-w-7xl mx-auto px-5 sm:px-6">
-            <div className="-mt-11 sm:-mt-12 bg-white rounded-2xl shadow-[0_20px_50px_rgba(11,43,36,0.14)] ring-1 ring-[#C08829]/10 grid grid-cols-3 divide-x divide-[#0B2B24]/[0.06]">
+            <div className="-mt-11 sm:-mt-12 bg-white rounded-2xl shadow-[0_20px_50px_rgba(11,43,36,0.14)] ring-1 ring-[#C08829]/10 grid grid-cols-3 divide-x divide-[#0B2B24]/6">
               {faktaCepat.map((f) => (
                 <div key={f.label} className="px-3 sm:px-6 py-5 text-center">
-                  <p className="font-[var(--font-fraunces)] font-bold text-2xl sm:text-3xl text-[#0B2B24]">{f.angka}</p>
+                  <p className="font-fraunces font-bold text-2xl sm:text-3xl text-[#0B2B24]">{f.angka}</p>
                   <p className="text-[11.5px] sm:text-[12.5px] text-[#0B2B24]/55 mt-1 leading-snug">{f.label}</p>
                 </div>
               ))}
@@ -740,12 +727,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
-      <section id="tentang" className="bg-[#FBF9F4]">
+      <section id="tentang" className="bg-[#FBF9F4] scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Tentang Kami</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Mengenal RSUD Pasirian
             </h3>
             <p className="text-[#0B2B24]/60 text-[15px] mt-3">
@@ -753,44 +739,42 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
             {sejarahRS.map((s) => (
-              <div key={s.tahun} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition">
+              <div key={s.tahun} className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
                 <span
                   className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3"
                   style={{ backgroundColor: `${s.color}14`, color: s.color }}
                 >
                   {s.tahun}
                 </span>
-                <h4 className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{s.judul}</h4>
+                <h4 className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">{s.judul}</h4>
                 <p className="text-[12.5px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
 
-          {}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
-            <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-7">
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Visi</span>
-              <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
+              <p className="font-fraunces font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
                 {visiMisi.visi}
               </p>
             </div>
-            <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-7">
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Misi</span>
-              <p className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
+              <p className="font-fraunces font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
                 {visiMisi.misi}
               </p>
             </div>
-            <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-7">
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#6B4A8A]">Kepemimpinan</span>
               <div className="flex items-center gap-3 mt-3">
                 <span className="w-11 h-11 shrink-0 rounded-full bg-[#0B2B24] text-[#DDB169] text-[13px] font-bold flex items-center justify-center">
                   {inisial(kepemimpinan.nama)}
                 </span>
                 <div>
-                  <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-[#0B2B24]">{kepemimpinan.nama}</p>
+                  <p className="font-fraunces font-semibold text-[14.5px] text-[#0B2B24]">{kepemimpinan.nama}</p>
                   <p className="text-[12px] text-[#0B2B24]/60">{kepemimpinan.jabatan}</p>
                 </div>
               </div>
@@ -798,7 +782,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {}
           <div className="bg-[#0B2B24] rounded-2xl p-7 sm:p-8 ring-1 ring-[#DDB169]/20">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#DDB169]">Legalitas</span>
             <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
@@ -815,11 +798,10 @@ export default function LandingPage() {
 
       <SemeruRidge tone="#ffffff" bg="#FBF9F4" />
 
-      {}
-      <section id="layanan" className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
+      <section id="layanan" className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20 scroll-mt-[calc(var(--header-h,150px))]">
         <div className="text-center max-w-xl mx-auto mb-12">
           <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Layanan Kami</span>
-          <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+          <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
             Fasilitas lengkap, siap melayani Anda
           </h3>
           <p className="text-[#0B2B24]/60 text-[15px] mt-3">
@@ -831,7 +813,7 @@ export default function LandingPage() {
           {layanan.map((item) => (
             <div
               key={item.label}
-              className="group bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition"
+              className="group bg-white border border-[#0B2B24]/6 rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
             >
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
@@ -839,27 +821,26 @@ export default function LandingPage() {
               >
                 <ServiceIcon d={item.icon} color={item.color} />
               </div>
-              <h4 className="font-[var(--font-fraunces)] font-semibold text-[16px] text-[#0B2B24]">{item.label}</h4>
+              <h4 className="font-fraunces font-semibold text-[16px] text-[#0B2B24]">{item.label}</h4>
               <p className="text-[13.5px] text-[#0B2B24]/60 mt-1.5 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
 
-        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#6B4A8A]">Selengkapnya</span>
-            <h4 className="font-[var(--font-fraunces)] font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h4 className="font-fraunces font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
               Kategori layanan lengkap
             </h4>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {kategoriLayanan.map((kat) => (
-              <div key={kat.nama} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+              <div key={kat.nama} className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
                 <div className="px-5 py-3.5 flex items-center gap-2" style={{ backgroundColor: '#0B2B24' }}>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: kat.color }} />
-                  <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-white">{kat.nama}</p>
+                  <p className="font-fraunces font-semibold text-[14.5px] text-white">{kat.nama}</p>
                 </div>
                 <ul className="px-5 py-4 space-y-2">
                   {kat.items.map((it) => (
@@ -874,19 +855,18 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Kapasitas</span>
-            <h4 className="font-[var(--font-fraunces)] font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h4 className="font-fraunces font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
               Kapasitas tempat tidur
             </h4>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
               <div className="px-5 py-3.5 bg-[#0B2B24]">
-                <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-white">Layanan Rawat Inap</p>
+                <p className="font-fraunces font-semibold text-[14.5px] text-white">Layanan Rawat Inap</p>
               </div>
               <table className="w-full text-[13.5px]">
                 <tbody>
@@ -896,7 +876,7 @@ export default function LandingPage() {
                       <td className="px-5 py-2.5 text-right font-semibold text-[#0B2B24] tabular-nums">{k.tt} TT</td>
                     </tr>
                   ))}
-                  <tr className="border-t border-[#0B2B24]/[0.08]">
+                  <tr className="border-t border-[#0B2B24]/8">
                     <td className="px-5 py-2.5 font-semibold text-[#0B2B24]">Total</td>
                     <td className="px-5 py-2.5 text-right font-bold text-[#C08829] tabular-nums">
                       {kapasitasRawatInap.reduce((sum, k) => sum + k.tt, 0)} TT
@@ -906,9 +886,9 @@ export default function LandingPage() {
               </table>
             </div>
 
-            <div className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden">
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
               <div className="px-5 py-3.5 bg-[#9E3B32]">
-                <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-white">Layanan IGD 24 Jam</p>
+                <p className="font-fraunces font-semibold text-[14.5px] text-white">Layanan IGD 24 Jam</p>
               </div>
               <table className="w-full text-[13.5px]">
                 <tbody>
@@ -918,7 +898,7 @@ export default function LandingPage() {
                       <td className="px-5 py-2.5 text-right font-semibold text-[#0B2B24] tabular-nums">{k.tt} TT</td>
                     </tr>
                   ))}
-                  <tr className="border-t border-[#0B2B24]/[0.08]">
+                  <tr className="border-t border-[#0B2B24]/8">
                     <td className="px-5 py-2.5 font-semibold text-[#0B2B24]">Total</td>
                     <td className="px-5 py-2.5 text-right font-bold text-[#9E3B32] tabular-nums">
                       {kapasitasIgd.reduce((sum, k) => sum + k.tt, 0)} TT
@@ -930,11 +910,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {}
         <div className="mt-16 sm:mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Fasilitas Kamar</span>
-            <h4 className="font-[var(--font-fraunces)] font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h4 className="font-fraunces font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
               Ruang rawat inap
             </h4>
             <p className="text-[#0B2B24]/60 text-[14px] mt-3">
@@ -944,7 +923,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {ruangRawatInap.map((r) => (
-              <div key={r.nama} className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-5 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
+              <div key={r.nama} className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
                   style={{ backgroundColor: `${r.color}14` }}
@@ -957,7 +936,7 @@ export default function LandingPage() {
                 >
                   {r.kelas}
                 </span>
-                <h5 className="font-[var(--font-fraunces)] font-semibold text-[15px] text-[#0B2B24]">{r.nama}</h5>
+                <h5 className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">{r.nama}</h5>
                 <p className="text-[12px] text-[#0B2B24]/55 mt-1">{r.ruang} ruang &middot; {r.tt} TT</p>
               </div>
             ))}
@@ -965,12 +944,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
-      <section id="jam-pelayanan" className="bg-[#FBF9F4]">
+      <section id="jam-pelayanan" className="bg-[#FBF9F4] scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Jam Pelayanan</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Kapan bisa datang ke RSUD Pasirian?
             </h3>
             <p className="text-[#0B2B24]/60 text-[15px] mt-3">
@@ -978,12 +956,12 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="max-w-3xl mx-auto bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden divide-y divide-[#0B2B24]/[0.06]">
+          <div className="max-w-3xl mx-auto bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden divide-y divide-[#0B2B24]/6">
             {jamPelayanan.map((j) => (
               <div key={j.layanan} className="flex items-center justify-between gap-4 px-5 sm:px-7 py-4">
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: j.color }} />
-                  <p className="font-[var(--font-fraunces)] font-semibold text-[14.5px] text-[#0B2B24]">{j.layanan}</p>
+                  <p className="font-fraunces font-semibold text-[14.5px] text-[#0B2B24]">{j.layanan}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {j.nonstop && (
@@ -1003,15 +981,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
-      <section id="dokter" className="relative bg-[#0B2B24] py-16 sm:py-20">
-        <svg viewBox="0 0 500 260" className="absolute left-0 top-0 w-[40%] max-w-[420px] opacity-[0.06] pointer-events-none" aria-hidden="true">
+      <section id="dokter" className="relative bg-[#0B2B24] py-16 sm:py-20 scroll-mt-[calc(var(--header-h,150px))]">
+        <svg viewBox="0 0 500 260" className="absolute left-0 top-0 w-[40%] max-w-105 opacity-[0.06] pointer-events-none" aria-hidden="true">
           <path d="M0,0 L0,50 L90,110 L150,70 L230,200 L270,150 L330,240 L380,170 L440,120 L500,150 L500,0 Z" fill="#F2E4C4" />
         </svg>
         <div className="relative max-w-7xl mx-auto px-5 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#DDB169]">Jadwal Dokter</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-white">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-white">
               Dokter spesialis kami
             </h3>
             <p className="text-white/55 text-[15px] mt-3">
@@ -1023,9 +1000,9 @@ export default function LandingPage() {
             {klinikData.map((k) => (
               <div
                 key={k.klinik}
-                className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 hover:border-[#DDB169]/40 hover:bg-white/[0.06] transition"
+                className="bg-white/4 border border-white/10 rounded-2xl p-6 hover:border-[#DDB169]/40 hover:bg-white/6 transition"
               >
-                <h4 className="font-[var(--font-fraunces)] font-semibold text-[16px] text-white mb-4">{k.klinik}</h4>
+                <h4 className="font-fraunces font-semibold text-[16px] text-white mb-4">{k.klinik}</h4>
                 <ul className="space-y-3">
                   {k.dokter.map((d) => (
                     <li key={d} className="flex items-center gap-3">
@@ -1042,12 +1019,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
-      <section id="testimoni" className="bg-white">
+      <section id="testimoni" className="bg-white scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Testimoni</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Kata mereka yang pernah berobat
             </h3>
             <p className="text-[#0B2B24]/60 text-[15px] mt-3">
@@ -1059,16 +1035,16 @@ export default function LandingPage() {
             {testimoni.map((t, i) => (
               <div
                 key={i}
-                className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition flex flex-col"
+                className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition flex flex-col"
               >
                 <BintangRating rating={t.rating} />
                 <p className="text-[13.5px] text-[#0B2B24]/75 leading-relaxed mt-3 flex-1">&ldquo;{t.isi}&rdquo;</p>
-                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-[#0B2B24]/[0.06]">
+                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-[#0B2B24]/6">
                   <span className="w-9 h-9 shrink-0 rounded-full bg-[#0B2B24] text-[#DDB169] text-[12px] font-bold flex items-center justify-center">
                     {inisial(t.nama)}
                   </span>
                   <div>
-                    <p className="font-[var(--font-fraunces)] font-semibold text-[13.5px] text-[#0B2B24]">{t.nama}</p>
+                    <p className="font-fraunces font-semibold text-[13.5px] text-[#0B2B24]">{t.nama}</p>
                     <p className="text-[11.5px] text-[#0B2B24]/50">{t.asal}</p>
                   </div>
                 </div>
@@ -1082,12 +1058,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
-      <section id="panduan-jkn" className="bg-white">
+      <section id="panduan-jkn" className="bg-white scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#2A6C93]">Pasien BPJS</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Panduan Mobile JKN
             </h3>
             <p className="text-[#0B2B24]/60 text-[15px] mt-3">
@@ -1099,9 +1074,9 @@ export default function LandingPage() {
             {panduanJknMobile.map((p) => (
               <div
                 key={p.langkah}
-                className="bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden hover:border-[#2A6C93]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] hover:-translate-y-0.5 transition"
+                className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden hover:border-[#2A6C93]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition"
               >
-                <div className="relative w-full aspect-[3/4] bg-[#FBF9F4] flex items-center justify-center">
+                <div className="relative w-full aspect-3/4 bg-[#FBF9F4] flex items-center justify-center">
                   {p.gambar ? (
                     <Image
                       src={p.gambar}
@@ -1111,7 +1086,6 @@ export default function LandingPage() {
                       className="object-contain"
                     />
                   ) : (
-                    
                     <div className="flex flex-col items-center gap-2 text-[#0B2B24]/25">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1126,7 +1100,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-[var(--font-fraunces)] font-semibold text-[13.5px] text-[#0B2B24]">{p.judul}</h4>
+                  <h4 className="font-fraunces font-semibold text-[13.5px] text-[#0B2B24]">{p.judul}</h4>
                   <p className="text-[11.5px] text-[#0B2B24]/60 mt-1 leading-relaxed">{p.desc}</p>
                 </div>
               </div>
@@ -1138,7 +1112,7 @@ export default function LandingPage() {
               href={MOBILE_JKN_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#2A6C93] hover:bg-[#255d80] text-white font-[var(--font-fraunces)] font-bold px-6 py-3.5 rounded-full transition"
+              className="inline-flex items-center gap-2 bg-[#2A6C93] hover:bg-[#255d80] text-white font-fraunces font-bold px-6 py-3.5 rounded-full transition"
             >
               Unduh Mobile JKN <span>↗</span>
             </a>
@@ -1148,12 +1122,11 @@ export default function LandingPage() {
 
       <SemeruRidge tone="#FBF9F4" bg="#ffffff" />
 
-      {}
-      <section id="kontak" className="bg-[#FBF9F4]">
+      <section id="kontak" className="bg-[#FBF9F4] scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#2A6C93]">Kenali Kami</span>
-            <h3 className="font-[var(--font-fraunces)] font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Kunjungi & hubungi kami
             </h3>
           </div>
@@ -1165,8 +1138,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="relative block w-full aspect-video rounded-2xl overflow-hidden group ring-1 ring-[#C08829]/15 shadow-[0_20px_50px_rgba(11,43,36,0.12)]"
             >
-              {/* Poster custom, tidak bergantung pada thumbnail YouTube */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#04140f] via-[#0B2B24] to-[#153b31]" />
+              <div className="absolute inset-0 bg-linear-to-br from-[#04140f] via-[#0B2B24] to-[#153b31]" />
               <div
                 className="absolute inset-0 opacity-[0.06]"
                 style={{
@@ -1178,9 +1150,9 @@ export default function LandingPage() {
                 <path d="M0,260 L0,210 L90,150 L150,190 L230,60 L270,110 L330,20 L380,90 L440,140 L500,110 L500,260 Z" fill="#DDB169" />
               </svg>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-black/20 group-hover:via-black/10 transition-all duration-300" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-black/20 group-hover:via-black/10 transition-all duration-300" />
               <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-                <span className="bg-white/90 backdrop-blur-md text-[#9E3B32] text-[10px] font-[var(--font-fraunces)] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg">
+                <span className="bg-white/90 backdrop-blur-md text-[#9E3B32] text-[10px] font-fraunces font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg">
                   Profil RS
                 </span>
               </div>
@@ -1188,7 +1160,7 @@ export default function LandingPage() {
                 <div className="w-16 h-16 bg-[#DDB169] text-[#0B2B24] rounded-full flex items-center justify-center text-xl shadow-xl group-hover:scale-110 transition-all duration-300 transform">
                   ▶
                 </div>
-                <p className="font-[var(--font-fraunces)] italic font-semibold text-white/90 text-lg sm:text-xl tracking-tight px-6 text-center">
+                <p className="font-fraunces italic font-semibold text-white/90 text-lg sm:text-xl tracking-tight px-6 text-center">
                   Profil RSUD Pasirian
                 </p>
               </div>
@@ -1201,7 +1173,7 @@ export default function LandingPage() {
             </a>
 
             <div className="flex flex-col justify-center gap-4">
-              <div className="flex items-start gap-3 bg-white border border-[#0B2B24]/[0.06] rounded-2xl px-5 py-4">
+              <div className="flex items-start gap-3 bg-white border border-[#0B2B24]/6 rounded-2xl px-5 py-4">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#2A6C93" strokeWidth="1.7" className="w-5 h-5 shrink-0 mt-0.5">
                   <path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" />
                   <circle cx="12" cy="9" r="2.5" />
@@ -1211,7 +1183,7 @@ export default function LandingPage() {
                   <p className="text-[13.5px] text-[#0B2B24]/65 mt-0.5">Jl. Raya Pasirian No. 225A, Kebonan, Pasirian, Lumajang 67372</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 bg-white border border-[#0B2B24]/[0.06] rounded-2xl px-5 py-4">
+              <div className="flex items-start gap-3 bg-white border border-[#0B2B24]/6 rounded-2xl px-5 py-4">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#1F6B4F" strokeWidth="1.7" className="w-5 h-5 shrink-0 mt-0.5">
                   <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z" />
                 </svg>
@@ -1223,9 +1195,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {}
-          <div className="mt-6 bg-white border border-[#0B2B24]/[0.06] rounded-2xl overflow-hidden ring-1 ring-[#C08829]/10">
-            <div className="relative w-full aspect-[16/9] sm:aspect-[21/9]">
+          <div className="mt-6 bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden ring-1 ring-[#C08829]/10">
+            <div className="relative w-full aspect-video sm:aspect-21/9">
               <iframe
                 src={GOOGLE_MAPS_EMBED_SRC}
                 title="Peta lokasi RSUD Pasirian"
@@ -1242,7 +1213,7 @@ export default function LandingPage() {
                 href={GOOGLE_MAPS_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 shrink-0 bg-[#0B2B24] hover:bg-[#153b31] text-white text-[12.5px] font-[var(--font-fraunces)] font-bold px-4 py-2.5 rounded-full transition whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-2 shrink-0 bg-[#0B2B24] hover:bg-[#153b31] text-white text-[12.5px] font-fraunces font-bold px-4 py-2.5 rounded-full transition whitespace-nowrap"
               >
                 Buka di Google Maps <span>↗</span>
               </a>
@@ -1251,11 +1222,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {}
       <footer className="bg-[#0B2B24] text-white/65">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-[13.5px]">
           <div>
-            <p className="font-[var(--font-fraunces)] font-semibold text-white text-[16px]">RSUD Pasirian</p>
+            <p className="font-fraunces font-semibold text-white text-[16px]">RSUD Pasirian</p>
             <p className="mt-2 leading-relaxed">Rumah sakit rujukan warga Pasirian dan sekitarnya, siaga 24 jam sejak 2016.</p>
           </div>
           <div>
@@ -1282,24 +1252,28 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {}
       <Link
         href="/chat"
         className="fixed bottom-6 right-6 z-50 group"
         title="Tanya Asisten Virtual"
       >
         <span className="absolute inset-0 rounded-full bg-[#DDB169]/40 animate-ping" />
-        <span className="relative flex w-14 h-14 rounded-full items-center justify-center text-[#0B2B24] shadow-[0_14px_30px_rgba(192,136,41,0.4)] transition group-hover:scale-110 bg-gradient-to-br from-[#DDB169] to-[#C08829]">
+        <span className="relative flex w-14 h-14 rounded-full items-center justify-center text-[#0B2B24] shadow-[0_14px_30px_rgba(192,136,41,0.4)] transition group-hover:scale-110 bg-linear-to-br from-[#DDB169] to-[#C08829]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
             <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" />
           </svg>
         </span>
       </Link>
 
-      {}
       <DaftarOnlineModal open={daftarModalOpen} onClose={() => setDaftarModalOpen(false)} />
 
       <style jsx global>{`
+        :root {
+          color-scheme: light;
+        }
+        html {
+          color-scheme: light only;
+        }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }

@@ -11,14 +11,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Perubahan pada Metadata untuk Judul & Icon Browser
 export const metadata = {
   title: "RSUD Pasirian Lumajang - Virtual Assistant",
   description: "Layanan Asisten Virtual Pintar RSUD Pasirian Kabupaten Lumajang",
   icons: {
-    // CUKUP GANTI BAGIAN INI SAJA:
-    icon: "/logo-rs-removebg-preview.png", 
+    icon: "/logo-rs-removebg-preview.png",
   },
+};
+
+export const viewport = {
+  colorScheme: "light",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }) {
@@ -26,6 +29,7 @@ export default function RootLayout({ children }) {
     <html
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      style={{ colorScheme: "light" }}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
