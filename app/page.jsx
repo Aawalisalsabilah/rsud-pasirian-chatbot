@@ -60,16 +60,16 @@ const kepemimpinan = {
 };
 
 const klinikSpesialis = [
-  { klinik: 'Klinik Anak', dokter: ['dr. Nurul Yudhi, Sp.A', 'dr. Wigit K, Sp.A'] },
-  { klinik: 'Klinik Bedah', dokter: ['dr. Arry Setyo D, Sp.B', 'dr. Hendra S, Sp.B'] },
-  { klinik: 'Klinik Obgyn', dokter: ['dr. Elvi W, Sp.OG', 'dr. Ryan I, Sp.OG'] },
-  { klinik: 'Klinik Penyakit Dalam', dokter: ['dr. Endra G, Sp.PD', 'dr. Wiryawan P, Sp.PD'] },
-  { klinik: 'Klinik Gigi Umum & Prostodonti', dokter: ['drg. Agung H, Sp.Pros', 'drg. Reza H, S.KG'] },
-  { klinik: 'Klinik Paru', dokter: ['dr. T.S Budi Satrio, Sp.P'] },
-  { klinik: 'Klinik Orthopedi', dokter: ['dr. Rosihan E, Sp.OT'] },
-  { klinik: 'Pelayanan Anestesi', dokter: ['dr. Doni T, Sp.An', 'dr. Ardhani, Sp.An'] },
-  { klinik: 'Pelayanan Radiologi', dokter: ['dr. Trilia, Sp.Rad'] },
-  { klinik: 'Pelayanan Laboratorium', dokter: ['dr. Dwita Riadini, Sp.PK'] },
+  { klinik: 'Klinik Anak', dokter: [{ nama: 'dr. Nurul Yudhi, Sp.A', aktif: true }, { nama: 'dr. Wigit K, Sp.A', aktif: true }] },
+  { klinik: 'Klinik Bedah', dokter: [{ nama: 'dr. Arry Setyo D, Sp.B', aktif: true }, { nama: 'dr. Hendra S, Sp.B', aktif: true }] },
+  { klinik: 'Klinik Obgyn', dokter: [{ nama: 'dr. Elvi W, Sp.OG', aktif: true }, { nama: 'dr. Ryan I, Sp.OG', aktif: true }] },
+  { klinik: 'Klinik Penyakit Dalam', dokter: [{ nama: 'dr. Endra G, Sp.PD', aktif: true }, { nama: 'dr. Wiryawan P, Sp.PD', aktif: true }] },
+  { klinik: 'Klinik Gigi Umum & Prostodonti', dokter: [{ nama: 'drg. Agung H, Sp.Pros', aktif: true }, { nama: 'drg. Reza H, S.KG', aktif: true }] },
+  { klinik: 'Klinik Paru', dokter: [{ nama: 'dr. T.S Budi Satrio, Sp.P', aktif: true }] },
+  { klinik: 'Klinik Orthopedi', dokter: [{ nama: 'dr. Rosihan E, Sp.OT', aktif: true }] },
+  { klinik: 'Pelayanan Anestesi', dokter: [{ nama: 'dr. Doni T, Sp.An', aktif: true }, { nama: 'dr. Ardhani, Sp.An', aktif: true }] },
+  { klinik: 'Pelayanan Radiologi', dokter: [{ nama: 'dr. Trilia, Sp.Rad', aktif: true }] },
+  { klinik: 'Pelayanan Laboratorium', dokter: [{ nama: 'dr. Dwita Riadini, Sp.PK', aktif: true }] },
 ];
 
 function inisial(nama) {
@@ -138,7 +138,6 @@ const jamPelayanan = [
   { layanan: 'Poliklinik Spesialis', jam: 'Senin–Jumat, sesuai jadwal dokter', nonstop: false, color: EMERALD },
 ];
 
-// Testimoni placeholder — ganti dengan testimoni pasien asli
 const testimoni = [
   {
     nama: 'Aris Junitasari',
@@ -537,8 +536,6 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
-  // Ukur tinggi header tiap kali kontennya berubah (mis. saat pengumuman muncul) atau layar di-resize,
-  // lalu pakai nilainya sebagai scroll-padding-top supaya klik menu anchor tidak ketutup header fixed.
   useEffect(() => {
     const updateHeight = () => {
       if (headerRef.current) {
@@ -552,8 +549,6 @@ export default function LandingPage() {
     return () => window.removeEventListener('resize', updateHeight);
   }, [announcement]);
 
-  // Scroll-spy: pantau section mana yang lagi keliatan di layar,
-  // lalu highlight menu navbar yang sesuai (kayak hover otomatis).
   useEffect(() => {
     const sectionIds = NAV_ITEMS.map((n) => n.id);
     const elements = sectionIds
@@ -580,28 +575,27 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, [headerHeight]);
 
-  useEffect(() => {
-    fetch('/api/poli')
-      .then((res) => res.json())
-      .then((res) => {
-        const rows = res.data || [];
-        const grouped = {};
-        rows.forEach((item) => {
-          if (item.is_active === false) return;
-          const namaKlinik = item.nama_poli;
-          const baris = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
-          if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
-          grouped[namaKlinik].push(baris);
-        });
-        const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
-        if (hasil.length > 0) {
-          setKlinikData(hasil);
-        }
-      })
-      .catch((err) => {
-        console.error('[JADWAL DOKTER FETCH ERROR]', err);
+useEffect(() => {
+  fetch('/api/poli', { cache: 'no-store' })
+    .then((res) => res.json())
+    .then((res) => {
+      const rows = res.data || [];
+      const grouped = {};
+      rows.forEach((item) => {
+        const namaKlinik = item.nama_poli;
+        const label = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
+        if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
+        grouped[namaKlinik].push({ nama: label, aktif: item.is_active !== false });
       });
-  }, []);
+      const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
+      if (hasil.length > 0) {
+        setKlinikData(hasil);
+      }
+    })
+    .catch((err) => {
+      console.error('[JADWAL DOKTER FETCH ERROR]', err);
+    });
+}, []);
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-(--font-inter) min-h-screen bg-white text-[#0B2B24]`} style={{ colorScheme: 'light' }}>
@@ -661,7 +655,6 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* Nav mobile: strip pill horizontal, bisa discroll ke samping */}
         <nav
           className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Navigasi utama"
@@ -681,14 +674,23 @@ export default function LandingPage() {
           ))}
         </nav>
 
-        {announcement && (
-          <div className="bg-[#C08829] text-[#0B2B24]">
-            <div className="max-w-7xl mx-auto px-5 sm:px-6 py-2 flex items-center justify-center gap-2 text-center">
-              <MegaphoneIcon className="w-4 h-4 shrink-0" />
-              <p className="text-[12.5px] sm:text-[13px] font-semibold leading-snug">{announcement.message}</p>
-            </div>
-          </div>
-        )}
+{announcement && (
+  <div className="bg-[#C08829] text-[#0B2B24] overflow-hidden">
+    <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3 sm:py-3.5 flex items-center gap-3">
+      <MegaphoneIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+      <div className="flex-1 overflow-hidden">
+        <div className="flex w-max animate-marquee">
+          <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24">
+            {announcement.message}
+          </p>
+          <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24" aria-hidden="true">
+            {announcement.message}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       </header>
 
       <section className="relative w-full overflow-hidden bg-[#0B2B24]">
@@ -1036,12 +1038,23 @@ export default function LandingPage() {
               >
                 <h4 className="font-fraunces font-semibold text-[16px] text-white mb-4">{k.klinik}</h4>
                 <ul className="space-y-3">
-                  {k.dokter.map((d) => (
-                    <li key={d} className="flex items-center gap-3">
-                      <span className="w-9 h-9 shrink-0 rounded-full bg-[#DDB169]/15 text-[#DDB169] text-[11px] font-bold flex items-center justify-center">
-                        {inisial(d)}
+                  {k.dokter.map((d, i) => (
+                    <li key={`${d.nama}-${i}`} className="flex items-start gap-3">
+                      <span
+                        className={`w-9 h-9 shrink-0 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                          d.aktif ? 'bg-[#DDB169]/15 text-[#DDB169]' : 'bg-[#9E3B32]/15 text-[#E4938A]'
+                        }`}
+                      >
+                        {inisial(d.nama)}
                       </span>
-                      <span className="text-[13.5px] text-white/75">{d}</span>
+                      <span className="text-[13.5px] text-white/75 leading-snug pt-1.5 flex flex-wrap items-center gap-2">
+                        {d.nama}
+                        {!d.aktif && (
+                          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#9E3B32]/25 text-[#F5B6AE]">
+                            Libur
+                          </span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -1309,8 +1322,16 @@ export default function LandingPage() {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 70s linear infinite;
+        }
         @media (prefers-reduced-motion: reduce) {
           .animate-ping, .animate-pulse { animation: none; }
+          .animate-marquee { animation: none; }
         }
       `}</style>
     </div>

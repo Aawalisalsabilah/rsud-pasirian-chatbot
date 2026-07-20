@@ -190,6 +190,7 @@ export default function ChatPage() {
 
   const topics = [
     { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', isPoliPicker: true },
+    { icon: '🛏️', label: 'Info Kamar Rawat Inap', shortLabel: 'Kamar Rawat Inap', isInfoLayanan: true },
     { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', isStaticList: true },
     { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', isLink: true, href: '/#panduan-jkn' },
     { icon: '🪪', label: 'Cara Daftar Pasien BPJS', shortLabel: 'Daftar Pasien BPJS', isStatic: true, staticKey: 'bpjs' },
@@ -283,6 +284,60 @@ export default function ChatPage() {
     sendMessage(`Jadwal dan dokter untuk ${namaPoli}`, `Mencari jadwal ${namaPoli}...`, namaPoli);
   };
 
+  // Tahap 1: user klik "Info Kamar Rawat Inap" -> ambil data ketersediaan kamar
+  // LANGSUNG dari database (endpoint /api/info-layanan, kategori "infoLayanan"),
+  // TANPA lewat Groq/LLM. Instan, gratis, gak makan jatah token TPM Groq.
+  const handleShowInfoLayanan = async () => {
+    if (isLoading) return;
+
+    setMessages((prev) => [...prev, { role: 'user', content: 'Info Kamar Rawat Inap' }]);
+    setIsLoading(true);
+    setLoadingText('Mengambil info kamar rawat inap...');
+
+    try {
+      const res = await fetch('/api/info-layanan');
+      const data = await res.json();
+      const items = data.items || [];
+
+      if (items.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Maaf, info ketersediaan kamar belum tersedia saat ini. Silakan hubungi bagian informasi RSUD Pasirian.' },
+        ]);
+      } else if (items.length === 1) {
+        // Cuma 1 entri di database -> langsung tampilkan isinya, gak perlu tombol pilihan
+        setMessages((prev) => [...prev, { role: 'assistant', content: items[0].content }]);
+      } else {
+        // Lebih dari 1 entri -> tampilkan sebagai tombol pilihan (mirip standar-buttons)
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            type: 'infolayanan-buttons',
+            items,
+            content: 'Silakan pilih info ruangan yang ingin Anda lihat:',
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Maaf, gagal memuat info kamar rawat inap. Silakan periksa koneksi Anda.' }]);
+    } finally {
+      setIsLoading(false);
+      setLoadingText('Sedang menyusun jawaban...');
+    }
+  };
+
+  // Tahap 2 (kalau entri > 1): user klik salah satu judul ruangan -> tampilkan isinya
+  const handleInfoLayananSelect = (item) => {
+    if (isLoading) return;
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: item.title },
+      { role: 'assistant', content: item.content },
+    ]);
+  };
+
   // Tahap 1 (statis, instan): user klik "Standar Pelayanan Publik" -> langsung
   // tampilkan teks pengantar + 3 tombol kategori. TANPA fetch/Groq sama sekali,
   // karena daftar 3 kategori ini fixed dan gak berubah-ubah.
@@ -325,6 +380,8 @@ export default function ChatPage() {
   const handleTopicClick = (topic) => {
     if (topic.isPoliPicker) {
       handleShowPoliList();
+    } else if (topic.isInfoLayanan) {
+      handleShowInfoLayanan();
     } else if (topic.isStaticList) {
       handleShowStandarPelayanan();
     } else if (topic.isStatic) {
@@ -415,12 +472,12 @@ export default function ChatPage() {
           </Link>
         </header>
 
-        <div className="flex-1 min-h-0 p-3 md:p-6 overflow-y-auto bg-[#FBF9F4] bg-[radial-gradient(#0B2B24_0.5px,transparent_0.5px)] [background-size:18px_18px] [background-opacity:0.05]">
+        <div className="flex-1 min-h-0 p-3 md:p-6 overflow-y-auto bg-[#FBF9F4] bg-[radial-gradient(#0B2B24_0.5px,transparent_0.5px)] bg-size-[18px_18px] [background-opacity:0.05]">
           <div className="space-y-4 max-w-full lg:max-w-6xl mx-auto w-full px-2 md:px-4">
             {messages.map((msg, index) => (
               <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role !== 'user' && (
-                  <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0 border border-[#0B2B24]/[0.08]">
+                  <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0 border border-[#0B2B24]/8">
                     <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={36} height={36} className="object-contain" />
                   </div>
                 )}
@@ -428,7 +485,7 @@ export default function ChatPage() {
                   className={`p-4 rounded-2xl text-sm md:text-base leading-relaxed shadow-[0_10px_28px_rgba(11,43,36,0.08)] max-w-[85%] md:max-w-[80%] border ${
                     msg.role === 'user'
                       ? 'bg-linear-to-b from-[#DDB169] to-[#C08829] text-[#0B2B24] border-[#C08829]/40 rounded-tr-none'
-                      : 'bg-white text-[#0B2B24] border-[#0B2B24]/[0.06] rounded-tl-none'
+                      : 'bg-white text-[#0B2B24] border-[#0B2B24]/6 rounded-tl-none'
                   }`}
                 >
                   {msg.type === 'poli-buttons' ? (
@@ -444,6 +501,23 @@ export default function ChatPage() {
                             className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {namaPoli}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : msg.type === 'infolayanan-buttons' ? (
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-[#0B2B24]">{msg.content}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {msg.items.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => handleInfoLayananSelect(item)}
+                            className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {item.title}
                           </button>
                         ))}
                       </div>
@@ -479,17 +553,17 @@ export default function ChatPage() {
                       </ReactMarkdown>
                     </div>
                   ) : (
-                    <span className="whitespace-pre-line break-words font-medium">{msg.content}</span>
+                    <span className="whitespace-pre-line wrap-break-word font-medium">{msg.content}</span>
                   )}
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex gap-3 justify-start items-center">
-                <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0 border border-[#0B2B24]/[0.08]">
+                <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0 border border-[#0B2B24]/8">
                   <Image src="/logo-rs.jpeg" alt="Logo RSUD Pasirian" width={36} height={36} className="object-contain" />
                 </div>
-                <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-[#0B2B24]/55 italic flex items-center gap-2 shadow-[0_10px_28px_rgba(11,43,36,0.08)] border border-[#0B2B24]/[0.06]">
+                <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-[#0B2B24]/55 italic flex items-center gap-2 shadow-[0_10px_28px_rgba(11,43,36,0.08)] border border-[#0B2B24]/6">
                   {loadingText}
                 </div>
               </div>
@@ -504,7 +578,7 @@ export default function ChatPage() {
                 <Link
                   key={topic.label}
                   href={topic.href}
-                  className="shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
+                  className="shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/10 text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
                 >
                   <span>{topic.icon}</span> <span>{topic.shortLabel}</span>
                 </Link>
@@ -513,7 +587,7 @@ export default function ChatPage() {
                   key={topic.label}
                   type="button"
                   onClick={() => handleTopicClick(topic)}
-                  className="shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/[0.1] text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
+                  className="shrink-0 flex items-center gap-1.5 bg-white border border-[#0B2B24]/10 text-[#0B2B24] text-sm font-medium px-3.5 py-2.5 rounded-full shadow-sm"
                 >
                   <span>{topic.icon}</span> <span>{topic.shortLabel}</span>
                 </button>
@@ -531,7 +605,7 @@ export default function ChatPage() {
             disabled={isLoading}
             rows={1}
             placeholder={isLoading ? 'Mohon tunggu...' : 'Tulis pertanyaanmu di sini...'}
-            className="flex-1 bg-[#FBF9F4] border border-[#0B2B24]/[0.12] rounded-xl px-4 py-3 text-sm text-[#0B2B24] focus:outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition resize-none max-h-[120px]"
+            className="flex-1 bg-[#FBF9F4] border border-[#0B2B24]/12 rounded-xl px-4 py-3 text-sm text-[#0B2B24] focus:outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition resize-none max-h-30"
           />
           <button
             type="submit"
