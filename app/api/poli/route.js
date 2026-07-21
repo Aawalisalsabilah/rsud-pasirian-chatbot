@@ -10,7 +10,6 @@ export async function GET() {
   const { data, error } = await supabase
     .from('poli_dokter')
     .select('*')
-    .eq('is_active', true)
     .order('nama_poli');
 
   if (error) {
