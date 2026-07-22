@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
-import { Fraunces, Inter } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter' });
+const fraunces = Poppins({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
+const inter = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
 
 const INK = '#0B2B24';
 const BRASS = '#C08829';
@@ -72,12 +72,6 @@ const klinikSpesialis = [
   { klinik: 'Pelayanan Laboratorium', dokter: [{ nama: 'dr. Dwita Riadini, Sp.PK', aktif: true }] },
 ];
 
-function inisial(nama) {
-  const bersih = nama.replace(/^(dr\.|drg\.)\s*/i, '');
-  const parts = bersih.split(' ').filter(Boolean);
-  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
-}
-
 const kategoriLayanan = [
   {
     nama: 'Rawat Jalan',
@@ -138,30 +132,11 @@ const jamPelayanan = [
   { layanan: 'Poliklinik Spesialis', jam: 'Senin–Jumat, sesuai jadwal dokter', nonstop: false, color: EMERALD },
 ];
 
-const testimoni = [
-  {
-    nama: 'Aris Junitasari',
-    asal: 'Pasirian',
-    rating: 5,
-    isi: 'Pelayanan diruang bayi Sangat bagus dalam menjelasankan ke pasien sangat detail dan mudah dimengerti',
-  },
-  {
-    nama: 'Ayasa',
-    asal: 'Candipuro',
-    rating: 5,
-    isi: 'Pelayanan baik, mulai dari petugas ambil antrean menyambut dengan ramah dan mengarahkan dengan jelas, dan dokter dan perawatnya juga melayani dengan baik, Saran saya lebih dilengkapi lagi poli spesialisnya',
-  },
-  {
-    nama: 'Vicha Devinta Anggrianna',
-    asal: 'Tempeh',
-    rating: 4,
-    isi: 'Rumah sakitnya bersih, tenaga medisnya ramah, puas dengan pelayanan yang ada',
-  },
-];
-
 const ALAMAT_LENGKAP = 'RSUD Pasirian, Jl. Raya Pasirian No. 225A, Kebonan, Pasirian, Lumajang 67372';
 const GOOGLE_MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ALAMAT_LENGKAP)}&output=embed`;
-const GOOGLE_MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ALAMAT_LENGKAP)}`;
+const GOOGLE_PLACE_ID = 'ChIJE_tuvUhp1i0RIpFhHjwQThY';
+const GOOGLE_MAPS_LINK = `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`;
+const GOOGLE_REVIEW_LINK = `https://search.google.com/local/writereview?placeid=${GOOGLE_PLACE_ID}`;
 
 const panduanJknMobile = [
   { langkah: 1, judul: 'Buka Aplikasi', gambar: '/1.png', desc: 'Belum punya akun? Tekan "Daftar". Jika sudah punya akun, langsung ke langkah "Masuk".' },
@@ -187,6 +162,34 @@ function ServiceIcon({ d, color }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0">
       <path d={d} />
+    </svg>
+  );
+}
+
+function QuoteIcon({ className = 'w-8 h-8' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M9.5 6C6.5 7.2 4.8 9.6 4.8 12.7c0 2.3 1.4 3.8 3.3 3.8 1.7 0 3-1.3 3-3 0-1.6-1.1-2.8-2.6-2.9.3-1.4 1.5-2.6 3-3.2L9.5 6Zm9 0c-3 1.2-4.7 3.6-4.7 6.7 0 2.3 1.4 3.8 3.3 3.8 1.7 0 3-1.3 3-3 0-1.6-1.1-2.8-2.6-2.9.3-1.4 1.5-2.6 3-3.2L18.5 6Z" />
+    </svg>
+  );
+}
+
+function LeaderIcon({ color, className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+      <path d="M12 4.5V2.5M9 3.2l.6 1.8M15 3.2l-.6 1.8" />
+    </svg>
+  );
+}
+
+function DoctorIcon({ className = 'w-4.5 h-4.5' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M6 3v6a4 4 0 0 0 8 0V3M6 3H4.5M14 3h1.5" />
+      <circle cx="19" cy="14" r="2" />
+      <path d="M19 9v3M10 13v2a5 5 0 0 0 5 5h.5" />
     </svg>
   );
 }
@@ -491,25 +494,6 @@ function DaftarOnlineModal({ open, onClose }) {
   );
 }
 
-function BintangRating({ rating = 5 }) {
-  return (
-    <div className="flex items-center gap-0.5" aria-label={`Rating ${rating} dari 5`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 24 24"
-          className="w-3.5 h-3.5"
-          fill={i < rating ? '#C08829' : 'none'}
-          stroke="#C08829"
-          strokeWidth="1.5"
-        >
-          <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8Z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 function MegaphoneIcon({ className = 'w-4 h-4' }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -575,27 +559,27 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, [headerHeight]);
 
-useEffect(() => {
-  fetch('/api/poli', { cache: 'no-store' })
-    .then((res) => res.json())
-    .then((res) => {
-      const rows = res.data || [];
-      const grouped = {};
-      rows.forEach((item) => {
-        const namaKlinik = item.nama_poli;
-        const label = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
-        if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
-        grouped[namaKlinik].push({ nama: label, aktif: item.is_active !== false });
+  useEffect(() => {
+    fetch('/api/poli', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((res) => {
+        const rows = res.data || [];
+        const grouped = {};
+        rows.forEach((item) => {
+          const namaKlinik = item.nama_poli;
+          const label = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
+          if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
+          grouped[namaKlinik].push({ nama: label, aktif: item.is_active !== false });
+        });
+        const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
+        if (hasil.length > 0) {
+          setKlinikData(hasil);
+        }
+      })
+      .catch((err) => {
+        console.error('[JADWAL DOKTER FETCH ERROR]', err);
       });
-      const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
-      if (hasil.length > 0) {
-        setKlinikData(hasil);
-      }
-    })
-    .catch((err) => {
-      console.error('[JADWAL DOKTER FETCH ERROR]', err);
-    });
-}, []);
+  }, []);
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-(--font-inter) min-h-screen bg-white text-[#0B2B24]`} style={{ colorScheme: 'light' }}>
@@ -674,23 +658,23 @@ useEffect(() => {
           ))}
         </nav>
 
-{announcement && (
-  <div className="bg-[#C08829] text-[#0B2B24] overflow-hidden">
-    <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3 sm:py-3.5 flex items-center gap-3">
-      <MegaphoneIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
-      <div className="flex-1 overflow-hidden">
-        <div className="flex w-max animate-marquee">
-          <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24">
-            {announcement.message}
-          </p>
-          <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24" aria-hidden="true">
-            {announcement.message}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+        {announcement && (
+          <div className="bg-[#C08829] text-[#0B2B24] overflow-hidden">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3 sm:py-3.5 flex items-center gap-3">
+              <MegaphoneIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+              <div className="flex-1 overflow-hidden">
+                <div className="flex w-max animate-marquee">
+                  <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24">
+                    {announcement.message}
+                  </p>
+                  <p className="text-[14px] sm:text-[16px] font-semibold leading-snug whitespace-nowrap pr-24" aria-hidden="true">
+                    {announcement.message}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <section className="relative w-full overflow-hidden bg-[#0B2B24]">
@@ -792,26 +776,28 @@ useEffect(() => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
-            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
-              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1F6B4F]">Visi</span>
-              <p className="font-fraunces font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
+            <div className="relative overflow-hidden rounded-2xl p-7" style={{ backgroundColor: EMERALD }}>
+              <QuoteIcon className="w-9 h-9 text-white/20 absolute top-5 right-5" />
+              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-white/70">Visi</span>
+              <p className="font-fraunces italic font-semibold text-[19px] sm:text-[20px] text-white mt-3 leading-snug relative z-10">
                 {visiMisi.visi}
               </p>
             </div>
-            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
-              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Misi</span>
-              <p className="font-fraunces font-semibold text-[16px] text-[#0B2B24] mt-2 leading-snug">
+            <div className="relative overflow-hidden rounded-2xl p-7" style={{ backgroundColor: BRASS }}>
+              <QuoteIcon className="w-9 h-9 text-white/25 absolute top-5 right-5" />
+              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#0B2B24]/60">Misi</span>
+              <p className="font-fraunces italic font-semibold text-[19px] sm:text-[20px] text-[#0B2B24] mt-3 leading-snug relative z-10">
                 {visiMisi.misi}
               </p>
             </div>
             <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7">
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#6B4A8A]">Kepemimpinan</span>
               <div className="flex items-center gap-3 mt-3">
-                <span className="w-11 h-11 shrink-0 rounded-full bg-[#0B2B24] text-[#DDB169] text-[13px] font-bold flex items-center justify-center">
-                  {inisial(kepemimpinan.nama)}
+                <span className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${PLUM}14` }}>
+                  <LeaderIcon color={PLUM} />
                 </span>
                 <div>
-                  <p className="font-fraunces font-semibold text-[14.5px] text-[#0B2B24]">{kepemimpinan.nama}</p>
+                  <p className="font-fraunces font-semibold text-[15px] text-[#0B2B24] leading-snug">{kepemimpinan.nama}</p>
                   <p className="text-[12px] text-[#0B2B24]/60">{kepemimpinan.jabatan}</p>
                 </div>
               </div>
@@ -1041,11 +1027,11 @@ useEffect(() => {
                   {k.dokter.map((d, i) => (
                     <li key={`${d.nama}-${i}`} className="flex items-start gap-3">
                       <span
-                        className={`w-9 h-9 shrink-0 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                        className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${
                           d.aktif ? 'bg-[#DDB169]/15 text-[#DDB169]' : 'bg-[#9E3B32]/15 text-[#E4938A]'
                         }`}
                       >
-                        {inisial(d.nama)}
+                        <DoctorIcon />
                       </span>
                       <span className="text-[13.5px] text-white/75 leading-snug pt-1.5 flex flex-wrap items-center gap-2">
                         {d.nama}
@@ -1066,39 +1052,43 @@ useEffect(() => {
 
       <section id="testimoni" className="bg-white scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
-          <div className="text-center max-w-xl mx-auto mb-12">
+          <div className="max-w-3xl mx-auto text-center bg-[#FBF9F4] border border-[#0B2B24]/6 rounded-3xl px-6 sm:px-12 py-12 sm:py-14">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Testimoni</span>
             <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
               Kata mereka yang pernah berobat
             </h3>
-            <p className="text-[#0B2B24]/60 text-[15px] mt-3">
-              Cerita singkat dari pasien dan keluarga yang pernah menggunakan layanan kami.
+
+            <div className="flex items-center justify-center gap-1 mt-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg key={i} viewBox="0 0 24 24" className="w-6 h-6" fill="#C08829" stroke="#C08829" strokeWidth="1.5">
+                  <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8Z" />
+                </svg>
+              ))}
+            </div>
+
+            <p className="text-[#0B2B24]/60 text-[14.5px] mt-4 leading-relaxed max-w-xl mx-auto">
+              Ulasan asli dari pasien dan keluarga yang pernah berobat di RSUD Pasirian bisa dilihat langsung di Google Maps, agar Anda mendapat gambaran yang jujur dan terkini.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {testimoni.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition flex flex-col"
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-7">
+              <a
+                href={GOOGLE_MAPS_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#0B2B24] hover:bg-[#153b31] text-white font-fraunces font-bold px-5 py-3 rounded-full transition"
               >
-                <BintangRating rating={t.rating} />
-                <p className="text-[13.5px] text-[#0B2B24]/75 leading-relaxed mt-3 flex-1">&ldquo;{t.isi}&rdquo;</p>
-                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-[#0B2B24]/6">
-                  <span className="w-9 h-9 shrink-0 rounded-full bg-[#0B2B24] text-[#DDB169] text-[12px] font-bold flex items-center justify-center">
-                    {inisial(t.nama)}
-                  </span>
-                  <div>
-                    <p className="font-fraunces font-semibold text-[13.5px] text-[#0B2B24]">{t.nama}</p>
-                    <p className="text-[11.5px] text-[#0B2B24]/50">{t.asal}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+                Lihat Ulasan di Google Maps <span>↗</span>
+              </a>
+              <a
+                href={GOOGLE_REVIEW_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-[#0B2B24]/15 hover:border-[#C08829]/50 hover:bg-[#C08829]/5 text-[#0B2B24] font-fraunces font-bold px-5 py-3 rounded-full transition"
+              >
+                Tulis Ulasan Anda
+              </a>
+            </div>
           </div>
-
-          <p className="text-center text-[11.5px] text-[#0B2B24]/40 mt-8 max-w-xl mx-auto leading-relaxed">
-          </p>
         </div>
       </section>
 

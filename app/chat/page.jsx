@@ -5,10 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
-import { Fraunces, Inter } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter' });
+const fraunces = Poppins({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
+const inter = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
 
 const INK = '#0B2B24';
 const BRASS = '#C08829';
@@ -16,8 +16,6 @@ const BRASS_SOFT = '#DDB169';
 const CREAM = '#FBF9F4';
 const EMERALD = '#1F6B4F';
 
-// Komponen kustom buat render link markdown jadi tombol brass,
-// biar link "Daftar Sekarang" / "Download Mobile JKN" dari AI kelihatan jelas & bisa diklik.
 function MarkdownLink({ href, children }) {
   return (
     <a
@@ -31,15 +29,6 @@ function MarkdownLink({ href, children }) {
   );
 }
 
-// ===== KONTEN STATIS: CARA DAFTAR PASIEN BPJS & UMUM =====
-// PENTING: Konten ini SENGAJA di-hardcode di frontend (BUKAN lewat Groq/LLM,
-// BUKAN lewat RAG search). Alasannya:
-// 1. Info prosedural ini jarang berubah -> gak butuh "kecerdasan" AI buat jawab.
-// 2. Harus SAKLEK/konsisten setiap kali diklik -- kalau lewat LLM, jawaban bisa
-//    sedikit beda tiap request dan berisiko halusinasi (contoh kasus URL kemarin).
-// 3. Instan & gratis, gak makan jatah token TPM Groq sama sekali.
-// Kalau suatu saat syarat/alur pendaftaran BPJS atau umum berubah, edit teks
-// di bawah ini langsung -- TIDAK perlu ubah apapun di knowledge_base/Supabase.
 const STATIC_CONTENT = {
   bpjs: `**Syarat Sebelum Mendaftar:**
 - Aplikasi **Mobile JKN** sudah terinstal dan akun sudah terverifikasi
@@ -103,9 +92,6 @@ Atau, Anda juga dapat mendaftar sebagai pasien umum secara offline dengan datang
 
 [📝 Daftar Sekarang](/)`,
 
-  // BARU: info reschedule/cancel jadwal kontrol BPJS ke poli spesialis.
-  // Sama kayak bpjs/umum di atas -- ini nomor petugas per poli, jarang
-  // berubah, jadi cukup statis aja gak usah lewat Groq/RAG.
   ubahJadwal: `Untuk Bapak/Ibu pasien **BPJS** yang berhalangan hadir atau ingin mengubah jadwal kunjungan kontrol ke poliklinik spesialis (yang telah dijadwalkan oleh petugas poliklinik), silakan konfirmasi dengan menghubungi nomor petugas berikut:
 
 - **Poli Gigi**: 085875083014
@@ -169,10 +155,7 @@ Silakan pilih layanan yang Anda butuhkan untuk mengetahui informasi lebih lanjut
 - Email resmi: **rsud.pasirian@gmail.com**
 - Telepon: **(0334) 5761044**`,
 };
-// ===== END KONTEN STATIS =====
 
-// Daftar kategori untuk tombol tahap-2 Standar Pelayanan Publik.
-// contentKey merujuk ke key di STATIC_CONTENT di atas.
 const STANDAR_KATEGORI = [
   { contentKey: 'standarPendaftaran', label: 'Pelayanan Pendaftaran Pasien Rawat Jalan' },
   { contentKey: 'standarIgd', label: 'Pelayanan Gawat Darurat (IGD)' },
@@ -198,9 +181,6 @@ export default function ChatPage() {
     { icon: '📞', label: 'Ubah Jadwal Kontrol BPJS', shortLabel: 'Ubah Jadwal Kontrol', isStatic: true, staticKey: 'ubahJadwal' },
   ];
 
-  // selectedPoli (opsional): dikirim ke backend saat user KLIK tombol poli
-  // spesifik, supaya backend bisa filter data jadwal secara EKSAK tanpa
-  // harus nebak-nebak dari kata kunci di dalam teks pesan.
   const sendMessage = async (messageContent, label = 'Sedang menyusun jawaban...', selectedPoli = null) => {
     if (!messageContent.trim() || isLoading) return;
 
@@ -240,9 +220,6 @@ export default function ChatPage() {
     sendMessage(input);
   };
 
-  // Tahap 1: user klik "Jadwal Pelayanan Poli Klinik" -> ambil daftar nama poli
-  // LANGSUNG dari database (endpoint /api/poli-list), TANPA lewat Groq/LLM.
-  // Ini instan, gratis, dan gak makan jatah token TPM Groq sama sekali.
   const handleShowPoliList = async () => {
     if (isLoading) return;
 
@@ -277,16 +254,10 @@ export default function ChatPage() {
     }
   };
 
-  // Tahap 2: user klik salah satu nama poli -> baru di sini kita panggil
-  // Groq, dengan selectedPoli persis biar backend gak perlu nebak dan
-  // prompt yang dibangun cuma berisi data poli ini aja (kecil, hemat token).
   const handlePoliSelect = (namaPoli) => {
     sendMessage(`Jadwal dan dokter untuk ${namaPoli}`, `Mencari jadwal ${namaPoli}...`, namaPoli);
   };
 
-  // Tahap 1: user klik "Info Kamar Rawat Inap" -> ambil data ketersediaan kamar
-  // LANGSUNG dari database (endpoint /api/info-layanan, kategori "infoLayanan"),
-  // TANPA lewat Groq/LLM. Instan, gratis, gak makan jatah token TPM Groq.
   const handleShowInfoLayanan = async () => {
     if (isLoading) return;
 
@@ -305,10 +276,8 @@ export default function ChatPage() {
           { role: 'assistant', content: 'Maaf, info ketersediaan kamar belum tersedia saat ini. Silakan hubungi bagian informasi RSUD Pasirian.' },
         ]);
       } else if (items.length === 1) {
-        // Cuma 1 entri di database -> langsung tampilkan isinya, gak perlu tombol pilihan
         setMessages((prev) => [...prev, { role: 'assistant', content: items[0].content }]);
       } else {
-        // Lebih dari 1 entri -> tampilkan sebagai tombol pilihan (mirip standar-buttons)
         setMessages((prev) => [
           ...prev,
           {
@@ -328,7 +297,6 @@ export default function ChatPage() {
     }
   };
 
-  // Tahap 2 (kalau entri > 1): user klik salah satu judul ruangan -> tampilkan isinya
   const handleInfoLayananSelect = (item) => {
     if (isLoading) return;
     setMessages((prev) => [
@@ -338,9 +306,6 @@ export default function ChatPage() {
     ]);
   };
 
-  // Tahap 1 (statis, instan): user klik "Standar Pelayanan Publik" -> langsung
-  // tampilkan teks pengantar + 3 tombol kategori. TANPA fetch/Groq sama sekali,
-  // karena daftar 3 kategori ini fixed dan gak berubah-ubah.
   const handleShowStandarPelayanan = () => {
     if (isLoading) return;
 
@@ -351,8 +316,6 @@ export default function ChatPage() {
     ]);
   };
 
-  // Tahap 2 (statis, instan): user klik salah satu kategori -> tampilkan detail
-  // kategori tersebut dari STATIC_CONTENT. Juga TANPA fetch/Groq.
   const handleStandarSelect = (contentKey, label) => {
     if (isLoading) return;
 
@@ -363,10 +326,6 @@ export default function ChatPage() {
     ]);
   };
 
-  // Handler untuk section STATIS (Cara Daftar Pasien BPJS / Umum / Ubah Jadwal Kontrol).
-  // TIDAK memanggil /api/chat sama sekali -- langsung push pertanyaan user
-  // dan jawaban tetap dari STATIC_CONTENT ke state messages. Instan, dan
-  // jawabannya dijamin SAMA PERSIS setiap kali diklik (gak lewat LLM).
   const handleShowStatic = (staticKey, label) => {
     if (isLoading) return;
 
@@ -414,7 +373,6 @@ export default function ChatPage() {
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-(--font-inter) flex h-dvh bg-[${CREAM}] text-[#0B2B24] overflow-hidden relative`} style={{ backgroundColor: CREAM }}>
-      {}
       <aside className="w-80 bg-[#0B2B24] p-6 flex flex-col justify-between hidden md:flex shadow-xl text-white z-10">
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">
@@ -458,7 +416,6 @@ export default function ChatPage() {
         </div>
       </aside>
 
-      {}
       <main className="flex-1 flex flex-col bg-[#FBF9F4] overflow-hidden w-full relative min-h-0">
         <header className="px-4 py-3 md:px-6 md:py-4 bg-white/95 backdrop-blur-md border-b border-[#C08829]/15 flex items-center justify-between shadow-[0_1px_0_rgba(11,43,36,0.04)] z-10 gap-2 shrink-0">
           <h1 className="font-(--font-fraunces) font-semibold text-sm md:text-base tracking-tight text-[#0B2B24] truncate">
