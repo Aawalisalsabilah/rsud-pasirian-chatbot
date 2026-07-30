@@ -782,7 +782,7 @@ export default function LandingPage() {
       </header>
 
       <section className="relative w-full overflow-hidden bg-[#0B2B24]">
-        <div className="relative h-145 sm:h-155 md:h-165 w-full" style={{ paddingTop: headerHeight }}>
+        <div className="relative h-165 sm:h-155 md:h-165 w-full" style={{ paddingTop: headerHeight }}>
           <Image
             src="/rsud-gedung.jpg"
             alt="Gedung RSUD Pasirian Lumajang"
@@ -795,11 +795,11 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-linear-to-r from-[#0B2B24]/95 via-[#0B2B24]/75 to-[#0B2B24]/35" />
           <div className="absolute inset-0 bg-linear-to-t from-[#04140f]/70 via-transparent to-transparent" />
 
-          <svg viewBox="0 0 500 260" className="absolute right-0 bottom-0 w-[60%] max-w-140 opacity-[0.14] pointer-events-none" aria-hidden="true">
+          <svg viewBox="0 0 500 260" className="hidden sm:block absolute right-0 bottom-0 w-[60%] max-w-140 opacity-[0.14] pointer-events-none" aria-hidden="true">
             <path d="M0,260 L0,210 L90,150 L150,190 L230,60 L270,110 L330,20 L380,90 L440,140 L500,110 L500,260 Z" fill="#F2E4C4" />
           </svg>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 h-full flex flex-col justify-center">
+          <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 h-full flex flex-col justify-center pb-8 sm:pb-0">
             <div className="max-w-xl">
               <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#F2E4C4] border border-[#DDB169]/50 rounded-full px-3.5 py-1.5 w-fit">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#DDB169] animate-pulse" />
