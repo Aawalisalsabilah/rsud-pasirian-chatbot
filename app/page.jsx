@@ -95,26 +95,19 @@ const kategoriLayanan = [
   },
 ];
 
+// Data statis ini dipakai sebagai fallback sebelum data dari /api/info-layanan berhasil dimuat.
 const ruangRawatInap = [
-  { nama: 'Mutiara', kelas: 'VIP', ruang: 9, tt: 9, color: BRASS },
-  { nama: 'Berlian', kelas: 'Kelas I', ruang: 6, tt: 12, color: STEEL },
-  { nama: 'Zamrud', kelas: 'Kelas II', ruang: 6, tt: 18, color: EMERALD },
-  { nama: 'Shapire', kelas: 'Kelas III', ruang: 6, tt: 24, color: PLUM },
-  { nama: 'ICU', kelas: 'Intensif', ruang: 2, tt: 7, color: CLAY },
-  { nama: 'PICU', kelas: 'Intensif', ruang: 1, tt: 1, color: CLAY },
-  { nama: 'NICU', kelas: 'Intensif', ruang: 1, tt: 3, color: CLAY },
-  { nama: 'Neonatologi', kelas: 'Kelas III', ruang: 1, tt: 16, color: PLUM },
-  { nama: 'Permata', kelas: 'Kelas III', ruang: 5, tt: 10, color: PLUM },
+  { nama: 'Mutiara', kelas: 'VIP', tt: 9, terisi: null, kosong: null, color: BRASS },
+  { nama: 'Berlian', kelas: 'Kelas I', tt: 12, terisi: null, kosong: null, color: STEEL },
+  { nama: 'Zamrud', kelas: 'Kelas II', tt: 18, terisi: null, kosong: null, color: EMERALD },
+  { nama: 'Shapire', kelas: 'Kelas III', tt: 24, terisi: null, kosong: null, color: PLUM },
+  { nama: 'ICU', kelas: 'Intensif', tt: 7, terisi: null, kosong: null, color: CLAY },
+  { nama: 'PICU', kelas: 'Intensif', tt: 1, terisi: null, kosong: null, color: CLAY },
+  { nama: 'NICU', kelas: 'Intensif', tt: 3, terisi: null, kosong: null, color: CLAY },
+  { nama: 'Neonatologi', kelas: 'Kelas III', tt: 16, terisi: null, kosong: null, color: PLUM },
+  { nama: 'Permata', kelas: 'Kelas III', tt: 10, terisi: null, kosong: null, color: PLUM },
 ];
 
-const kapasitasRawatInap = [
-  { ruang: 'Intensif', tt: 10 },
-  { ruang: 'VIP', tt: 9 },
-  { ruang: 'Kelas I', tt: 10 },
-  { ruang: 'Kelas II', tt: 14 },
-  { ruang: 'Kelas III', tt: 46 },
-  { ruang: 'Isolasi', tt: 11 },
-];
 const kapasitasIgd = [
   { ruang: 'Triase', tt: 7 },
   { ruang: 'Isolasi', tt: 2 },
@@ -148,6 +141,22 @@ const panduanJknMobile = [
   { langkah: 7, judul: 'Pilih RSUD Pasirian', gambar: '/7.png', desc: 'Pada daftar rujukan yang tersedia, tekan "Ambil Antrean" di RSUD Pasirian Lumajang.' },
   { langkah: 8, judul: 'Pilih Tanggal & Dokter', gambar: '/8.png', desc: 'Periksa info rujukan, pilih tanggal kunjungan dan dokter, lalu tekan "Daftar pelayanan".' },
   { langkah: 9, judul: 'Antrean Berhasil', gambar: '/9.png', desc: 'Nomor antrean poliklinik dan kode booking Anda muncul. Simpan untuk ditunjukkan saat datang.' },
+];
+
+const daftarDokter = [
+  { nama: 'dr. Hendra Setiawan, Sp.B', foto: '/dokter/dr-HendraSetiawan.jpg', noSTR: '3511101421003158', noSIP: '25.1/SIP-DS.35.08/VIII/2021', poli: 'Poli Spesialis Bedah' },
+  { nama: 'dr. Arry Setyo Dharma, Sp.B', foto: '/dokter/dr-ArrySetyoDharma.jpg', noSTR: '73.1.1.101.2.17.100287', noSIP: '40.1/SIP-DS.35.08/IV/2022', poli: 'Poli Spesialis Bedah' },
+  { nama: 'dr. Rosihan Effendi, Sp.OT', foto: '/dokter/dr-RosihanEffendi.jpg', noSTR: '3311103421110355', noSIP: '43.1/SIP-DS.35.08/X/2021', poli: 'Poli Spesialis Ortopedi & Traumatologi' },
+  { nama: 'dr. Trisasongko Budisatrio, Sp.P', foto: '/dokter/dr-TrisasongkoBudisatrio.jpg', noSTR: '3511604317047475', noSIP: '503/345.1.1/427.59/SIPDS-3508/II/2023', poli: 'Poli Spesialis Paru' },
+  { nama: 'dr. Wiryawan Pradipto, Sp.Pd', foto: '/dokter/dr-WiryawanPradipto.jpg', noSTR: '3511401422094134', noSIP: '503/155.1.1/427.59/SIPDS-3508/XII/2022', poli: 'Poli Spesialis Penyakit Dalam' },
+  { nama: 'dr. Endra Gunawan, Sp.Pd', foto: '/dokter/dr-EndraGunawan.jpg', noSTR: '3511401421075514', noSIP: '59.1/SIP-DS.3508/XI/2021', poli: 'Poli Spesialis Penyakit Dalam' },
+  { nama: 'dr. Elvi Widiastuti, Sp.OG', foto: '/dokter/dr-ElviWidiastuti.jpg', noSTR: '1621301522016477', noSIP: '503/041.1.2/427.59/SIPDS-3508/I/2023', poli: 'Poli Spesialis Kandungan' },
+  { nama: 'dr. Ryan Ishak, Sp.OG', foto: '/dokter/dr-RyanIshak.jpg', noSTR: '7111301321151356', noSIP: '61.2/SIP-DS.35.08/XI/2021', poli: 'Poli Spesialis Kandungan' },
+  { nama: 'dr. Agung Hardianto, Sp.Pros', foto: '/dokter/dr-AgungHardianto.jpg', noSTR: '3512501321047436', noSIP: '30.1/SIP-DS.35.08/VIII/2021', poli: 'Poli Spesialis Gigi Tiruan' },
+  { nama: 'dr. Nurul Yudhi Prihastuy, Sp.A', foto: '/dokter/dr-NurulYudhiPrihastuy.jpg', noSTR: '3521201317026057', noSIP: '36.1/SIP-DS.35.08.IV/2022', poli: 'Poli Spesialis Anak' },
+  { nama: 'dr. Niken Dumilah', foto: '/dokter/dr-NikenDumilah.jpg', noSTR: 'VK00001264912538', noSIP: 'MR35082502007935', poli: 'Dokter VCT' },
+  { nama: 'dr. Trilia Kurniati, Sp.Rad', foto: '/dokter/dr-TriliaKurniati.jpg', noSTR: '3521503421047490', noSIP: '55.1/SIP-DS.35.38/XI/2021', poli: 'Radiologi' },
+  { nama: 'dr. Donny Tilon, Sp.An', foto: '/dokter/dr-DonnyTilon.jpg', noSTR: '3511501422047531', noSIP: '503/014.1/427.59/SIP-DokterSpesialis-3508/X/2022', poli: 'Dokter Spesialis Anestesi' },
 ];
 
 function BedIcon({ color }) {
@@ -213,6 +222,7 @@ const NAV_ITEMS = [
   { id: 'layanan', label: 'Layanan' },
   { id: 'jam-pelayanan', label: 'Jam Pelayanan' },
   { id: 'dokter', label: 'Jadwal Dokter' },
+  { id: 'profil-dokter', label: 'Profil Dokter' },
   { id: 'testimoni', label: 'Testimoni' },
   { id: 'panduan-jkn', label: 'Panduan JKN' },
   { id: 'kontak', label: 'Kontak' },
@@ -228,6 +238,75 @@ function formatTanggalIndo(isoDate) {
   const [tahun, bulan, tanggal] = isoDate.split('-');
   const namaBulan = NAMA_BULAN[parseInt(bulan, 10) - 1] || '';
   return `${parseInt(tanggal, 10)} ${namaBulan} ${tahun}`;
+}
+
+// Ruang ICU/NICU/PICU selalu ditandai "Intensif", meski admin menulisnya sebagai "Kelas VIP"
+function getKelasInfo(namaRuang, kelasRaw) {
+  const nameUpper = (namaRuang || '').toUpperCase();
+  if (nameUpper.includes('ICU')) {
+    return { label: 'Intensif', color: CLAY };
+  }
+  const key = (kelasRaw || '').trim().toUpperCase();
+  const map = {
+    '1': { label: 'Kelas I', color: STEEL },
+    I: { label: 'Kelas I', color: STEEL },
+    '2': { label: 'Kelas II', color: EMERALD },
+    II: { label: 'Kelas II', color: EMERALD },
+    '3': { label: 'Kelas III', color: PLUM },
+    III: { label: 'Kelas III', color: PLUM },
+    VIP: { label: 'VIP', color: BRASS },
+  };
+  return map[key] || { label: `Kelas ${kelasRaw}`, color: STEEL };
+}
+
+// Parsing teks admin (format: "N. NAMA (Kelas X)" + Jumlah/Terisi/Kosong Bed) jadi data kamar terstruktur
+function parseRuangRawatInap(konten) {
+  if (!konten) return { rooms: [], tanggalUpdate: null };
+
+  const tanggalMatch = konten.match(/tanggal\s+(\d{1,2})-(\d{1,2})-(\d{4})/i);
+  let tanggalUpdate = null;
+  if (tanggalMatch) {
+    const [, tgl, bln, thn] = tanggalMatch;
+    tanggalUpdate = `${parseInt(tgl, 10)} ${NAMA_BULAN[parseInt(bln, 10) - 1] || ''} ${thn}`;
+  }
+
+  const roomRegex = /^\s*\d+\.\s*([^\n(]+?)\s*\(Kelas\s*([A-Za-z0-9]+)\)\s*\r?\n-\s*Jumlah Bed:\s*(\d+)\s*\r?\n-\s*Bed Terisi:\s*(\d+)\s*\r?\n-\s*Bed Kosong:\s*(\d+)/gm;
+
+  const rooms = [];
+  let match;
+  while ((match = roomRegex.exec(konten)) !== null) {
+    const nama = match[1].trim();
+    const kelasRaw = match[2];
+    const tt = parseInt(match[3], 10);
+    const terisi = parseInt(match[4], 10);
+    const kosong = parseInt(match[5], 10);
+    const { label: kelas, color } = getKelasInfo(nama, kelasRaw);
+    rooms.push({ nama, kelas, tt, terisi, kosong, color });
+  }
+
+  return { rooms, tanggalUpdate };
+}
+
+// Urutan tampilan kategori kelas pada tabel kapasitas
+const URUTAN_KELAS = ['Intensif', 'VIP', 'Kelas I', 'Kelas II', 'Kelas III'];
+
+function kelompokkanKapasitasPerKelas(rooms) {
+  const grup = {};
+  rooms.forEach((r) => {
+    if (!grup[r.kelas]) grup[r.kelas] = { kelas: r.kelas, tt: 0, terisi: 0, kosong: 0, color: r.color, adaDetail: true };
+    grup[r.kelas].tt += r.tt || 0;
+    if (typeof r.terisi === 'number') grup[r.kelas].terisi += r.terisi;
+    else grup[r.kelas].adaDetail = false;
+    if (typeof r.kosong === 'number') grup[r.kelas].kosong += r.kosong;
+    else grup[r.kelas].adaDetail = false;
+  });
+  const hasil = Object.values(grup);
+  hasil.sort((a, b) => {
+    const ia = URUTAN_KELAS.indexOf(a.kelas);
+    const ib = URUTAN_KELAS.indexOf(b.kelas);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
+  return hasil;
 }
 
 const FORM_KOSONG = {
@@ -507,6 +586,8 @@ export default function LandingPage() {
   const [klinikData, setKlinikData] = useState(klinikSpesialis);
   const [announcement, setAnnouncement] = useState(null);
   const [activeSection, setActiveSection] = useState('tentang');
+  const [ruangRawatInapData, setRuangRawatInapData] = useState(ruangRawatInap);
+  const [tanggalUpdateKamar, setTanggalUpdateKamar] = useState(null);
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(76);
 
@@ -580,6 +661,29 @@ export default function LandingPage() {
         console.error('[JADWAL DOKTER FETCH ERROR]', err);
       });
   }, []);
+
+  useEffect(() => {
+    fetch('/api/info-layanan', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        const items = json.items || [];
+        const kamarItem =
+          items.find((it) => it.title && /kamar|rawat inap/i.test(it.title)) || items[0];
+        if (kamarItem?.content) {
+          const { rooms, tanggalUpdate } = parseRuangRawatInap(kamarItem.content);
+          if (rooms.length > 0) {
+            setRuangRawatInapData(rooms);
+            setTanggalUpdateKamar(tanggalUpdate);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('[INFO LAYANAN FETCH ERROR]', err);
+      });
+  }, []);
+
+  const kapasitasRawatInapDinamis = kelompokkanKapasitasPerKelas(ruangRawatInapData);
+  const totalTtRawatInap = ruangRawatInapData.reduce((sum, r) => sum + (r.tt || 0), 0);
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-(--font-inter) min-h-screen bg-white text-[#0B2B24]`} style={{ colorScheme: 'light' }}>
@@ -883,6 +987,11 @@ export default function LandingPage() {
             <h4 className="font-fraunces font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
               Kapasitas tempat tidur
             </h4>
+            {tanggalUpdateKamar && (
+              <p className="text-[#0B2B24]/45 text-[12.5px] mt-2">
+                Data rawat inap diperbarui {tanggalUpdateKamar}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -891,17 +1000,28 @@ export default function LandingPage() {
                 <p className="font-fraunces font-semibold text-[14.5px] text-white">Layanan Rawat Inap</p>
               </div>
               <table className="w-full text-[13.5px]">
+                <thead>
+                  <tr className="text-[11px] uppercase tracking-wide text-[#0B2B24]/40">
+                    <th className="text-left font-semibold px-5 pt-3 pb-1">Kelas</th>
+                    <th className="text-right font-semibold px-5 pt-3 pb-1">Kosong</th>
+                    <th className="text-right font-semibold px-5 pt-3 pb-1">Total TT</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {kapasitasRawatInap.map((k, i) => (
-                    <tr key={k.ruang} className={i % 2 === 1 ? 'bg-[#FBF9F4]' : ''}>
-                      <td className="px-5 py-2.5 text-[#0B2B24]/75">{k.ruang}</td>
+                  {kapasitasRawatInapDinamis.map((k, i) => (
+                    <tr key={k.kelas} className={i % 2 === 1 ? 'bg-[#FBF9F4]' : ''}>
+                      <td className="px-5 py-2.5 text-[#0B2B24]/75">{k.kelas}</td>
+                      <td className="px-5 py-2.5 text-right font-semibold tabular-nums" style={{ color: k.adaDetail ? EMERALD : '#0B2B24' }}>
+                        {k.adaDetail ? `${k.kosong} TT` : '—'}
+                      </td>
                       <td className="px-5 py-2.5 text-right font-semibold text-[#0B2B24] tabular-nums">{k.tt} TT</td>
                     </tr>
                   ))}
                   <tr className="border-t border-[#0B2B24]/8">
                     <td className="px-5 py-2.5 font-semibold text-[#0B2B24]">Total</td>
+                    <td className="px-5 py-2.5" />
                     <td className="px-5 py-2.5 text-right font-bold text-[#C08829] tabular-nums">
-                      {kapasitasRawatInap.reduce((sum, k) => sum + k.tt, 0)} TT
+                      {totalTtRawatInap} TT
                     </td>
                   </tr>
                 </tbody>
@@ -938,29 +1058,43 @@ export default function LandingPage() {
             <h4 className="font-fraunces font-semibold text-2xl sm:text-[1.75rem] tracking-tight mt-2 text-[#0B2B24]">
               Ruang rawat inap
             </h4>
-            <p className="text-[#0B2B24]/60 text-[14px] mt-3">
-            </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {ruangRawatInap.map((r) => (
-              <div key={r.nama} className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-                  style={{ backgroundColor: `${r.color}14` }}
-                >
-                  <BedIcon color={r.color} />
+            {ruangRawatInapData.map((r, idx) => {
+              const punyaDetail = typeof r.kosong === 'number';
+              const penuh = punyaDetail && r.kosong <= 0;
+              return (
+                <div key={`${r.nama}-${idx}`} className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+                    style={{ backgroundColor: `${r.color}14` }}
+                  >
+                    <BedIcon color={r.color} />
+                  </div>
+                  <span
+                    className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1.5"
+                    style={{ backgroundColor: `${r.color}14`, color: r.color }}
+                  >
+                    {r.kelas}
+                  </span>
+                  <h5 className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">{r.nama}</h5>
+                  <p className="text-[12px] text-[#0B2B24]/55 mt-1">{r.tt} TT</p>
+                  {punyaDetail && (
+                    <span
+                      className="inline-block text-[10.5px] font-bold px-2 py-0.5 rounded-full mt-1.5"
+                      style={
+                        penuh
+                          ? { backgroundColor: `${CLAY}14`, color: CLAY }
+                          : { backgroundColor: `${EMERALD}14`, color: EMERALD }
+                      }
+                    >
+                      {penuh ? 'Penuh' : `${r.kosong} Bed Kosong`}
+                    </span>
+                  )}
                 </div>
-                <span
-                  className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1.5"
-                  style={{ backgroundColor: `${r.color}14`, color: r.color }}
-                >
-                  {r.kelas}
-                </span>
-                <h5 className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">{r.nama}</h5>
-                <p className="text-[12px] text-[#0B2B24]/55 mt-1">{r.ruang} ruang &middot; {r.tt} TT</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1044,6 +1178,54 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="profil-dokter" className="bg-white py-16 sm:py-20 scroll-mt-[calc(var(--header-h,150px))]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Profil Dokter</span>
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+              Kenali dokter spesialis kami
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+            {daftarDokter.map((d, i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition min-w-0"
+              >
+                <div className="relative w-full aspect-4/5 bg-[#FBF9F4]">
+                  <Image
+                    src={d.foto}
+                    alt={d.nama}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div className="p-3 sm:p-4 min-w-0">
+                  <h4 className="font-fraunces font-semibold text-[12px] sm:text-[13.5px] text-[#0B2B24] leading-snug break-words">
+                    {d.nama}
+                  </h4>
+                  <p className="text-[10px] sm:text-[11px] font-semibold text-[#C08829] mt-1 leading-snug break-words">
+                    {d.poli}
+                  </p>
+                  <div className="text-[9px] sm:text-[10.5px] text-[#0B2B24]/60 mt-2 space-y-1">
+                    <p className="break-all leading-snug">
+                      <span className="text-[#0B2B24]/45 font-medium">STR: </span>
+                      {d.noSTR}
+                    </p>
+                    <p className="break-all leading-snug">
+                      <span className="text-[#0B2B24]/45 font-medium">SIP: </span>
+                      {d.noSIP}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1269,6 +1451,7 @@ export default function LandingPage() {
               <li><a href="#layanan" className="hover:text-[#DDB169] transition">Layanan</a></li>
               <li><a href="#jam-pelayanan" className="hover:text-[#DDB169] transition">Jam Pelayanan</a></li>
               <li><a href="#dokter" className="hover:text-[#DDB169] transition">Jadwal Dokter</a></li>
+              <li><a href="#profil-dokter" className="hover:text-[#DDB169] transition">Profil Dokter</a></li>
               <li><a href="#testimoni" className="hover:text-[#DDB169] transition">Testimoni</a></li>
               <li><a href="#panduan-jkn" className="hover:text-[#DDB169] transition">Panduan JKN</a></li>
               <li><a href="#kontak" className="hover:text-[#DDB169] transition">Kontak</a></li>
