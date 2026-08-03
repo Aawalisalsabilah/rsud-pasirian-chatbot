@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-import { buildSystemPrompt, getValidDoctorNames } from '@/lib/knowledge';
+import { buildSystemPrompt, getValidDoctorNames, detectPendaftaranAmbiguous } from '@/lib/knowledge';
 import { chatRateLimit, getClientIp } from '@/lib/rate-limit';
 import { put } from '@vercel/blob';
 
@@ -30,6 +30,8 @@ const OFF_TOPIC_KEYWORDS = [
 ];
 
 const OFF_TOPIC_REPLY = 'Mohon maaf, saya hanya dapat membantu pertanyaan seputar layanan RSUD Pasirian Lumajang, seperti jadwal dokter, pendaftaran pasien, ketersediaan kamar, dan informasi layanan rumah sakit lainnya. Ada yang bisa saya bantu terkait hal tersebut?';
+
+const PENDAFTARAN_CLARIFICATION_REPLY = 'Baik, sebelum saya jelaskan, Anda ingin mendaftar sebagai pasien BPJS/JKN atau pasien umum (mandiri)?';
 
 function isGreeting(text) {
     return GREETING_REGEX.test((text || '').trim());
@@ -94,7 +96,7 @@ function appendMenuSuggestion(reply, lastUserContent) {
     if (!menuName) return reply;
     if (reply.includes(menuName)) return reply;
 
-    return `${reply}\n\nUntuk informasi lebih lengkap, kamu bisa klik menu **${menuName}** yang tersedia di halaman ini ya.`;
+    return `${reply}\n\nUntuk informasi lebih lengkap, Anda bisa klik menu **${menuName}** yang tersedia di halaman ini ya.`;
 }
 
 function appendRegistrationLink(reply, lastUserContent) {
@@ -202,6 +204,11 @@ export async function POST(request) {
 
     if (isOffTopic(lastUserMessage?.content)) {
         return NextResponse.json({ reply: OFF_TOPIC_REPLY });
+    }
+
+    const lowerLastUserContent = (lastUserMessage?.content || '').toLowerCase();
+    if (detectPendaftaranAmbiguous(lowerLastUserContent)) {
+        return NextResponse.json({ reply: PENDAFTARAN_CLARIFICATION_REPLY });
     }
 
     let dynamicSystemPrompt;
