@@ -142,9 +142,6 @@ function IconMegaphone(props) {
 }
 
 // ===== MODAL KONFIRMASI LOGOUT =====
-// Muncul sebelum benar-benar logout, biar nggak kepencet nggak sengaja.
-// Klik area gelap di luar modal atau tombol "Batal" akan menutup modal
-// tanpa logout; hanya tombol "Keluar" di dalam modal yang memicu logout asli.
 function LogoutConfirmModal({ onConfirm, onCancel }) {
   return (
     <div
@@ -348,7 +345,7 @@ function KnowledgeTab() {
     byKategori[key].push(item);
   });
 
-  // Urutan kategori: yang dikenal (KATEGORI_INFO) dulu, sisanya diurutkan alfabet
+  // Urutan kategori
   const knownOrder = Object.keys(KATEGORI_INFO);
   const otherKeys = Object.keys(byKategori)
     .filter((k) => !knownOrder.includes(k))
@@ -732,7 +729,7 @@ function PoliTab() {
 
   if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
 
-  // Filter berdasarkan pencarian (nama poli ATAU nama dokter)
+  // Filter berdasarkan pencarian (nama poli atau nama dokter)
   const keyword = search.trim().toLowerCase();
   const filteredItems = keyword
     ? items.filter(

@@ -6,9 +6,6 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// Endpoint ringan khusus buat ambil daftar nama poli.
-// SENGAJA tidak lewat Groq/LLM sama sekali -- ini query database polos,
-// jadi instan, gratis, dan tidak makan jatah token TPM Groq.
 export async function GET() {
   const { data, error } = await supabase
     .from('poli_dokter')

@@ -35,9 +35,6 @@ export async function POST(request) {
 
     // ===== BUAT TOKEN SESI BARU (BUKAN SECRET STATIS) =====
     // Setiap login sukses dapet token acak baru yang disimpen di Redis.
-    // Ini yang memungkinkan 1 sesi bisa dicabut sendiri-sendiri tanpa
-    // ngaruh ke sesi lain (beda dari sebelumnya yang pakai 1 secret sama
-    // buat semua orang).
     let sessionToken;
     try {
       sessionToken = await createAdminSession();

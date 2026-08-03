@@ -8,7 +8,6 @@ const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 });
 
-// ==== KONFIGURASI LINK PENDAFTARAN ====
 const LINK_DAFTAR_UMUM = '/?openDaftar=umum';
 const LINK_MOBILE_JKN_ANDROID = 'https://play.google.com/store/apps/details?id=com.telkom.mobile.jkn';
 const LINK_MOBILE_JKN_IOS = 'https://apps.apple.com/id/app/mobile-jkn/id1237601115';
@@ -17,9 +16,86 @@ const KEYWORDS_PENDAFTARAN = ['daftar', 'pendaftaran', 'mendaftar', 'booking', '
 const KEYWORDS_BPJS = ['bpjs', 'jkn'];
 const KEYWORDS_UMUM = ['umum'];
 
-// Batas panjang pesan user, biar nggak ada yang sengaja kirim teks raksasa
-// buat bikin prompt membengkak dan kena limit TPM Groq.
 const MAX_MESSAGE_LENGTH = 1000;
+
+const GREETING_REGEX = /^(hai+|ha?llo+|hi+|hey+|halo+|permisi|mau tanya|tanya dong|min|admin|assalamualaikum|selamat (pagi|siang|sore|malam)|pagi|siang|sore|malam|tes|test|p)[\s.,!?]*$/i;
+
+const GREETING_REPLY = 'Halo, selamat datang di RSUD Pasirian Lumajang! 👋\n\nSaya Pasirian Smart Assistant, siap membantu Anda seputar informasi layanan rumah sakit seperti jadwal dokter, cara pendaftaran BPJS/umum, ketersediaan kamar rawat inap, dan lainnya.\n\nAda yang bisa saya bantu?';
+
+const OFF_TOPIC_KEYWORDS = [
+    'resep masakan', 'resep makanan', 'buatkan puisi', 'buat puisi', 'buatkan cerita', 'buat cerita',
+    'kode program', 'coding', 'source code', 'terjemahkan', 'lirik lagu', 'buatkan lagu',
+    'hitung', 'matematika', 'ramalan', 'zodiak', 'horoskop', 'lelucon', 'humor dong',
+    'siapa presiden', 'cuaca hari ini', 'skor pertandingan', 'harga saham', 'kurs dollar',
+];
+
+const OFF_TOPIC_REPLY = 'Mohon maaf, saya hanya dapat membantu pertanyaan seputar layanan RSUD Pasirian Lumajang, seperti jadwal dokter, pendaftaran pasien, ketersediaan kamar, dan informasi layanan rumah sakit lainnya. Ada yang bisa saya bantu terkait hal tersebut?';
+
+function isGreeting(text) {
+    return GREETING_REGEX.test((text || '').trim());
+}
+
+function isOffTopic(text) {
+    const lower = (text || '').toLowerCase();
+    return OFF_TOPIC_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+const MENU_RULES = [
+    {
+        menu: 'Cara Daftar Pasien BPJS',
+        keywords: ['bpjs', 'jkn', 'daftar bpjs', 'daftar jkn', 'mobile jkn', 'kartu bpjs', 'peserta bpjs'],
+    },
+    {
+        menu: 'Cara Daftar Pasien Umum',
+        keywords: ['pasien umum', 'daftar umum', 'bayar sendiri', 'non bpjs', 'tanpa bpjs', 'biaya sendiri'],
+    },
+    {
+        menu: 'Ubah Jadwal Kontrol BPJS',
+        keywords: ['ubah jadwal', 'reschedule', 'ganti jadwal', 'jadwal kontrol', 'batal kontrol', 'pindah jadwal'],
+    },
+    {
+        menu: 'Jadwal Pelayanan Poli Klinik',
+        keywords: ['jadwal dokter', 'jadwal poli', 'praktek dokter', 'jam praktek', 'jadwal klinik'],
+    },
+    {
+        menu: 'Info Kamar Rawat Inap',
+        keywords: ['kamar rawat inap', 'rawat inap', 'ketersediaan kamar', 'kamar kosong', 'kelas kamar'],
+    },
+    {
+        menu: 'Standar Pelayanan Publik',
+        keywords: ['standar pelayanan', 'hak pasien', 'kewajiban pasien', 'sop pelayanan', 'maklumat pelayanan'],
+    },
+    {
+        menu: 'Panduan Pendaftaran JKN Mobile',
+        keywords: ['cara pakai mobile jkn', 'install mobile jkn', 'download mobile jkn', 'aplikasi jkn', 'panduan jkn mobile'],
+    },
+];
+
+function detectMenu(userQuestion, botResponse) {
+    const combined = `${(userQuestion || '').toLowerCase()} ${(botResponse || '').toLowerCase()}`;
+
+    for (const rule of MENU_RULES) {
+        const matched = rule.keywords.some((kw) => combined.includes(kw));
+        if (matched) return rule.menu;
+    }
+
+    return null;
+}
+
+function isClarifyingQuestion(reply) {
+    const trimmed = (reply || '').trim();
+    return trimmed.endsWith('?');
+}
+
+function appendMenuSuggestion(reply, lastUserContent) {
+    if (isClarifyingQuestion(reply)) return reply;
+
+    const menuName = detectMenu(lastUserContent, reply);
+    if (!menuName) return reply;
+    if (reply.includes(menuName)) return reply;
+
+    return `${reply}\n\nUntuk informasi lebih lengkap, kamu bisa klik menu **${menuName}** yang tersedia di halaman ini ya.`;
+}
 
 function appendRegistrationLink(reply, lastUserContent) {
     const lowerUser = (lastUserContent || '').toLowerCase();
@@ -73,10 +149,6 @@ function containsUnknownDoctor(replyText, validNames) {
 }
 
 export async function POST(request) {
-    // ===== RATE LIMITING =====
-    // Dibungkus try-catch: kalau Upstash lagi down/misconfigured, JANGAN
-    // sampai seluruh chatbot ikut down. Fail-open (izinkan request) supaya
-    // fitur utama tetap jalan meskipun proteksi rate limit sedang bermasalah.
     try {
         const ip = getClientIp(request);
         const { success, limit, remaining, reset } = await chatRateLimit.limit(ip);
@@ -98,7 +170,6 @@ export async function POST(request) {
     } catch (rateLimitError) {
         console.error('[RATE LIMIT ERROR - FAIL OPEN]', rateLimitError.message);
     }
-    // ===== END RATE LIMITING =====
 
     let incomingMessages;
     try {
@@ -110,7 +181,6 @@ export async function POST(request) {
             return NextResponse.json({ reply: 'Format data chat tidak valid.' }, { status: 400 });
         }
 
-        // ===== VALIDASI PANJANG PESAN =====
         const lastMsg = [...incomingMessages].reverse().find((m) => m.role === 'user');
         if (lastMsg?.content && lastMsg.content.length > MAX_MESSAGE_LENGTH) {
             return NextResponse.json(
@@ -118,16 +188,24 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        // ===== END VALIDASI PANJANG PESAN =====
 
     } catch (parseError) {
         console.error('[REQUEST PARSE ERROR]', parseError);
         return NextResponse.json({ reply: 'Format permintaan tidak valid.' }, { status: 400 });
     }
 
+    const lastUserMessage = [...incomingMessages].reverse().find((m) => m.role === 'user');
+
+    if (isGreeting(lastUserMessage?.content)) {
+        return NextResponse.json({ reply: GREETING_REPLY });
+    }
+
+    if (isOffTopic(lastUserMessage?.content)) {
+        return NextResponse.json({ reply: OFF_TOPIC_REPLY });
+    }
+
     let dynamicSystemPrompt;
     let validDoctorNames;
-    const lastUserMessage = [...incomingMessages].reverse().find((m) => m.role === 'user');
     try {
         dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '', selectedPoli);
         validDoctorNames = await getValidDoctorNames();
@@ -170,6 +248,7 @@ export async function POST(request) {
         }
 
         reply = appendRegistrationLink(reply, lastUserMessage?.content);
+        reply = appendMenuSuggestion(reply, lastUserMessage?.content);
 
     } catch (groqError) {
         console.error('[GROQ API ERROR]', {

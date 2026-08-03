@@ -8,8 +8,6 @@ export async function POST(request) {
     await revokeAdminSession(token);
   } catch (err) {
     console.error('[LOGOUT ERROR]', err.message);
-    // Tetap lanjut hapus cookie di browser meskipun gagal hapus dari Redis --
-    // minimal browser user nggak nyimpen token lagi.
   }
 
   const response = NextResponse.json({ success: true });

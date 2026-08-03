@@ -95,7 +95,7 @@ const kategoriLayanan = [
   },
 ];
 
-// Data statis ini dipakai sebagai fallback sebelum data dari /api/info-layanan berhasil dimuat.
+
 const ruangRawatInap = [
   { nama: 'Mutiara', kelas: 'VIP', tt: 9, terisi: null, kosong: null, color: BRASS },
   { nama: 'Berlian', kelas: 'Kelas I', tt: 12, terisi: null, kosong: null, color: STEEL },
@@ -240,7 +240,7 @@ function formatTanggalIndo(isoDate) {
   return `${parseInt(tanggal, 10)} ${namaBulan} ${tahun}`;
 }
 
-// Ruang ICU/NICU/PICU selalu ditandai "Intensif", meski admin menulisnya sebagai "Kelas VIP"
+
 function getKelasInfo(namaRuang, kelasRaw) {
   const nameUpper = (namaRuang || '').toUpperCase();
   if (nameUpper.includes('ICU')) {
@@ -259,7 +259,7 @@ function getKelasInfo(namaRuang, kelasRaw) {
   return map[key] || { label: `Kelas ${kelasRaw}`, color: STEEL };
 }
 
-// Parsing teks admin (format: "N. NAMA (Kelas X)" + Jumlah/Terisi/Kosong Bed) jadi data kamar terstruktur
+
 function parseRuangRawatInap(konten) {
   if (!konten) return { rooms: [], tanggalUpdate: null };
 

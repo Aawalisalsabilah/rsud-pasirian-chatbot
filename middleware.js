@@ -17,18 +17,13 @@ export async function middleware(request) {
   if (isProtectedPage || isProtectedApi) {
     const token = request.cookies.get('admin_session')?.value;
 
-    // ===== VALIDASI TOKEN LEWAT REDIS (BUKAN BANDING KE 1 SECRET STATIS) =====
     let valid = false;
     try {
       valid = await isValidAdminSession(token);
     } catch (redisError) {
       console.error('[SESSION VALIDATION ERROR]', redisError.message);
-      // Fail-closed sengaja di sini (beda dari rate limit yang fail-open) --
-      // untuk validasi AUTH, kalau Redis lagi down lebih aman anggap sesi
-      // tidak valid daripada malah meloloskan akses admin tanpa verifikasi.
       valid = false;
     }
-    // ===== END VALIDASI =====
 
     if (!valid) {
       if (isProtectedApi) {
