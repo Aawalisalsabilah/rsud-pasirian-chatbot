@@ -104,62 +104,323 @@ Atau, Anda juga dapat mendaftar sebagai pasien umum secara offline dengan datang
 
 **Catatan:** Konfirmasi sebaiknya dilakukan sebelum jadwal kunjungan agar slot kontrol Anda dapat diatur ulang oleh petugas poliklinik terkait.`,
 
-  standarIntro: `RSUD Pasirian Lumajang berkomitmen memberikan pelayanan transparan, akuntabel, dan berkualitas sesuai **UU No. 25 Tahun 2009** tentang Pelayanan Publik. Terdapat 3 kategori utama:
+  standarIntro: `RSUD Pasirian Lumajang berkomitmen memberikan pelayanan transparan, akuntabel, dan berkualitas sesuai **UU No. 25 Tahun 2009** tentang Pelayanan Publik. Silakan pilih kategori layanan di bawah ini untuk informasi lebih lanjut.`,
 
-1. **Pelayanan Pendaftaran Pasien Rawat Jalan**
-2. **Pelayanan Gawat Darurat (IGD)**
-3. **Penanganan Pengaduan, Saran, dan Masukan**
+  standarPendaftaran: `**Persyaratan Pelayanan:**
 
-Silakan pilih layanan yang Anda butuhkan untuk mengetahui informasi lebih lanjut.`,
+*Pasien BPJS Kesehatan:*
+- Pasien Baru: KTP/KK, Surat Rujukan dari Fasilitas Kesehatan Tingkat Pertama
+- Pasien Lama: KTP/KK, Surat Rujukan dari Faskes Tingkat Pertama / Surat Kontrol (SKDP) / Resume Medis
 
-  standarPendaftaran: `**Persyaratan:**
-- **Pasien Umum**: Tidak ada syarat khusus, dapat mendaftar online lewat formulir pendaftaran (data terkirim ke WhatsApp) atau datang langsung ke loket informasi
-- **Pasien BPJS**:
-  - Aplikasi **Mobile JKN** sudah terinstal dan akun sudah terverifikasi
-  - **Surat Rujukan** dari Faskes Tingkat Pertama (Puskesmas/Klinik) masih aktif dan mengarah ke RSUD Pasirian Lumajang (kode faskes **0188R008**)
-  - Ambil antrean lewat Mobile JKN paling lambat **H-1** sebelum tanggal kunjungan
+*Pasien Umum:*
+- Pasien Baru: KTP/KK
+- Pasien Lama: KTP/KK, Surat Kontrol/Resume Medis (jika ada)
 
-**Prosedur:**
-- Mengambil nomor antrean
-- Menuju loket pendaftaran saat nomor dipanggil
-- Petugas memverifikasi data
-- Pasien menerima berkas dan diarahkan ke poliklinik tujuan
+*Pasien BPJS Ketenagakerjaan:*
+- Pasien Baru: KTP/KK, Kartu Peserta BPJS Ketenagakerjaan, Formulir 3KK 1 & 3KK 2, Kronologi Kejadian, Berita Acara, Absensi, Fotocopy KTP saksi 2 orang & rekom JR (jika kecelakaan kerja di jalan raya)
+- Pasien Lama: KTP/KK, Kartu Peserta BPJS Ketenagakerjaan, Surat Kontrol/Resume Medis (jika ada)
 
-**Jangka Waktu:**
-- Rata-rata **5-10 menit** per pasien (di luar waktu tunggu antrean)
+*Pasien Jasa Raharja:*
+- Pasien Baru: Surat Rekomendasi Jasa Raharja, Fotocopy KTP Penanggung Jawab, Fotocopy KTP Pasien, Materai 10.000 (3 lembar)
+- Pasien Lama: Fotocopy KTP Pasien, Materai 10.000 (2 lembar) pada kontrol pertama Post Rawat Inap, Surat Kontrol/Resume Medis (jika ada)
 
-**Biaya/Tarif:**
-- Sesuai Peraturan Daerah (Perda) Kabupaten Lumajang tentang Tarif Layanan Kesehatan
-- **Gratis** bagi peserta BPJS aktif sesuai ketentuan`,
+**Prosedur Pelayanan:**
 
-  standarIgd: `**Persyaratan:**
-- Pasien atau pengantar pasien mendaftar di **triase IGD**
-- Identitas pasien dapat dilengkapi kemudian
+1. **Daftar di Tempat (Onsite)** — Ambil nomor antrean di mesin anjungan → dipanggil menuju loket pendaftaran → petugas melengkapi data di SIMRS sesuai poliklinik tujuan → khusus pasien BPJS Kesehatan wajib validasi Finger Print/Face Recognise untuk penerbitan SEP → menuju ruang tunggu poliklinik tujuan
+2. **Daftar Melalui Mobile JKN** (khusus BPJS Kesehatan) — Check-in via barcode di poliklinik tujuan → validasi Finger Print di poli → petugas mencetak SEP
+3. **Daftar Melalui WhatsApp** — Datang ke loket pendaftaran menunjukkan bukti pendaftaran online → ke kasir terlebih dahulu → menuju poliklinik tujuan
 
-**Prosedur:**
-- Pasien masuk ke ruang triase untuk dinilai tingkat kegawatannya
-- Pasien dengan kondisi gawat darurat akan langsung ditangani
-- Petugas melakukan stabilisasi dan tindakan medis yang diperlukan
-- Keputusan untuk rawat inap atau rawat jalan dibuat setelah kondisi stabil
+**Jangka Waktu Pelayanan:**
+- Senin–Kamis: 07.30–11.30
+- Jumat: 07.30–10.00
+- Waktu pelayanan: **5–10 menit/pasien**
 
-**Jangka Waktu:**
-- Waktu tanggap (response time) di triase **kurang dari 5 menit**
+**Biaya Pelayanan:**
+Sesuai Perda Kabupaten Lumajang No. 9 Tahun 2025 tentang Pajak Daerah dan Retribusi Daerah
+- Biaya Administrasi: **Rp 0**
+- Biaya Jasa Dokter: **Rp 35.000**
+- Asuhan Keperawatan: **Rp 7.500**
+- Pasien BPJS Kesehatan: gratis sesuai ketentuan yang berlaku
+- Pasien BPJS Ketenagakerjaan & Jasa Raharja: mengikuti regulasi dan tarif masing-masing penjamin
 
-**Biaya/Tarif:**
-- Sesuai Peraturan Daerah (Perda) tentang Tarif Layanan Kesehatan
-- **Ditanggung BPJS** untuk kasus gawat darurat sesuai ketentuan`,
+**Produk Pelayanan:**
+- Nomor Rekam Medis Pasien
+- Kartu Berobat Pasien (KIB)
+- Bukti Pendaftaran Rawat Jalan
+- Nomor Antrean (Onsite, Online, Mobile JKN)
+- Data Kunjungan Pasien Rawat Jalan
+- SEP untuk pasien BPJS Kesehatan`,
+
+  standarPendaftaranRawatInap: `**Persyaratan Pelayanan:**
+
+*Pasien BPJS Kesehatan:* KTP/KK, Surat Rujukan dari Faskes sebelumnya (jika ada), Surat Pengantar Rawat Inap dari IGD, SEP (Surat Eligibilitas Peserta)
+
+*Pasien Umum:* KTP/KK, Surat Rujukan dari Faskes sebelumnya (jika ada), Surat Pengantar Rawat Inap dari IGD
+
+*Pasien BPJS Ketenagakerjaan:* KTP/KK, Kartu Peserta BPJS Ketenagakerjaan, Formulir 3KK 1 & 3KK 2, Kronologi Kejadian, Berita Acara, Absensi, Surat Pengantar Rawat Inap dari IGD, Fotocopy KTP saksi 2 orang & rekom JR (jika kecelakaan kerja di jalan raya)
+
+*Pasien Jasa Raharja:* KTP/KK/SIM, Surat Rekomendasi Jasa Raharja, Fotocopy KTP Penanggung Jawab, Materai 10.000 (3 lembar), Surat Pengantar Rawat Inap dari IGD
+
+*Pasien SKTM:* KTP/KK, Surat Keterangan Tidak Mampu dari Kantor Desa & Kecamatan, Bukti DTSEN (desil 1–10), Surat Rekomendasi Dinas Sosial, Virtual Account BPJS (untuk desil 6–10), Surat Pengantar Rawat Inap dari IGD
+
+*Pasien Persalinan Gratis (PG):* KTP/KK, Surat Rujukan dari Puskesmas, Surat Pengantar Rawat Inap dari IGD
+
+**Prosedur Pelayanan:**
+1. **IGD** — Pasien dan keluarga datang ke IGD untuk pemeriksaan
+2. **Pendaftaran** — Petugas melakukan identifikasi dan entry data pasien di SIMRS beserta kelengkapan administrasi
+3. **Berobat Jalan** — Jika hanya berobat jalan, pasien menuju kasir lalu loket farmasi
+4. **Kembali ke IGD** — Keluarga pasien kembali membawa formulir bukti pendaftaran (Formulir Identitas Pasien & General Consent)
+5. **Finger Print** — Khusus pasien BPJS, dilakukan Finger Print oleh petugas admin IGD beserta surat permintaan rawat inap untuk menentukan ruang dan hak kelas perawatan
+6. **Informasi Kamar** — Petugas menginformasikan ketersediaan kamar sesuai hak kelas dan fasilitas rawat inap
+7. **Formulir** — Keluarga mengisi formulir persetujuan rawat inap di Loket Pendaftaran Rawat Inap
+8. **Cetak Gelang & SEP** — Petugas mencetak gelang pasien dan SEP (jika ada jaminan kesehatan)
+9. **Pindah Ruang** — Pasien dipindahkan ke ruang rawat inap oleh transporter
+10. **Rawat Inap** — Pasien mendapat pelayanan sesuai kebutuhan medis
+
+**Jangka Waktu Pelayanan:**
+- Waktu operasional pendaftaran: **Setiap hari 24 jam**, terbagi 3 shift — Pagi (07.30–13.30), Sore (13.30–19.30), Malam (19.30–07.30)
+- Waktu pelayanan pendaftaran: **≤ 15 menit/pasien**
+
+**Biaya Pelayanan:**
+Sesuai Perda Kabupaten Lumajang No. 9 Tahun 2025 tentang Pajak Daerah dan Retribusi Daerah
+- Pasien Umum: sesuai tarif Perda dan kelas perawatan yang berlaku
+- Pasien BPJS Kesehatan, BPJS Ketenagakerjaan, Jasa Raharja: sesuai regulasi dan tarif masing-masing penjamin
+- Pasien SKTM & PG: sesuai regulasi dan tarif pada Peraturan Bupati
+
+*Ketentuan Selisih Naik Kelas (Khusus Peserta BPJS Kesehatan Kelas 2 & Kelas 1):*
+Sesuai **PERMENKES Nomor 3 Tahun 2023**, peserta BPJS/JKN yang bersedia membayar biaya tambahan untuk naik kelas perawatan dikenakan selisih dengan perhitungan sebagai berikut:
+- **Kelas 2 → Kelas 1**: selisih tarif INACBG kelas 1 dengan tarif INACBG kelas 2
+- **Kelas 2 → VIP**: selisih tarif INACBG kelas 1 dengan kelas 2, ditambah paling banyak 75% dari tarif INACBG kelas 1
+- **Kelas 1 → VIP**: paling banyak 75% dari tarif INACBG kelas 1
+
+Tarif INACBG merupakan sistem pembayaran paket yang ditanggung BPJS/JKN berdasarkan penyakit/diagnosa yang diderita pasien. Ketentuan naik kelas ini hanya berlaku untuk peserta BPJS/JKN dengan hak kelas 2 dan kelas 1.
+
+**Produk Pelayanan:**
+- Nomor Rekam Medis Pasien
+- Bukti Pendaftaran Rawat Inap
+- Data Kunjungan Pasien Rawat Inap
+- SEP untuk pasien BPJS Kesehatan
+- Penempatan ruang/kamar perawatan
+- Berkas Rekam Medis Pasien Rawat Inap`,
+
+  standarIgd: `**Persyaratan Pelayanan:**
+- **Pasien Umum**: KTP/kartu identitas
+- **Pasien JKN**: KTP/kartu identitas, Surat Rujukan/Surat Pengantar (bila bukan kasus gawat darurat)
+
+**Prosedur Pelayanan:**
+1. Pasien datang ke IGD, keluarga menuju tempat pendaftaran dengan menunjukkan persyaratan yang diperlukan
+2. Dokter jaga IGD melakukan triase dibantu tenaga paramedis
+3. Petugas melakukan asesmen awal IGD
+4. Pemeriksaan penunjang (laboratorium & radiologi) dilakukan bila diperlukan
+5. Dokter mendiagnosa, memberikan tindakan pengobatan, dan melakukan observasi
+6. Pasien dipindahkan ke rawat inap/rawat jalan/ruang tindakan/dirujuk/pulang atas permintaan sendiri
+   - Bila kamar rawat inap belum tersedia, pasien ditempatkan di ruang transit
+   - Bila pasien meninggal dunia, dipindahkan ke ruang jenazah
+7. Dokter meresepkan obat, keluarga mengambil di depo farmasi
+8. Pasien melakukan pembayaran di kasir
+9. Pasien pulang
+
+**Sistem Triase IGD — Siapa yang Didahulukan?**
+Semua pasien pasti dilayani, namun yang paling gawat akan ditolong lebih dulu. Berikut 5 level triase yang digunakan:
+
+- **Level 1 — Sangat Gawat Darurat** (harus segera ditangani): henti jantung, henti napas, perdarahan hebat, tidak sadar/koma
+- **Level 2 — Gawat Darurat** (≤ 15 menit): nyeri dada, trauma kepala dengan penurunan kesadaran, sesak berat
+- **Level 3 — Darurat** (≤ 30 menit, butuh cepat tapi bisa tunggu sebentar): demam tinggi pada anak, luka dengan perdarahan terkendali, nyeri tanpa tanda syok, kecelakaan kerja
+- **Level 4 — Tidak Darurat** (≤ 60 menit, kondisi masih stabil): nyeri kronis tanpa defisit neurologis, sakit tenggorokan, luka ringan tanpa perdarahan
+- **Level 5 — Tidak Mendesak** (≤ 120 menit, keluhan ringan): resep ulang obat, kontrol rutin, batuk pilek, luka lecet
+
+*"Bukan pilih kasih, tapi menyelamatkan nyawa. Mohon pengertian bila harus menunggu."*
+
+**Jangka Waktu Pelayanan:**
+Buka **24 jam**
+- Pendaftaran: 15 menit
+- Triase: < 5 menit
+- Pemeriksaan dokter: 10–15 menit
+- Pemeriksaan penunjang (bila diperlukan): 30–60 menit
+- Tindakan pengobatan: 30–60 menit
+
+**Biaya Pelayanan:**
+Sesuai Perda Kabupaten Lumajang No. 9 Tahun 2025 tentang Pajak Daerah dan Retribusi Daerah
+- Konsultasi dokter umum di rawat jalan/IGD: **Rp 22.500**
+- Asuhan Keperawatan/Kebidanan — Partial care: Rp 20.000, Total care: Rp 40.000, Intensif: Rp 60.000
+- Biaya obat dan BHHP tindakan pengobatan disesuaikan dengan kebutuhan terapi pasien
+- Pelayanan pasien BPJS Kesehatan dilayani sesuai ketentuan yang berlaku tanpa biaya tambahan/gratis
+
+**Produk Pelayanan:**
+Pelayanan Gawat Darurat dengan **respon time < 5 menit**, terhitung sejak pasien datang sampai dilakukan pemeriksaan oleh dokter, perawat, atau bidan.`,
+
+  standarIcu: `**Persyaratan Pelayanan:**
+Pasien dengan indikasi medis rawat ICU sesuai kriteria:
+- **Prioritas 1 (Tertinggi)**: Pasien kritis, tidak stabil, dan sangat membutuhkan terapi intensif (ventilator, obat vasoaktif, dll). Contoh: syok septik, gagal napas, koma
+- **Prioritas 2**: Pasien yang memerlukan pemantauan ketat dan berpotensi membutuhkan terapi intensif segera. Contoh: riwayat penyakit jantung berat atau gangguan paru yang membutuhkan observasi
+- **Prioritas 3**: Pasien kritis/sakit berat dengan peluang sembuh kecil karena penyakit penyerta kronis yang sudah parah, dirawat untuk mengatasi kegawatan akut tanpa tindakan ekstrem seperti CPR bila terjadi henti jantung
+
+**Prosedur Pelayanan:**
+1. Pasien yang akan masuk ICU disetujui oleh DPJP dan dokter Anestesi sebagai penanggung jawab
+2. Perawat IGD/bangsal menghubungi perawat ICU terkait pasien yang akan dirawat
+3. Bila tempat tersedia, perawat ICU mempersiapkan tempat dan alat sesuai kebutuhan monitoring dan tindakan
+4. Pasien mendapat pelayanan intensif oleh petugas
+5. Setelah pelayanan intensif, pasien dapat pindah ruangan, meninggal, pulang sembuh, APS, atau dirujuk ke RS lain
+6. Bila pasien membaik dan acc KRS dr.Sp.A, dilakukan proses pembayaran di kasir
+7. Bila pasien tidak membaik (APS, Rujuk, Meninggal), dilakukan proses pembayaran di kasir
+
+**Jangka Waktu Pelayanan:**
+Pelayanan ICU diberikan secara cepat, tepat, dan berfokus pada pasien, dengan jangka waktu berbeda-beda sesuai kondisi pasien dan kriteria eksklusif pelayanan ICU.
+
+**Biaya Pelayanan:**
+Sesuai Perda Kabupaten Lumajang No. 9 Tahun 2025 tentang Pajak Daerah dan Retribusi Daerah. Beberapa rincian tarif:
+- Akomodasi rawat ICU: Rp 255.000/hari
+- Visite dokter spesialis: Rp 75.000/visite
+- Konsultasi dokter spesialis: Rp 35.000/konsultasi
+- Visite dokter umum: Rp 40.000/visite
+- Asuhan keperawatan ICU: Rp 60.000/hari
+- Resusitasi Jantung Paru Otak: Rp 133.000/tindakan
+- Pemasangan oksigen: Rp 14.850/tindakan
+- Oksigen Nasal Canule / Simple Mask: Rp 141.075/12 jam
+- Oksigen NRBM / Jackson Reese: Rp 141.075/6 jam
+- Oksigen Ventilator / HFNC: Rp 519.750/6 jam
+- Pemasangan EKG: Rp 74.250/tindakan
+- Pemberian Nutrisi (Enteral/Parenteral): Rp 27.000/hari
+- Pemeriksaan Lab khusus cepat (GDA): Rp 29.700/tindakan
+- Tunjangan fungsi vital selama transportasi: Rp 59.400/tindakan
+- Terapi Tertitrasi (syringe pump): Rp 33.000/tindakan
+- Bed side monitor / Infus pump: Rp 33.000
+- Ventilator: Rp 165.000
+- Intubasi endo tracheal: Rp 383.600/tindakan
+- Ekstubasi: Rp 168.600/tindakan
+- Pelayanan pasien BPJS Kesehatan dilayani sesuai ketentuan yang berlaku tanpa biaya tambahan/gratis`,
+
+  standarNeonatologi: `**Persyaratan Pelayanan:**
+1. Bayi baru lahir dari IGD/VK/OK
+2. Bayi sakit dari IGD/Poli Anak usia 0–28 hari
+3. **Level I**: asuhan neonatus normal
+4. **Level II**: asuhan neonatus dengan ketergantungan tinggi
+5. **Level III**: asuhan neonatus intensif (NICU)
+6. TTD persetujuan Rawat Inap
+
+**Prosedur Pelayanan:**
+- Bayi baru lahir (Level 1, 2, 3) dari IGD/VK/OK, atau bayi usia 0–28 hari (Level 2 & 3) dari IGD/Poli Anak, didaftarkan ke admisi rawat inap
+- Pasien dengan pembiayaan Umum/BPJS/SKTM memenuhi persyaratan dan menandatangani persetujuan rawat inap
+- Bayi baru lahir langsung masuk ruang perawatan Neonatologi/NICU
+- Bayi usia 0–28 hari dari IGD/Poli Anak, setelah pemeriksaan penunjang (Lab & Radiologi) dan persetujuan dokter Sp.A, masuk ke ruang perawatan Neonatologi/NICU
+- Bila bayi membaik dan acc KRS dr.Sp.A, dilakukan proses pembayaran di kasir
+- Bila bayi tidak membaik (APS, Rujuk, Meninggal), dilakukan proses pembayaran di kasir
+- Pasien pulang
+
+**Jangka Waktu Pelayanan:**
+- **Bayi Rawat Gabung**: observasi 6 jam di Ruang Neonatologi
+- **Level I**: 1–2 hari, setelah observasi 24 jam sejak lahir
+- **Level II**: 3–4 hari, tergantung kondisi pasien
+- **Level III**: jangka waktu berbeda-beda tergantung kondisi pasien (NICU)
+
+**Biaya Pelayanan:**
+Sesuai Perda Kabupaten Lumajang No. 9 Tahun 2025 tentang Pajak Daerah dan Retribusi Daerah, mengacu tarif SIMRS Khanza. Beberapa rincian tarif:
+- Resusitasi BBL: Rp 103.950
+- Suction slim: Rp 59.400
+- Perawatan tali pusat: Rp 22.275
+- Asuhan Keperawatan Intensif: Rp 60.000
+- Asuhan Keperawatan Total Care: Rp 40.000
+- Asuhan Gizi/kali kunjungan: Rp 20.000
+- Injeksi Intramuscular/Intravena: Rp 21.600
+- Pasang Infus: Rp 40.500 · Lepas Infus: Rp 24.300
+- Infant warmer / Incubator: Rp 61.600
+- Gda stik: Rp 29.700
+- Oksigen nasal 3 jam: Rp 14.850 · 6 jam: Rp 35.000 · 12 jam: Rp 70.000
+- Oksigen masker/masker rebreathing 6 jam: Rp 141.500
+- Oksigen ventilator 6 jam: Rp 519.750
+- CPAP: Rp 110.000
+- Infusion pump / Syringe pump / Bedside monitor: Rp 33.000
+- Observasi pasien gawat: Rp 59.400
+- Pasang OGT: Rp 35.100 · Lepas OGT: Rp 14.850
+- Pengambilan sampel darah vena: Rp 32.400
+- Resusitasi Jantung Paru Otak: Rp 133.000
+- Nebulizer: Rp 21.600
+- Ventilator: Rp 165.000
+- Pelayanan pasien BPJS Kesehatan dilayani sesuai ketentuan yang berlaku tanpa biaya tambahan/gratis
+
+**Produk Pelayanan:**
+- Bayi baru lahir (RG, Level I, II, dan III)
+- Bayi sakit usia 0–28 hari`,
 
   standarPengaduan: `Jika pasien menemukan pelayanan yang tidak sesuai standar, dapat menyampaikan melalui:
-- Kotak saran yang tersedia di area rumah sakit
-- Menghubungi bagian **Humas atau Manajemen**
-- Email resmi: **rsud.pasirian@gmail.com**
-- Telepon: **(0334) 5761044**`,
+
+**Langsung / Onsite**
+- Kotak Saran: tersedia di area IGD, Rawat Jalan, dan Rawat Inap
+
+**WhatsApp / SMS / Telepon**
+- 085143407352 (kontak pengaduan resmi)
+- (0334) 5761044 (telepon kantor)
+
+**Online & Media Sosial**
+- Website: **rsudpasirian.lumajangkab.go.id**
+- Email: **rsud.pasirian@gmail.com**
+- Google Review: RSUD Pasirian
+- Instagram: **@rsud_pasirian**
+- Facebook: **Rsud Pasirian Lumajang**
+- TikTok: **@rsud_pasirian**
+- YouTube: **@rsudpasirianlumajang**
+
+**Koordinator Pengaduan**
+Reni Puspita Sari, S.KM
+
+**Survei Kepuasan Masyarakat (SKM) Online:**
+Kami sangat menghargai penilaian dan masukan Anda terhadap pelayanan kami. Silakan isi Survei Kepuasan Masyarakat secara online melalui tautan berikut, mencakup layanan IGD, Rawat Jalan, Rawat Inap, Kamar Operasi, Pendaftaran, ICU, Neonatologi, Radiologi, Farmasi, Pemulasaraan Jenazah, Gizi, Laboratorium, Unit Pencucian dan Sterilisasi, Ambulance, hingga Transfusi/Donor Darah:
+
+[📊 Isi Survei Kepuasan Masyarakat (SKM)](https://skm.go.id/share/instansi/9eb408d7-7a3e-4d5d-921d-ca3005d258b2/2)
+
+*"Punya keluhan, kritik, atau saran? Suara Anda adalah kunci perbaikan layanan kami. Jangan ragu menyampaikannya agar kami dapat melayani Anda lebih baik lagi."*`,
+
+  standarKompensasi: `**Kompensasi Ketidaksesuaian Standar Pelayanan (Komponen Service Delivery)**
+Nomor: 400.7.1/520/427.52.02/2026
+
+Apabila Bapak/Ibu mengalami ketidaksesuaian pelayanan dari komponen Service Delivery berikut, RSUD Pasirian akan memberikan kompensasi sesuai ketentuan di bawah ini:
+
+**1. Persyaratan Pelayanan**
+*Bentuk Ketidaksesuaian/Maladministrasi:* Petugas meminta persyaratan tambahan yang tidak relevan atau di luar ketentuan Standar Pelayanan yang telah dipublikasikan.
+
+*Bentuk Kompensasi:*
+1. Penyampaian permohonan maaf secara lisan dan tertulis dari Pimpinan Unit Pelayanan
+2. Pelayanan tetap diproses secara langsung tanpa menuntut pengguna melengkapi syarat tambahan tersebut
+3. Pemberian akses "Jalur Prioritas" (Fast Track) bagi pengguna layanan untuk permohonan layanan saat ini atau layanan berikutnya
+
+**2. Sistem, Mekanisme, dan Prosedur**
+*Bentuk Ketidaksesuaian/Maladministrasi:* Prosedur berbelit-belit, tidak sesuai SOP, atau pengguna layanan dipingpong antar meja/loket pelayanan.
+
+*Bentuk Kompensasi:*
+1. Penyampaian permohonan maaf langsung dari petugas dan penyelia layanan
+2. Penyediaan petugas pendamping khusus yang akan mengurusakan seluruh proses dokumen pengguna layanan hingga tuntas tanpa pengguna perlu berpindah loket
+
+**3. Jangka Waktu Penyelesaian**
+*Bentuk Ketidaksesuaian/Maladministrasi:* Waktu penyelesaian layanan melebihi batas waktu (SLA) yang dijanjikan dalam Standar Pelayanan.
+
+*Bentuk Kompensasi:*
+1. Penyampaian permohonan maaf disertai penjelasan alasan keterlambatan kepada pengguna layanan
+
+**4. Biaya / Tarif**
+*Bentuk Ketidaksesuaian/Maladministrasi:* Ketidaksesuaian Biaya Pelayanan (petugas memungut biaya di luar ketentuan tarif resmi / Pungli).
+
+*Bentuk Kompensasi:*
+1. Penyampaian permohonan maaf secara resmi dan tindakan tegas kepada oknum petugas
+2. Pengembalian biaya sepenuhnya (100%) kepada pengguna layanan
+
+**5. Produk Pelayanan**
+*Bentuk Ketidaksesuaian/Maladministrasi:* Terdapat kesalahan teknis/cacat pada produk layanan yang diterbitkan (contoh: salah ketik nama, spesifikasi dokumen keliru, buram).
+
+*Bentuk Kompensasi:*
+1. Penyampaian permohonan maaf atas kelalaian petugas dalam proses verifikasi
+2. Pencetakan/penerbitan ulang produk layanan yang benar secara instan saat itu juga (on the spot)
+
+**Catatan:** Jika Bapak/Ibu mengalami salah satu ketidaksesuaian di atas, silakan segera laporkan ke bagian Humas atau Manajemen RSUD Pasirian agar kompensasi dapat segera diproses.`,
 };
 
 const STANDAR_KATEGORI = [
   { contentKey: 'standarPendaftaran', label: 'Pelayanan Pendaftaran Pasien Rawat Jalan' },
+  { contentKey: 'standarPendaftaranRawatInap', label: 'Pelayanan Pendaftaran Pasien Rawat Inap' },
   { contentKey: 'standarIgd', label: 'Pelayanan Gawat Darurat (IGD)' },
+  { contentKey: 'standarIcu', label: 'Pelayanan Ruang Intensif (ICU)' },
+  { contentKey: 'standarNeonatologi', label: 'Pelayanan Unit Neonatologi' },
   { contentKey: 'standarPengaduan', label: 'Penanganan Pengaduan, Saran, dan Masukan' },
+  { contentKey: 'standarKompensasi', label: 'Kompensasi Ketidaksesuaian Standar Pelayanan' },
 ];
 
 export default function ChatPage() {

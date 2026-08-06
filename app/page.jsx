@@ -131,6 +131,41 @@ const GOOGLE_PLACE_ID = 'ChIJE_tuvUhp1i0RIpFhHjwQThY';
 const GOOGLE_MAPS_LINK = `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`;
 const GOOGLE_REVIEW_LINK = `https://search.google.com/local/writereview?placeid=${GOOGLE_PLACE_ID}`;
 
+const IKM_DATA = {
+  periode: 'Semester I Tahun 2026',
+  kpk: { skor: '83.85', kategori: 'B (Baik)' },
+  menpanRb: { skor: '81,48', kategori: 'B (Baik)' },
+};
+
+const SKM_LAYANAN_TERCAKUP = [
+  'Instalasi Gawat Darurat',
+  'Instalasi Farmasi',
+  'Rawat Jalan',
+  'Pemulasaran Jenazah',
+  'Rawat Inap',
+  'Instalasi Gizi',
+  'Kamar Operasi',
+  'Laboratorium',
+  'Pendaftaran Rawat Jalan',
+  'Unit Pencucian dan Sterilisasi',
+  'Intensive Care Unit (ICU)',
+  'Ambulance',
+  'Neonatologi',
+  'Transfusi/Donor Darah',
+  'Radiologi',
+  'Pendaftaran Pasien Rawat Inap',
+];
+
+const SKM_ONLINE_LINK = 'https://skm.go.id/share/instansi/9eb408d7-7a3e-4d5d-921d-ca3005d258b2/2';
+const SKM_WA_PENDAFTARAN = '6281358768216';
+const SKM_INFO_LAYANAN_TELP = '(0334) 5761044';
+const SKM_SOSMED = {
+  website: 'rsudpasirian.lumajangkab.go.id',
+  email: 'rsud.pasirian@gmail.com',
+  facebook: 'Rsud Pasirian Lumajang',
+  instagram: '@rsud_pasirian',
+};
+
 const panduanJknMobile = [
   { langkah: 1, judul: 'Buka Aplikasi', gambar: '/1.png', desc: 'Belum punya akun? Tekan "Daftar". Jika sudah punya akun, langsung ke langkah "Masuk".' },
   { langkah: 2, judul: 'Isi Data Pendaftaran', gambar: '/2.png', desc: 'Isi NIK, nama lengkap, tanggal lahir, dan captcha, lalu tekan "Verifikasi Data".' },
@@ -219,14 +254,31 @@ function SemeruRidge({ tone = INK, bg = 'transparent', flip = false, className =
 
 const NAV_ITEMS = [
   { id: 'tentang', label: 'Tentang' },
-  { id: 'layanan', label: 'Layanan' },
-  { id: 'jam-pelayanan', label: 'Jam Pelayanan' },
-  { id: 'dokter', label: 'Jadwal Dokter' },
-  { id: 'profil-dokter', label: 'Profil Dokter' },
+  {
+    label: 'Info Layanan',
+    children: [
+      { id: 'layanan', label: 'Layanan' },
+      { id: 'jam-pelayanan', label: 'Jam Pelayanan' },
+    ],
+  },
+  {
+    label: 'Dokter',
+    children: [
+      { id: 'dokter', label: 'Jadwal Dokter' },
+      { id: 'profil-dokter', label: 'Profil Dokter' },
+    ],
+  },
   { id: 'testimoni', label: 'Testimoni' },
   { id: 'panduan-jkn', label: 'Panduan JKN' },
+  { id: 'ikm', label: 'Survei & IKM' },
   { id: 'kontak', label: 'Kontak' },
 ];
+
+function flattenNavItems(items) {
+  return items.flatMap((item) => (item.children ? item.children : [item]));
+}
+
+const FLAT_NAV_ITEMS = flattenNavItems(NAV_ITEMS);
 
 const WA_NOMOR_UMUM = '6285230703508';
 const MOBILE_JKN_LINK = 'https://play.google.com/store/apps/details?id=app.bpjs.mobile';
@@ -287,7 +339,6 @@ function parseRuangRawatInap(konten) {
   return { rooms, tanggalUpdate };
 }
 
-// Urutan tampilan kategori kelas pada tabel kapasitas
 const URUTAN_KELAS = ['Intensif', 'VIP', 'Kelas I', 'Kelas II', 'Kelas III'];
 
 function kelompokkanKapasitasPerKelas(rooms) {
@@ -585,11 +636,17 @@ export default function LandingPage() {
   const [daftarModalOpen, setDaftarModalOpen] = useState(false);
   const [klinikData, setKlinikData] = useState(klinikSpesialis);
   const [announcement, setAnnouncement] = useState(null);
+  const [announcementLoaded, setAnnouncementLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState('tentang');
   const [ruangRawatInapData, setRuangRawatInapData] = useState(ruangRawatInap);
   const [tanggalUpdateKamar, setTanggalUpdateKamar] = useState(null);
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(76);
+  const initialHashRef = useRef(
+    typeof window !== 'undefined' ? window.location.hash.replace('#', '') : ''
+  );
+  const suppressObserverRef = useRef(false);
+  const suppressTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetch('/api/announcement')
@@ -598,7 +655,8 @@ export default function LandingPage() {
         const ann = json.data;
         if (ann?.is_active && ann?.message) setAnnouncement(ann);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setAnnouncementLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -606,39 +664,109 @@ export default function LandingPage() {
       if (headerRef.current) {
         const h = headerRef.current.offsetHeight;
         setHeaderHeight(h);
+        document.documentElement.style.setProperty('--header-h', `${h + 12}px`);
         document.documentElement.style.scrollPaddingTop = `${h + 12}px`;
       }
     };
     updateHeight();
+    const raf = requestAnimationFrame(updateHeight);
     window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updateHeight);
+    };
   }, [announcement]);
 
   useEffect(() => {
-    const sectionIds = NAV_ITEMS.map((n) => n.id);
-    const elements = sectionIds
+    if (!announcementLoaded || !headerRef.current) return;
+
+    const h = headerRef.current.offsetHeight;
+    setHeaderHeight(h);
+    document.documentElement.style.setProperty('--header-h', `${h + 12}px`);
+    document.documentElement.style.scrollPaddingTop = `${h + 12}px`;
+
+    const hashId = initialHashRef.current;
+    if (hashId) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(hashId);
+        if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+      });
+    }
+  }, [announcementLoaded]);
+
+
+  useEffect(() => {
+    const sectionIds = FLAT_NAV_ITEMS.map((n) => n.id);
+    const sections = sectionIds
       .map((id) => document.getElementById(id))
       .filter(Boolean);
 
-    if (elements.length === 0) return;
+    if (sections.length === 0) return;
+
+    const visibleRatios = new Map();
 
     const observer = new IntersectionObserver(
       (entries) => {
+        if (suppressObserverRef.current) return;
+
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
+          visibleRatios.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
         });
+
+        const doc = document.documentElement;
+        const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 2;
+
+        let nextId = null;
+        if (atBottom) {
+          nextId = sectionIds[sectionIds.length - 1];
+        } else {
+          let best = null;
+          sectionIds.forEach((id) => {
+            const ratio = visibleRatios.get(id) || 0;
+            if (ratio > 0 && (!best || ratio > best.ratio)) {
+              best = { id, ratio };
+            }
+          });
+          nextId = best ? best.id : null;
+        }
+
+        if (nextId) {
+          setActiveSection((prev) => (prev !== nextId ? nextId : prev));
+          if (window.location.hash !== `#${nextId}`) {
+            window.history.replaceState(null, '', `#${nextId}`);
+          }
+        }
       },
       {
-        rootMargin: `-${headerHeight + 20}px 0px -60% 0px`,
-        threshold: 0,
+        root: null,
+        rootMargin: `-${headerHeight + 24}px 0px -55% 0px`,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
       }
     );
 
-    elements.forEach((el) => observer.observe(el));
+    sections.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [headerHeight]);
+
+
+  const handleNavClick = (id) => (e) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    suppressObserverRef.current = true;
+    if (suppressTimeoutRef.current) clearTimeout(suppressTimeoutRef.current);
+
+    setActiveSection(id);
+    window.history.replaceState(null, '', `#${id}`);
+
+    const top = el.getBoundingClientRect().top + window.scrollY - (headerHeight + 12);
+    window.scrollTo({ top, behavior: 'smooth' });
+
+    suppressTimeoutRef.current = setTimeout(() => {
+      suppressObserverRef.current = false;
+    }, 700);
+  };
 
   useEffect(() => {
     fetch('/api/poli', { cache: 'no-store' })
@@ -721,18 +849,51 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-[#0B2B24]/80">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                className={`transition ${
-                  activeSection === item.id ? 'text-[#C08829]' : 'hover:text-[#C08829]'
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
+          <nav className="hidden md:flex items-center gap-6 text-[13px] font-semibold text-[#0B2B24]/80">
+            {NAV_ITEMS.map((item) =>
+              item.children ? (
+                <div key={item.label} className="relative group">
+                  <button
+                    type="button"
+                    className={`flex items-center gap-1 py-2 transition ${
+                      item.children.some((c) => c.id === activeSection) ? 'text-[#C08829]' : 'hover:text-[#C08829]'
+                    }`}
+                  >
+                    {item.label}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 transition group-hover:rotate-180">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-1 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 transition-all duration-150 z-50">
+                    <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(11,43,36,0.18)] ring-1 ring-[#0B2B24]/8 py-2 min-w-45 overflow-hidden">
+                      {item.children.map((c) => (
+                        <a
+                          key={c.id}
+                          href={`#${c.id}`}
+                          onClick={handleNavClick(c.id)}
+                          className={`block px-4 py-2.5 text-[13px] font-semibold transition ${
+                            activeSection === c.id ? 'text-[#C08829] bg-[#C08829]/8' : 'text-[#0B2B24]/80 hover:text-[#C08829] hover:bg-[#C08829]/6'
+                          }`}
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={handleNavClick(item.id)}
+                  className={`transition ${
+                    activeSection === item.id ? 'text-[#C08829]' : 'hover:text-[#C08829]'
+                  }`}
+                >
+                  {item.label}
+                </a>
+              )
+            )}
           </nav>
 
           <button
@@ -747,10 +908,11 @@ export default function LandingPage() {
           className="md:hidden flex items-center gap-2 overflow-x-auto px-5 pb-3 -mt-0.5 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Navigasi utama"
         >
-          {NAV_ITEMS.map((item) => (
+          {FLAT_NAV_ITEMS.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
+              onClick={handleNavClick(item.id)}
               className={`shrink-0 text-[12.5px] font-semibold px-3.5 py-1.5 rounded-full transition whitespace-nowrap ${
                 activeSection === item.id
                   ? 'bg-[#C08829]/15 text-[#C08829]'
@@ -827,6 +989,7 @@ export default function LandingPage() {
                 </Link>
                 <a
                   href="#layanan"
+                  onClick={handleNavClick('layanan')}
                   className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white font-medium px-6 py-3.5 rounded-full transition"
                 >
                   Lihat Layanan
@@ -1338,6 +1501,107 @@ export default function LandingPage() {
 
       <SemeruRidge tone="#FBF9F4" bg="#ffffff" />
 
+      <section id="ikm" className="bg-[#FBF9F4] scroll-mt-[calc(var(--header-h,150px))]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Kepuasan Masyarakat</span>
+            <h3 className="font-fraunces font-semibold text-3xl sm:text-[2.25rem] tracking-tight mt-2 text-[#0B2B24]">
+              Survei & Indeks Kepuasan Masyarakat
+            </h3>
+            <p className="text-[#0B2B24]/60 text-[15px] mt-3">
+              Penilaian resmi mutu pelayanan kami, serta cara memberikan masukan langsung.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-[#0B2B24] rounded-2xl p-7 sm:p-8 ring-1 ring-[#DDB169]/20">
+              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#DDB169]">Versi KPK</span>
+              <p className="font-fraunces font-bold text-5xl text-white mt-3">{IKM_DATA.kpk.skor}</p>
+              <span className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mt-3 bg-[#1F6B4F]/25 text-[#7FD9AE]">
+                Kategori Mutu: {IKM_DATA.kpk.kategori}
+              </span>
+              <p className="text-[12.5px] text-white/50 mt-4">{IKM_DATA.periode}</p>
+            </div>
+            <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-7 sm:p-8">
+              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#C08829]">Versi MenPAN RB</span>
+              <p className="font-fraunces font-bold text-5xl text-[#0B2B24] mt-3">{IKM_DATA.menpanRb.skor}</p>
+              <span className="inline-block text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mt-3 bg-[#1F6B4F]/10 text-[#1F6B4F]">
+                Kategori Mutu: {IKM_DATA.menpanRb.kategori}
+              </span>
+              <p className="text-[12.5px] text-[#0B2B24]/50 mt-4">{IKM_DATA.periode}</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
+            <div className="px-5 py-3.5 bg-[#9E3B32]">
+              <p className="font-fraunces font-semibold text-[14.5px] text-white">Isi Survei Kepuasan Masyarakat (SKM) Online</p>
+            </div>
+            <div className="p-6 sm:p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div>
+                <p className="text-[13.5px] text-[#0B2B24]/70 leading-relaxed">
+                  Isi Survei Kepuasan Masyarakat secara online lewat tombol di bawah, atau scan QR code SKM Online yang tersedia di area layanan RSUD Pasirian. Survei ini mencakup layanan berikut:
+                </p>
+                <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                  {SKM_LAYANAN_TERCAKUP.map((l) => (
+                    <li key={l} className="flex items-start gap-2 text-[12.5px] text-[#0B2B24]/65">
+                      <span className="w-1 h-1 rounded-full mt-2 shrink-0 bg-[#C08829]" />
+                      {l}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={SKM_ONLINE_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#9E3B32] hover:bg-[#87322a] text-white font-fraunces font-bold px-5 py-3 rounded-full transition mt-6"
+                >
+                  Isi Survei SKM Sekarang <span>↗</span>
+                </a>
+              </div>
+              <div className="bg-[#FBF9F4] rounded-xl p-5 flex flex-col justify-start gap-4">
+                <div className="flex items-start gap-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#1F6B4F" strokeWidth="1.7" className="w-5 h-5 shrink-0 mt-0.5">
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z" />
+                  </svg>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#0B2B24]">Info Layanan</p>
+                    <p className="text-[13px] text-[#0B2B24]/65 mt-0.5">{SKM_INFO_LAYANAN_TELP}</p>
+                  </div>
+                </div>
+                <a
+                  href={`https://wa.me/${SKM_WA_PENDAFTARAN}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 hover:opacity-80 transition"
+                >
+                  <svg viewBox="0 0 24 24" fill="#25D366" className="w-5 h-5 shrink-0 mt-0.5">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.29-1.38a9.87 9.87 0 0 0 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.13a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.32a8.19 8.19 0 0 1-1.26-4.35c0-4.53 3.69-8.22 8.24-8.22 2.2 0 4.27.86 5.83 2.42a8.16 8.16 0 0 1 2.41 5.81c0 4.53-3.69 8.23-8.23 8.23Zm4.51-6.16c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.12-.16.25-.64.8-.78.96-.15.16-.29.18-.53.06-.25-.12-1.04-.38-1.99-1.22-.73-.66-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.41-.42-.56-.43-.14-.01-.31-.01-.48-.01-.16 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.46-.6 1.66-1.17.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z" />
+                  </svg>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#0B2B24]">Pendaftaran Online</p>
+                    <p className="text-[13px] text-[#0B2B24]/65 mt-0.5">0813-5876-8216 (WhatsApp)</p>
+                    <p className="text-[11.5px] text-[#0B2B24]/45 mt-0.5">Pendaftaran dilakukan sehari sebelumnya</p>
+                  </div>
+                </a>
+                <div className="flex items-start gap-3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2A6C93" strokeWidth="1.7" className="w-5 h-5 shrink-0 mt-0.5">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+                  </svg>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#0B2B24]">Sosial Media & Website</p>
+                    <p className="text-[13px] text-[#0B2B24]/65 mt-0.5">{SKM_SOSMED.website}</p>
+                    <p className="text-[13px] text-[#0B2B24]/65">{SKM_SOSMED.email}</p>
+                    <p className="text-[13px] text-[#0B2B24]/65">Facebook: {SKM_SOSMED.facebook}</p>
+                    <p className="text-[13px] text-[#0B2B24]/65">Instagram: {SKM_SOSMED.instagram}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="kontak" className="bg-[#FBF9F4] scroll-mt-[calc(var(--header-h,150px))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 sm:pt-20 pb-16 sm:pb-20">
           <div className="text-center max-w-xl mx-auto mb-10">
@@ -1447,14 +1711,15 @@ export default function LandingPage() {
           <div>
             <p className="text-white font-semibold mb-2">Tautan</p>
             <ul className="space-y-1.5">
-              <li><a href="#tentang" className="hover:text-[#DDB169] transition">Tentang</a></li>
-              <li><a href="#layanan" className="hover:text-[#DDB169] transition">Layanan</a></li>
-              <li><a href="#jam-pelayanan" className="hover:text-[#DDB169] transition">Jam Pelayanan</a></li>
-              <li><a href="#dokter" className="hover:text-[#DDB169] transition">Jadwal Dokter</a></li>
-              <li><a href="#profil-dokter" className="hover:text-[#DDB169] transition">Profil Dokter</a></li>
-              <li><a href="#testimoni" className="hover:text-[#DDB169] transition">Testimoni</a></li>
-              <li><a href="#panduan-jkn" className="hover:text-[#DDB169] transition">Panduan JKN</a></li>
-              <li><a href="#kontak" className="hover:text-[#DDB169] transition">Kontak</a></li>
+              <li><a href="#tentang" onClick={handleNavClick('tentang')} className="hover:text-[#DDB169] transition">Tentang</a></li>
+              <li><a href="#layanan" onClick={handleNavClick('layanan')} className="hover:text-[#DDB169] transition">Layanan</a></li>
+              <li><a href="#jam-pelayanan" onClick={handleNavClick('jam-pelayanan')} className="hover:text-[#DDB169] transition">Jam Pelayanan</a></li>
+              <li><a href="#dokter" onClick={handleNavClick('dokter')} className="hover:text-[#DDB169] transition">Jadwal Dokter</a></li>
+              <li><a href="#profil-dokter" onClick={handleNavClick('profil-dokter')} className="hover:text-[#DDB169] transition">Profil Dokter</a></li>
+              <li><a href="#testimoni" onClick={handleNavClick('testimoni')} className="hover:text-[#DDB169] transition">Testimoni</a></li>
+              <li><a href="#panduan-jkn" onClick={handleNavClick('panduan-jkn')} className="hover:text-[#DDB169] transition">Panduan JKN</a></li>
+              <li><a href="#ikm" onClick={handleNavClick('ikm')} className="hover:text-[#DDB169] transition">Survei & IKM</a></li>
+              <li><a href="#kontak" onClick={handleNavClick('kontak')} className="hover:text-[#DDB169] transition">Kontak</a></li>
               <li><Link href="/chat" className="hover:text-[#DDB169] transition">Chat dengan Kami</Link></li>
             </ul>
           </div>
