@@ -21,10 +21,9 @@ const KATEGORI_INFO = {
   panduanJKN: { label: 'Panduan JKN Mobile', color: PLUM },
 };
 
-// Pola judul yang dianggap "bagian" dari satu topik, misal: "Standar Pelayanan Publik (bagian 3)"
+// Judul dengan pola "Topik (bagian N)" dikelompokkan otomatis jadi satu grup
 const BAGIAN_REGEX = /^(.*?)\s*\(bagian\s*(\d+)\)\s*$/i;
 
-// ===== Helper tanggal per minggu (dipakai buat label export JPG/PDF) =====
 const namaBulanID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
 function formatTanggalID(date) {
@@ -57,6 +56,19 @@ function hariKeTanggalExport(hariText, week) {
   if (hariText === 'Senin, Rabu, Jumat') return `Senin, Rabu, Jumat (${week['Senin']}, ${week['Rabu']}, ${week['Jumat']})`;
   if (hariText === 'Jumat') return `Jumat (${week['Jumat']})`;
   return hariText;
+}
+
+// Kolom hari/jam bisa berisi beberapa baris (dipisah \n) untuk dokter dengan
+// lebih dari satu slot praktik, misal "Senin-Kamis" + "Jumat" dengan jam beda.
+function splitJadwalLines(hari, jam) {
+  const hariArr = (hari || '').split('\n').filter(Boolean);
+  const jamArr = (jam || '').split('\n').filter(Boolean);
+  const len = Math.max(hariArr.length, jamArr.length, 1);
+  const rows = [];
+  for (let i = 0; i < len; i++) {
+    rows.push({ hari: hariArr[i] || '', jam: jamArr[i] || '' });
+  }
+  return rows;
 }
 
 function IconPencil(props) {
@@ -141,7 +153,6 @@ function IconMegaphone(props) {
   );
 }
 
-// ===== MODAL KONFIRMASI LOGOUT =====
 function LogoutConfirmModal({ onConfirm, onCancel }) {
   return (
     <div
@@ -176,7 +187,6 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
     </div>
   );
 }
-// ===== END MODAL KONFIRMASI LOGOUT =====
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'pengumuman'
@@ -191,7 +201,6 @@ export default function AdminDashboard() {
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-(family-name:--font-inter) min-h-screen bg-[#FBF9F4] text-[#0B2B24]`}>
-      {}
       <header className="bg-[#0B2B24]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -221,7 +230,6 @@ export default function AdminDashboard() {
         />
       )}
 
-      {}
       <nav className="bg-white border-b border-[#0B2B24]/8">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex gap-2">
           <button
@@ -271,6 +279,7 @@ function KnowledgeTab() {
   const [saving, setSaving] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
   const [search, setSearch] = useState('');
+  const formRef = useRef(null);
 
   async function loadData() {
     setLoading(true);
@@ -283,6 +292,13 @@ function KnowledgeTab() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Otomatis scroll ke form begitu mulai edit/tambah data
+  useEffect(() => {
+    if (editing && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [editing]);
 
   async function handleSave(form) {
     setSaving(true);
@@ -324,7 +340,6 @@ function KnowledgeTab() {
 
   if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
 
-  // Filter berdasarkan pencarian (judul, isi konten, atau nama kategori)
   const keyword = search.trim().toLowerCase();
   const filteredItems = keyword
     ? items.filter((it) => {
@@ -337,7 +352,6 @@ function KnowledgeTab() {
       })
     : items;
 
-  // Kelompokkan semua item (hasil filter) berdasarkan kategori
   const byKategori = {};
   filteredItems.forEach((item) => {
     const key = item.kategori || 'lainnya';
@@ -345,7 +359,6 @@ function KnowledgeTab() {
     byKategori[key].push(item);
   });
 
-  // Urutan kategori
   const knownOrder = Object.keys(KATEGORI_INFO);
   const otherKeys = Object.keys(byKategori)
     .filter((k) => !knownOrder.includes(k))
@@ -381,12 +394,14 @@ function KnowledgeTab() {
       </div>
 
       {editing && (
-        <KnowledgeForm
-          initial={editing}
-          onCancel={() => setEditing(null)}
-          onSave={handleSave}
-          saving={saving}
-        />
+        <div ref={formRef}>
+          <KnowledgeForm
+            initial={editing}
+            onCancel={() => setEditing(null)}
+            onSave={handleSave}
+            saving={saving}
+          />
+        </div>
       )}
 
       <div className="flex flex-col gap-7">
@@ -394,7 +409,6 @@ function KnowledgeTab() {
           const kat = KATEGORI_INFO[kategoriKey] || { label: kategoriKey, color: STEEL };
           const list = byKategori[kategoriKey];
 
-          // Pisahkan yang punya pola "(bagian N)" ke dalam grup, sisanya standalone
           const groups = {};
           const standalone = [];
           list.forEach((item) => {
@@ -608,8 +622,9 @@ function PoliTab() {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState({}); 
+  const [expanded, setExpanded] = useState({});
   const printRef = useRef(null);
+  const formRef = useRef(null);
 
   async function loadData() {
     setLoading(true);
@@ -622,6 +637,12 @@ function PoliTab() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (editing && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [editing]);
 
   async function handleSave(form) {
     setSaving(true);
@@ -729,7 +750,6 @@ function PoliTab() {
 
   if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
 
-  // Filter berdasarkan pencarian (nama poli atau nama dokter)
   const keyword = search.trim().toLowerCase();
   const filteredItems = keyword
     ? items.filter(
@@ -739,7 +759,6 @@ function PoliTab() {
       )
     : items;
 
-  // Kelompokkan berdasarkan nama_poli
   const grouped = {};
   for (const item of filteredItems) {
     if (!grouped[item.nama_poli]) grouped[item.nama_poli] = [];
@@ -790,12 +809,14 @@ function PoliTab() {
       </div>
 
       {editing && (
-        <PoliForm
-          initial={editing}
-          onCancel={() => setEditing(null)}
-          onSave={handleSave}
-          saving={saving}
-        />
+        <div ref={formRef}>
+          <PoliForm
+            initial={editing}
+            onCancel={() => setEditing(null)}
+            onSave={handleSave}
+            saving={saving}
+          />
+        </div>
       )}
 
       <div className="flex flex-col gap-2.5">
@@ -826,6 +847,7 @@ function PoliTab() {
                 <div className="border-t border-[#0B2B24]/6 px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
                   {doctors.map((item) => {
                     const isActive = item.is_active !== false;
+                    const jadwalRows = splitJadwalLines(item.hari, item.jam);
                     return (
                       <div
                         key={item.id}
@@ -835,7 +857,11 @@ function PoliTab() {
                       >
                         <div className="min-w-45">
                           <p className="font-semibold text-[14px] text-[#0B2B24]">{item.nama_dokter}</p>
-                          <p className="text-[12.5px] text-[#0B2B24]/55 mt-0.5">{item.hari} &middot; {item.jam}</p>
+                          {jadwalRows.map((row, i) => (
+                            <p key={i} className="text-[12.5px] text-[#0B2B24]/55 mt-0.5">
+                              {row.hari}{row.hari && row.jam ? ' · ' : ''}{row.jam}
+                            </p>
+                          ))}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
@@ -887,7 +913,6 @@ function PoliTab() {
         )}
       </div>
 
-      {}
       <div style={printStyles.offscreen}>
         <div ref={printRef} style={printStyles.sheet}>
           <div style={printStyles.header}>
@@ -910,14 +935,30 @@ function PoliTab() {
               </tr>
             </thead>
             <tbody>
-              {items.filter((item) => item.is_active !== false).map((item) => (
-                <tr key={item.id}>
-                  <td style={printStyles.td}>{item.nama_poli}</td>
-                  <td style={printStyles.td}>{item.nama_dokter}</td>
-                  <td style={printStyles.td}>{hariKeTanggalExport(item.hari, getWeekInfoForExport().week)}</td>
-                  <td style={printStyles.td}>{item.jam}</td>
-                </tr>
-              ))}
+              {items.filter((item) => item.is_active !== false).map((item) => {
+                const rows = splitJadwalLines(item.hari, item.jam);
+                const { week } = getWeekInfoForExport();
+                return (
+                  <tr key={item.id}>
+                    <td style={printStyles.td}>{item.nama_poli}</td>
+                    <td style={printStyles.td}>{item.nama_dokter}</td>
+                    <td style={printStyles.td}>
+                      {rows.map((row, i) => (
+                        <div key={i} style={i > 0 ? { marginTop: '4px' } : undefined}>
+                          {hariKeTanggalExport(row.hari, week)}
+                        </div>
+                      ))}
+                    </td>
+                    <td style={printStyles.td}>
+                      {rows.map((row, i) => (
+                        <div key={i} style={i > 0 ? { marginTop: '4px' } : undefined}>
+                          {row.jam}
+                        </div>
+                      ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           <p style={printStyles.footer}>Jadwal dapat berubah sewaktu-waktu. Informasi lebih lanjut hubungi RSUD Pasirian.</p>
@@ -930,9 +971,37 @@ function PoliTab() {
 function PoliForm({ initial, onCancel, onSave, saving }) {
   const [nama_poli, setNamaPoli] = useState(initial.nama_poli || '');
   const [nama_dokter, setNamaDokter] = useState(initial.nama_dokter || '');
-  const [hari, setHari] = useState(initial.hari || '');
-  const [jam, setJam] = useState(initial.jam || '');
+  const [blocks, setBlocks] = useState(() => {
+    const rows = splitJadwalLines(initial.hari, initial.jam);
+    return rows.length ? rows : [{ hari: '', jam: '' }];
+  });
   const [is_active, setIsActive] = useState(initial.is_active !== false);
+
+  function updateBlock(idx, field, value) {
+    setBlocks((prev) => prev.map((b, i) => (i === idx ? { ...b, [field]: value } : b)));
+  }
+
+  function addBlock() {
+    setBlocks((prev) => [...prev, { hari: '', jam: '' }]);
+  }
+
+  function removeBlock(idx) {
+    setBlocks((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function handleSubmit() {
+    const validBlocks = blocks.filter((b) => b.hari.trim() && b.jam.trim());
+    onSave({
+      id: initial.id,
+      nama_poli,
+      nama_dokter,
+      hari: validBlocks.map((b) => b.hari.trim()).join('\n'),
+      jam: validBlocks.map((b) => b.jam.trim()).join('\n'),
+      is_active,
+    });
+  }
+
+  const hasValidBlock = blocks.some((b) => b.hari.trim() && b.jam.trim());
 
   return (
     <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
@@ -956,28 +1025,53 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
         className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-1">
-        <div>
-          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Hari Praktik</label>
-          <input
-            value={hari}
-            onChange={(e) => setHari(e.target.value)}
-            placeholder="Senin-Jumat"
-            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
-          />
-        </div>
-        <div>
-          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Jam Praktik</label>
-          <input
-            value={jam}
-            onChange={(e) => setJam(e.target.value)}
-            placeholder="08.00-12.00"
-            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
-          />
-        </div>
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">
+        Jadwal Praktik (bisa lebih dari satu slot, misal Senin-Kamis jam beda dengan Jumat)
+      </label>
+      <div className="flex flex-col gap-3">
+        {blocks.map((block, idx) => (
+          <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-start bg-[#FBF9F4] border border-[#0B2B24]/8 rounded-xl p-3">
+            <div>
+              <label className="block text-[11.5px] font-semibold text-[#0B2B24]/55 mb-1">Hari Praktik</label>
+              <input
+                value={block.hari}
+                onChange={(e) => updateBlock(idx, 'hari', e.target.value)}
+                placeholder="Senin-Kamis"
+                className="w-full rounded-lg border border-[#0B2B24]/12 px-3 py-2 text-[13px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11.5px] font-semibold text-[#0B2B24]/55 mb-1">Jam Praktik</label>
+              <input
+                value={block.jam}
+                onChange={(e) => updateBlock(idx, 'jam', e.target.value)}
+                placeholder="12.00-16.00"
+                className="w-full rounded-lg border border-[#0B2B24]/12 px-3 py-2 text-[13px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+              />
+            </div>
+            <div className="flex sm:justify-end sm:items-end h-full">
+              <button
+                type="button"
+                onClick={() => removeBlock(idx)}
+                disabled={blocks.length <= 1}
+                title="Hapus slot ini"
+                className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/6 px-3 py-2 rounded-lg text-[12px] font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <IconTrash /> Hapus
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
+      <button
+        type="button"
+        onClick={addBlock}
+        className="inline-flex items-center gap-1.5 text-[#8a5a12] hover:text-[#C08829] text-[12.5px] font-semibold mt-3 transition"
+      >
+        <IconPlus /> Tambah Slot Waktu Praktik
+      </button>
 
-      <label className="flex items-center gap-2 mt-4 text-[13px] font-semibold text-[#0B2B24]/70 cursor-pointer w-fit">
+      <label className="flex items-center gap-2 mt-5 text-[13px] font-semibold text-[#0B2B24]/70 cursor-pointer w-fit">
         <input
           type="checkbox"
           checked={is_active}
@@ -996,8 +1090,8 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
           Batal
         </button>
         <button
-          onClick={() => onSave({ id: initial.id, nama_poli, nama_dokter, hari, jam, is_active })}
-          disabled={saving || !nama_poli.trim() || !nama_dokter.trim()}
+          onClick={handleSubmit}
+          disabled={saving || !nama_poli.trim() || !nama_dokter.trim() || !hasValidBlock}
           className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}
@@ -1096,7 +1190,7 @@ function AnnouncementTab() {
           placeholder="Misal: Layanan Poli Gigi tutup sementara 8-10 Juli 2026 karena pemeliharaan alat."
           className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
         />
-        
+
         <div className="flex items-center justify-end gap-3 mt-5">
           {savedOk && <span className="text-[12.5px] font-semibold text-[#1F6B4F]">Tersimpan.</span>}
           <button

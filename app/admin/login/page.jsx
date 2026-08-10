@@ -56,7 +56,6 @@ export default function LoginPage() {
 
   return (
     <div className={`${fraunces.variable} ${inter.variable} font-[var(--font-inter)] min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0B2B24] p-6`}>
-      {}
       <div
         className="absolute w-[480px] h-[480px] rounded-full pointer-events-none -top-40 -right-40"
         style={{ background: 'radial-gradient(circle, rgba(192,136,41,0.32) 0%, rgba(192,136,41,0) 70%)' }}
@@ -66,7 +65,6 @@ export default function LoginPage() {
         style={{ background: 'radial-gradient(circle, rgba(31,107,79,0.4) 0%, rgba(31,107,79,0) 70%)' }}
       />
 
-      {}
       <svg viewBox="0 0 500 260" className="absolute right-0 bottom-0 w-[55%] max-w-[520px] opacity-[0.08] pointer-events-none" aria-hidden="true">
         <path d="M0,260 L0,210 L90,150 L150,190 L230,60 L270,110 L330,20 L380,90 L440,140 L500,110 L500,260 Z" fill="#F2E4C4" />
       </svg>
@@ -98,6 +96,10 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
+            // Ekstensi browser (password manager, form-filler) sering nyuntik
+            // atribut seperti fdprocessedid ke input ini setelah server render,
+            // yang bikin React salah kira ada mismatch hydration. Ini aman diabaikan.
+            suppressHydrationWarning
             className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[14px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
           />
 

@@ -776,9 +776,24 @@ export default function LandingPage() {
         const grouped = {};
         rows.forEach((item) => {
           const namaKlinik = item.nama_poli;
-          const label = item.jam ? `${item.nama_dokter} — ${item.hari}, ${item.jam}` : item.nama_dokter;
           if (!grouped[namaKlinik]) grouped[namaKlinik] = [];
-          grouped[namaKlinik].push({ nama: label, aktif: item.is_active !== false });
+          let dokter = grouped[namaKlinik].find((d) => d.nama === item.nama_dokter);
+          if (!dokter) {
+            dokter = { nama: item.nama_dokter, aktif: item.is_active !== false, jadwal: [] };
+            grouped[namaKlinik].push(dokter);
+          }
+          if (item.is_active === false) dokter.aktif = false;
+
+          const hariLines = (item.hari || '').split('\n').filter(Boolean);
+          const jamLines = (item.jam || '').split('\n').filter(Boolean);
+          const jumlahBaris = Math.max(hariLines.length, jamLines.length);
+          for (let i = 0; i < jumlahBaris; i++) {
+            const hariBaris = hariLines[i] || '';
+            const jamBaris = jamLines[i] || '';
+            if (hariBaris || jamBaris) {
+              dokter.jadwal.push(hariBaris && jamBaris ? `${hariBaris}, ${jamBaris}` : hariBaris || jamBaris);
+            }
+          }
         });
         const hasil = Object.entries(grouped).map(([klinik, dokter]) => ({ klinik, dokter }));
         if (hasil.length > 0) {
@@ -1330,14 +1345,25 @@ export default function LandingPage() {
                       >
                         <DoctorIcon />
                       </span>
-                      <span className="text-[13.5px] text-white/75 leading-snug pt-1.5 flex flex-wrap items-center gap-2">
-                        {d.nama}
-                        {!d.aktif && (
-                          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#9E3B32]/25 text-[#F5B6AE]">
-                            Libur
-                          </span>
+                      <div className="pt-1.5 min-w-0">
+                        <span className="text-[13.5px] text-white/75 leading-snug flex flex-wrap items-center gap-2">
+                          {d.nama}
+                          {!d.aktif && (
+                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#9E3B32]/25 text-[#F5B6AE]">
+                              Libur
+                            </span>
+                          )}
+                        </span>
+                        {d.jadwal && d.jadwal.length > 0 && (
+                          <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                            {d.jadwal.map((j, jIdx) => (
+                              <li key={jIdx} className="text-[12px] text-white/55 leading-snug">
+                                {j}
+                              </li>
+                            ))}
+                          </ul>
                         )}
-                      </span>
+                      </div>
                     </li>
                   ))}
                 </ul>
