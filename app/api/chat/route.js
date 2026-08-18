@@ -17,6 +17,7 @@ const KEYWORDS_BPJS = ['bpjs', 'jkn'];
 const KEYWORDS_UMUM = ['umum'];
 
 const MAX_MESSAGE_LENGTH = 1000;
+const CONTEXT_WINDOW_USER_MESSAGES = 3;
 
 const GREETING_REGEX = /^(hai+|ha?llo+|hi+|hey+|halo+|permisi|mau tanya|tanya dong|min|admin|assalamualaikum|selamat (pagi|siang|sore|malam)|pagi|siang|sore|malam|tes|test|p)[\s.,!?]*$/i;
 
@@ -150,6 +151,17 @@ function containsUnknownDoctor(replyText, validNames) {
     return false;
 }
 
+// Gabungkan beberapa pesan user terakhir jadi satu string, dipakai KHUSUS
+// untuk deteksi keyword poli/hari di buildSystemPrompt (bukan buat isi
+// jawaban LLM). Tanpa ini, follow-up question yang gak nyebut ulang nama
+// poli (mis. "selain dokter itu ada lagi?") bakal kehilangan konteks poli
+// yang dibahas sebelumnya, karena buildSystemPrompt cuma liat 1 pesan.
+function buildContextQuery(incomingMessages) {
+    const userMessages = incomingMessages.filter((m) => m.role === 'user');
+    const lastN = userMessages.slice(-CONTEXT_WINDOW_USER_MESSAGES);
+    return lastN.map((m) => m.content).join(' ');
+}
+
 export async function POST(request) {
     try {
         const ip = getClientIp(request);
@@ -211,10 +223,12 @@ export async function POST(request) {
         return NextResponse.json({ reply: PENDAFTARAN_CLARIFICATION_REPLY });
     }
 
+    const contextQuery = buildContextQuery(incomingMessages);
+
     let dynamicSystemPrompt;
     let validDoctorNames;
     try {
-        dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '', selectedPoli);
+        dynamicSystemPrompt = await buildSystemPrompt(lastUserMessage?.content || '', selectedPoli, contextQuery);
         validDoctorNames = await getValidDoctorNames();
     } catch (knowledgeError) {
         console.error('[KNOWLEDGE/BLOB ERROR]', {
