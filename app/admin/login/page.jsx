@@ -96,9 +96,6 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
-            // Ekstensi browser (password manager, form-filler) sering nyuntik
-            // atribut seperti fdprocessedid ke input ini setelah server render,
-            // yang bikin React salah kira ada mismatch hydration. Ini aman diabaikan.
             suppressHydrationWarning
             className="w-full rounded-xl border border-[#0B2B24]/[0.12] px-3.5 py-2.5 text-[14px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
           />

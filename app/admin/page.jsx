@@ -21,7 +21,8 @@ const KATEGORI_INFO = {
   panduanJKN: { label: 'Panduan JKN Mobile', color: PLUM },
 };
 
-// Judul dengan pola "Topik (bagian N)" dikelompokkan otomatis jadi satu grup
+const KELAS_KAMAR = ['Intensif', 'VIP', 'Kelas I', 'Kelas II', 'Kelas III'];
+
 const BAGIAN_REGEX = /^(.*?)\s*\(bagian\s*(\d+)\)\s*$/i;
 
 const namaBulanID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -58,8 +59,6 @@ function hariKeTanggalExport(hariText, week) {
   return hariText;
 }
 
-// Kolom hari/jam bisa berisi beberapa baris (dipisah \n) untuk dokter dengan
-// lebih dari satu slot praktik, misal "Senin-Kamis" + "Jumat" dengan jam beda.
 function splitJadwalLines(hari, jam) {
   const hariArr = (hari || '').split('\n').filter(Boolean);
   const jamArr = (jam || '').split('\n').filter(Boolean);
@@ -153,6 +152,17 @@ function IconMegaphone(props) {
   );
 }
 
+function IconBed(props) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M2 4v16" />
+      <path d="M2 8h18a2 2 0 0 1 2 2v10" />
+      <path d="M2 17h20" />
+      <path d="M6 8v9" />
+    </svg>
+  );
+}
+
 function LogoutConfirmModal({ onConfirm, onCancel }) {
   return (
     <div
@@ -189,7 +199,7 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
 }
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'pengumuman'
+  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman'
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
 
@@ -231,10 +241,10 @@ export default function AdminDashboard() {
       )}
 
       <nav className="bg-white border-b border-[#0B2B24]/8">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 flex gap-2">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 flex gap-2 overflow-x-auto scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <button
             onClick={() => setTab('knowledge')}
-            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
               tab === 'knowledge'
                 ? 'border-[#C08829] text-[#0B2B24]'
                 : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
@@ -244,7 +254,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => setTab('poli')}
-            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
               tab === 'poli'
                 ? 'border-[#C08829] text-[#0B2B24]'
                 : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
@@ -253,8 +263,18 @@ export default function AdminDashboard() {
             Jadwal Dokter
           </button>
           <button
+            onClick={() => setTab('kamar')}
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'kamar'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Kamar Rawat Inap
+          </button>
+          <button
             onClick={() => setTab('pengumuman')}
-            className={`px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
               tab === 'pengumuman'
                 ? 'border-[#C08829] text-[#0B2B24]'
                 : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
@@ -266,7 +286,15 @@ export default function AdminDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-5 sm:px-6 py-8">
-        {tab === 'knowledge' ? <KnowledgeTab /> : tab === 'poli' ? <PoliTab /> : <AnnouncementTab />}
+        {tab === 'knowledge' ? (
+          <KnowledgeTab />
+        ) : tab === 'poli' ? (
+          <PoliTab />
+        ) : tab === 'kamar' ? (
+          <KamarTab />
+        ) : (
+          <AnnouncementTab />
+        )}
       </main>
     </div>
   );
@@ -293,7 +321,6 @@ function KnowledgeTab() {
     loadData();
   }, []);
 
-  // Otomatis scroll ke form begitu mulai edit/tambah data
   useEffect(() => {
     if (editing && formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1092,6 +1119,319 @@ function PoliForm({ initial, onCancel, onSave, saving }) {
         <button
           onClick={handleSubmit}
           disabled={saving || !nama_poli.trim() || !nama_dokter.trim() || !hasValidBlock}
+          className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
+        >
+          {saving ? 'Menyimpan...' : 'Simpan'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function KamarTab() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState({});
+  const formRef = useRef(null);
+
+  async function loadData() {
+    setLoading(true);
+    const res = await fetch('/api/admin/kamar');
+    const json = await res.json();
+    setItems(json.data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (editing && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [editing]);
+
+  async function handleSave(form) {
+    setSaving(true);
+    const isEdit = Boolean(form.id);
+    const url = isEdit ? `/api/admin/kamar/${form.id}` : '/api/admin/kamar';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nama_ruang: form.nama_ruang,
+        kelas: form.kelas,
+        jumlah_bed: form.jumlah_bed,
+        bed_terisi: form.bed_terisi,
+      }),
+    });
+
+    setSaving(false);
+
+    if (res.ok) {
+      setEditing(null);
+      loadData();
+    } else {
+      const json = await res.json();
+      alert('Gagal menyimpan: ' + (json.error || 'unknown error'));
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Yakin mau hapus data kamar ini?')) return;
+    const res = await fetch(`/api/admin/kamar/${id}`, { method: 'DELETE' });
+    if (res.ok) loadData();
+    else alert('Gagal menghapus data.');
+  }
+
+  function toggleKelas(kelas) {
+    setExpanded((prev) => ({ ...prev, [kelas]: !prev[kelas] }));
+  }
+
+  if (loading) return <p className="text-[#0B2B24]/55 text-[14px]">Memuat data...</p>;
+
+  const keyword = search.trim().toLowerCase();
+  const filteredItems = keyword
+    ? items.filter(
+        (it) =>
+          it.nama_ruang.toLowerCase().includes(keyword) ||
+          it.kelas.toLowerCase().includes(keyword)
+      )
+    : items;
+
+  const grouped = {};
+  for (const item of filteredItems) {
+    if (!grouped[item.kelas]) grouped[item.kelas] = [];
+    grouped[item.kelas].push(item);
+  }
+  const kelasOrder = KELAS_KAMAR.filter((k) => grouped[k] && grouped[k].length > 0);
+
+  const isGroupOpen = (kelas) => (keyword ? true : Boolean(expanded[kelas]));
+
+  const totalBed = items.reduce((sum, it) => sum + it.jumlah_bed, 0);
+  const totalTerisi = items.reduce((sum, it) => sum + it.bed_terisi, 0);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-[#0B2B24]/55 text-[14px] font-medium">
+          {items.length} ruang &middot; {totalTerisi}/{totalBed} bed terisi
+        </p>
+        <button
+          onClick={() => setEditing({})}
+          className="inline-flex items-center gap-2 bg-linear-to-b from-[#DDB169] to-[#C08829] hover:from-[#e6bd7c] hover:to-[#ca9235] text-[#0B2B24] font-(family-name:--font-fraunces) font-bold px-4 sm:px-5 py-2.5 rounded-full text-[13.5px] transition shadow-[0_8px_20px_rgba(192,136,41,0.3)]"
+        >
+          <IconPlus /> Tambah Ruang
+        </button>
+      </div>
+
+      <div className="relative mb-5">
+        <IconSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0B2B24]/40" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari nama ruang atau kelas..."
+          className="w-full rounded-xl border border-[#0B2B24]/12 pl-10 pr-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white"
+        />
+      </div>
+
+      {editing && (
+        <div ref={formRef}>
+          <KamarForm
+            initial={editing}
+            onCancel={() => setEditing(null)}
+            onSave={handleSave}
+            saving={saving}
+          />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2.5">
+        {kelasOrder.map((kelas) => {
+          const rooms = grouped[kelas];
+          const kelasTotalBed = rooms.reduce((s, r) => s + r.jumlah_bed, 0);
+          const kelasTotalTerisi = rooms.reduce((s, r) => s + r.bed_terisi, 0);
+          const open = isGroupOpen(kelas);
+
+          return (
+            <div key={kelas} className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleKelas(kelas)}
+                className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left"
+              >
+                <div className="flex items-center gap-2.5 text-[#0B2B24]">
+                  <IconChevron
+                    className="transition-transform"
+                    style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                  />
+                  <span className="font-(family-name:--font-fraunces) font-semibold text-[15px] text-[#0B2B24]">{kelas}</span>
+                </div>
+                <span className="text-[12.5px] font-semibold text-[#0B2B24]/50 shrink-0">
+                  {rooms.length} ruang &middot; {kelasTotalTerisi}/{kelasTotalBed} bed
+                </span>
+              </button>
+
+              {open && (
+                <div className="border-t border-[#0B2B24]/6 px-3.5 sm:px-4 py-3.5 flex flex-col gap-2 bg-[#FBF9F4]">
+                  {rooms.map((item) => {
+                    const penuh = item.bed_kosong === 0;
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex flex-wrap items-center justify-between gap-3 bg-white border border-[#0B2B24]/6 rounded-xl px-4 py-3"
+                      >
+                        <div className="min-w-45 flex items-center gap-2">
+                          <IconBed className="text-[#0B2B24]/40 shrink-0" />
+                          <div>
+                            <p className="font-semibold text-[14px] text-[#0B2B24]">{item.nama_ruang}</p>
+                            <p className="text-[12.5px] text-[#0B2B24]/55 mt-0.5">
+                              {item.bed_terisi}/{item.jumlah_bed} bed terisi &middot; {item.bed_kosong} kosong
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className="text-[11.5px] font-bold px-2.5 py-1 rounded-full"
+                            style={
+                              penuh
+                                ? { backgroundColor: '#9E3B3214', color: CLAY }
+                                : { backgroundColor: `${EMERALD}14`, color: EMERALD }
+                            }
+                          >
+                            {penuh ? 'Penuh' : `${item.bed_kosong} tersedia`}
+                          </span>
+                          <button
+                            onClick={() => setEditing(item)}
+                            title="Edit"
+                            className="inline-flex items-center gap-1.5 border border-[#2A6C93] text-[#2A6C93] hover:bg-[#2A6C93]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
+                            <IconPencil /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            title="Hapus"
+                            className="inline-flex items-center gap-1.5 border border-[#9E3B32] text-[#9E3B32] hover:bg-[#9E3B32]/6 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition"
+                          >
+                            <IconTrash /> Hapus
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {kelasOrder.length === 0 && (
+          <p className="text-[#0B2B24]/50 text-[14px] italic">Tidak ada ruang yang cocok dengan pencarian.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function KamarForm({ initial, onCancel, onSave, saving }) {
+  const [nama_ruang, setNamaRuang] = useState(initial.nama_ruang || '');
+  const [kelas, setKelas] = useState(initial.kelas || KELAS_KAMAR[0]);
+  const [jumlah_bed, setJumlahBed] = useState(initial.jumlah_bed ?? '');
+  const [bed_terisi, setBedTerisi] = useState(initial.bed_terisi ?? 0);
+
+  const jb = Number(jumlah_bed);
+  const bt = Number(bed_terisi);
+  const validJumlah = Number.isInteger(jb) && jb > 0;
+  const validTerisi = Number.isInteger(bt) && bt >= 0 && bt <= jb;
+  const bedKosongPreview = validJumlah && validTerisi ? jb - bt : null;
+
+  function handleSubmit() {
+    onSave({
+      id: initial.id,
+      nama_ruang: nama_ruang.trim(),
+      kelas,
+      jumlah_bed: jb,
+      bed_terisi: bt,
+    });
+  }
+
+  return (
+    <div className="bg-white border border-[#0B2B24]/6 rounded-2xl p-6 mb-6 shadow-[0_14px_34px_rgba(11,43,36,0.08)]">
+      <p className="font-(family-name:--font-fraunces) font-semibold text-[16px] text-[#0B2B24] mb-4">
+        {initial.id ? 'Edit Ruang' : 'Tambah Ruang Baru'}
+      </p>
+
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Nama Ruang</label>
+      <input
+        value={nama_ruang}
+        onChange={(e) => setNamaRuang(e.target.value)}
+        placeholder="Melati 1"
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition mb-4"
+      />
+
+      <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Kelas</label>
+      <select
+        value={kelas}
+        onChange={(e) => setKelas(e.target.value)}
+        className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition bg-white mb-4"
+      >
+        {KELAS_KAMAR.map((k) => (
+          <option key={k} value={k}>{k}</option>
+        ))}
+      </select>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Jumlah Bed</label>
+          <input
+            type="number"
+            min={1}
+            value={jumlah_bed}
+            onChange={(e) => setJumlahBed(e.target.value)}
+            placeholder="10"
+            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Bed Terisi</label>
+          <input
+            type="number"
+            min={0}
+            value={bed_terisi}
+            onChange={(e) => setBedTerisi(e.target.value)}
+            placeholder="0"
+            className="w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+          />
+        </div>
+      </div>
+
+      {jumlah_bed !== '' && !validJumlah && (
+        <p className="text-[12px] text-[#9E3B32] mt-2">Jumlah bed harus angka bulat lebih dari 0.</p>
+      )}
+      {validJumlah && !validTerisi && (
+        <p className="text-[12px] text-[#9E3B32] mt-2">Bed terisi harus antara 0 dan {jb}.</p>
+      )}
+      {bedKosongPreview !== null && (
+        <p className="text-[12.5px] text-[#0B2B24]/60 mt-3 bg-[#FBF9F4] px-3 py-2 rounded-lg">
+          Bed kosong: <span className="font-semibold text-[#0B2B24]">{bedKosongPreview}</span> (dihitung otomatis)
+        </p>
+      )}
+
+      <div className="flex justify-end gap-2.5 mt-5">
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="px-4 py-2.5 rounded-full border border-[#0B2B24]/12 text-[#0B2B24]/70 font-semibold text-[13.5px] hover:bg-[#FBF9F4] transition disabled:opacity-50"
+        >
+          Batal
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !nama_ruang.trim() || !validJumlah || !validTerisi}
           className="px-5 py-2.5 rounded-full bg-[#0B2B24] hover:bg-[#153b31] text-white font-(family-name:--font-fraunces) font-bold text-[13.5px] transition disabled:opacity-50"
         >
           {saving ? 'Menyimpan...' : 'Simpan'}

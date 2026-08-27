@@ -151,11 +151,7 @@ function containsUnknownDoctor(replyText, validNames) {
     return false;
 }
 
-// Gabungkan beberapa pesan user terakhir jadi satu string, dipakai KHUSUS
-// untuk deteksi keyword poli/hari di buildSystemPrompt (bukan buat isi
-// jawaban LLM). Tanpa ini, follow-up question yang gak nyebut ulang nama
-// poli (mis. "selain dokter itu ada lagi?") bakal kehilangan konteks poli
-// yang dibahas sebelumnya, karena buildSystemPrompt cuma liat 1 pesan.
+
 function buildContextQuery(incomingMessages) {
     const userMessages = incomingMessages.filter((m) => m.role === 'user');
     const lastN = userMessages.slice(-CONTEXT_WINDOW_USER_MESSAGES);

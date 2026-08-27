@@ -54,9 +54,9 @@ const legalitas = [
 ];
 
 const kepemimpinan = {
-  nama: 'dr. Wawan Arwijanto',
+  nama: 'dr. Mohammad Zainul Arifin',
   jabatan: 'Direktur RSUD Pasirian',
-  sejak: 'Menjabat sejak 17 Juni 2016',
+  sejak: 'Menjabat sejak Mei 2026',
 };
 
 const klinikSpesialis = [
@@ -292,51 +292,15 @@ function formatTanggalIndo(isoDate) {
   return `${parseInt(tanggal, 10)} ${namaBulan} ${tahun}`;
 }
 
-
-function getKelasInfo(namaRuang, kelasRaw) {
-  const nameUpper = (namaRuang || '').toUpperCase();
-  if (nameUpper.includes('ICU')) {
-    return { label: 'Intensif', color: CLAY };
-  }
-  const key = (kelasRaw || '').trim().toUpperCase();
+function getKelasColor(kelas) {
   const map = {
-    '1': { label: 'Kelas I', color: STEEL },
-    I: { label: 'Kelas I', color: STEEL },
-    '2': { label: 'Kelas II', color: EMERALD },
-    II: { label: 'Kelas II', color: EMERALD },
-    '3': { label: 'Kelas III', color: PLUM },
-    III: { label: 'Kelas III', color: PLUM },
-    VIP: { label: 'VIP', color: BRASS },
+    Intensif: CLAY,
+    VIP: BRASS,
+    'Kelas I': STEEL,
+    'Kelas II': EMERALD,
+    'Kelas III': PLUM,
   };
-  return map[key] || { label: `Kelas ${kelasRaw}`, color: STEEL };
-}
-
-
-function parseRuangRawatInap(konten) {
-  if (!konten) return { rooms: [], tanggalUpdate: null };
-
-  const tanggalMatch = konten.match(/tanggal\s+(\d{1,2})-(\d{1,2})-(\d{4})/i);
-  let tanggalUpdate = null;
-  if (tanggalMatch) {
-    const [, tgl, bln, thn] = tanggalMatch;
-    tanggalUpdate = `${parseInt(tgl, 10)} ${NAMA_BULAN[parseInt(bln, 10) - 1] || ''} ${thn}`;
-  }
-
-  const roomRegex = /^\s*\d+\.\s*([^\n(]+?)\s*\(Kelas\s*([A-Za-z0-9]+)\)\s*\r?\n-\s*Jumlah Bed:\s*(\d+)\s*\r?\n-\s*Bed Terisi:\s*(\d+)\s*\r?\n-\s*Bed Kosong:\s*(\d+)/gm;
-
-  const rooms = [];
-  let match;
-  while ((match = roomRegex.exec(konten)) !== null) {
-    const nama = match[1].trim();
-    const kelasRaw = match[2];
-    const tt = parseInt(match[3], 10);
-    const terisi = parseInt(match[4], 10);
-    const kosong = parseInt(match[5], 10);
-    const { label: kelas, color } = getKelasInfo(nama, kelasRaw);
-    rooms.push({ nama, kelas, tt, terisi, kosong, color });
-  }
-
-  return { rooms, tanggalUpdate };
+  return map[kelas] || STEEL;
 }
 
 const URUTAN_KELAS = ['Intensif', 'VIP', 'Kelas I', 'Kelas II', 'Kelas III'];
@@ -373,6 +337,14 @@ const FORM_KOSONG = {
   poliTujuan: '',
 };
 
+const POLI_ALIAS_WA = {
+  'Dokter VCT': 'Kristal',
+};
+
+function labelPoliUntukWA(namaPoli) {
+  return POLI_ALIAS_WA[namaPoli] || namaPoli;
+}
+
 function susunPesanPendaftaran(f) {
   const baris = [
     `Format pengisian pendaftaran pasien : ${f.namaLengkap}`,
@@ -384,7 +356,7 @@ function susunPesanPendaftaran(f) {
     `Alamat KTP Lengkap : ${f.alamat}`,
     `No. Telp Aktif : ${f.telp}`,
     `Nama ibu kandung : ${f.namaIbu}`,
-    `Poli Tujuan : ${f.poliTujuan}`,
+    `Poli Tujuan : ${labelPoliUntukWA(f.poliTujuan)}`,
     `Jenis Pembayaran : UMUM`,
     ``,
     `Harap membawa identitas asli saat ke Rumah Sakit.`,
@@ -392,15 +364,20 @@ function susunPesanPendaftaran(f) {
   return baris.join('\n');
 }
 
-function LabeledInput({ label, ...props }) {
+function LabeledInput({ label, error, ...props }) {
   return (
     <label className="block">
       <span className="text-[12.5px] font-semibold text-[#0B2B24]/70">{label}</span>
       <input
         {...props}
-        className="mt-1.5 w-full rounded-xl border border-[#0B2B24]/12 px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:border-[#C08829] focus:ring-2 focus:ring-[#C08829]/15 transition"
+        className={`mt-1.5 w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] text-[#0B2B24] outline-none focus:ring-2 transition ${
+          error
+            ? 'border-[#9E3B32] focus:border-[#9E3B32] focus:ring-[#9E3B32]/15'
+            : 'border-[#0B2B24]/12 focus:border-[#C08829] focus:ring-[#C08829]/15'
+        }`}
         style={{ colorScheme: 'light' }}
       />
+      {error && <p className="text-[12px] text-[#9E3B32] mt-1.5 leading-relaxed">{error}</p>}
     </label>
   );
 }
@@ -435,10 +412,7 @@ const daftarPoli = [
   { nama: 'Dokter VCT', dokter: [{ nama: 'dr. Niken Dumilah', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
   { nama: 'Radiologi', dokter: [{ nama: 'dr. Trilia Kurniati, Sp.Rad', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
   { nama: 'Laboratorium', dokter: [{ nama: 'dr. Dwita Riadini, Sp.PK', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
-  { nama: 'Dokter Spesialis Anestesi', dokter: [{ nama: 'dr. Donny Tilon, Sp.An', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
-  { nama: 'Dokter Spesialis Anestesiologi & Terapi Intensif', dokter: [{ nama: 'dr. Ardhani Khalifatul Nur Kholis, Sp.An-Ti', hari: 'Sabtu & Minggu', jam: 'Sesuai Jam Kerja' }] },
   { nama: 'Layanan Fisioterapi', dokter: [{ nama: 'Mochamad Nursaid, A.Md', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }, { nama: 'David Aryanto, A.Md.F', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
-  { nama: 'Layanan Konsultasi Gizi', dokter: [{ nama: 'Nur Rizqi Intan Syaputri, S.ST', hari: 'Senin-Jumat', jam: 'Sesuai Jam Kerja' }] },
 ];
 
 const POLI_OPTIONS = daftarPoli.map((p) => p.nama);
@@ -465,11 +439,24 @@ function DaftarOnlineModal({ open, onClose }) {
 
   const ubah = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
+  const ubahHuruf = (field) => (e) => {
+    const v = e.target.value.replace(/[^A-Za-zÀ-ÿ\s.,'-]/g, '');
+    setForm((prev) => ({ ...prev, [field]: v }));
+  };
+
+  const ubahAngka = (field, maxLength) => (e) => {
+    const v = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLength);
+    setForm((prev) => ({ ...prev, [field]: v }));
+  };
+
   const batasMinimalTanggal = tanggalMinimalDaftar();
   const tanggalKontrolValid = !form.tanggalKontrol || form.tanggalKontrol >= batasMinimalTanggal;
+  const namaValid = form.namaLengkap.trim().length > 0;
+  const nikValid = form.nik.length === 16;
+  const telpValid = form.telp.length >= 10 && form.telp.length <= 13 && form.telp.startsWith('0');
 
-  const wajibTerisi = form.tanggalKontrol && tanggalKontrolValid && form.nik && form.namaLengkap && form.tempatLahir
-    && form.tanggalLahir && form.alamat && form.telp && form.namaIbu && form.poliTujuan;
+  const wajibTerisi = form.tanggalKontrol && tanggalKontrolValid && namaValid && nikValid && form.tempatLahir
+    && form.tanggalLahir && form.alamat && telpValid && form.namaIbu.trim().length > 0 && form.poliTujuan;
 
   const kirimWhatsApp = () => {
     const pesan = susunPesanPendaftaran(form);
@@ -580,7 +567,14 @@ function DaftarOnlineModal({ open, onClose }) {
             </p>
 
             <div className="mt-5 space-y-3.5">
-              <LabeledInput label="Nama lengkap (sesuai KTP)" type="text" placeholder="Contoh: Tutuk Yekti Andayani" value={form.namaLengkap} onChange={ubah('namaLengkap')} />
+              <LabeledInput
+                label="Nama lengkap (sesuai KTP)"
+                type="text"
+                placeholder="Contoh: Tutuk Yekti Andayani"
+                value={form.namaLengkap}
+                onChange={ubahHuruf('namaLengkap')}
+                maxLength={80}
+              />
               <div>
                 <LabeledInput
                   label="Tanggal kontrol/periksa"
@@ -595,15 +589,44 @@ function DaftarOnlineModal({ open, onClose }) {
                   </p>
                 )}
               </div>
-              <LabeledInput label="Nomor RM (kosongkan jika pasien baru)" type="text" placeholder="Contoh: 002862" value={form.nomorRM} onChange={ubah('nomorRM')} />
-              <LabeledInput label="NIK KTP" type="text" inputMode="numeric" placeholder="16 digit NIK" value={form.nik} onChange={ubah('nik')} />
+              <LabeledInput
+                label="Nomor RM (kosongkan jika pasien baru)"
+                type="text"
+                inputMode="numeric"
+                placeholder="Contoh: 002862"
+                value={form.nomorRM}
+                onChange={ubahAngka('nomorRM', 15)}
+              />
+              <LabeledInput
+                label="NIK KTP"
+                type="text"
+                inputMode="numeric"
+                placeholder="16 digit NIK"
+                value={form.nik}
+                onChange={ubahAngka('nik', 16)}
+                error={form.nik && !nikValid ? `NIK harus 16 digit (saat ini ${form.nik.length} digit)` : ''}
+              />
               <div className="grid grid-cols-2 gap-3">
-                <LabeledInput label="Tempat lahir" type="text" placeholder="Contoh: Lumajang" value={form.tempatLahir} onChange={ubah('tempatLahir')} />
+                <LabeledInput
+                  label="Tempat lahir"
+                  type="text"
+                  placeholder="Contoh: Lumajang"
+                  value={form.tempatLahir}
+                  onChange={ubahHuruf('tempatLahir')}
+                />
                 <LabeledInput label="Tanggal lahir" type="date" value={form.tanggalLahir} onChange={ubah('tanggalLahir')} />
               </div>
               <LabeledInput label="Alamat KTP lengkap" type="text" placeholder="Sesuai KTP" value={form.alamat} onChange={ubah('alamat')} />
-              <LabeledInput label="No. Telp aktif" type="tel" inputMode="numeric" placeholder="Contoh: 0857xxxxxxx" value={form.telp} onChange={ubah('telp')} />
-              <LabeledInput label="Nama ibu kandung" type="text" value={form.namaIbu} onChange={ubah('namaIbu')} />
+              <LabeledInput
+                label="No. Telp aktif"
+                type="tel"
+                inputMode="numeric"
+                placeholder="Contoh: 0857xxxxxxx"
+                value={form.telp}
+                onChange={ubahAngka('telp', 13)}
+                error={form.telp && !telpValid ? 'Nomor harus diawali 0 dan berjumlah 10-13 digit' : ''}
+              />
+              <LabeledInput label="Nama ibu kandung" type="text" value={form.namaIbu} onChange={ubahHuruf('namaIbu')} />
               <LabeledSelect label="Poli tujuan" options={POLI_OPTIONS} value={form.poliTujuan} onChange={ubah('poliTujuan')} />
             </div>
 
@@ -806,22 +829,38 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    fetch('/api/info-layanan', { cache: 'no-store' })
+    fetch('/api/kamar', { cache: 'no-store' })
       .then((res) => res.json())
       .then((json) => {
-        const items = json.items || [];
-        const kamarItem =
-          items.find((it) => it.title && /kamar|rawat inap/i.test(it.title)) || items[0];
-        if (kamarItem?.content) {
-          const { rooms, tanggalUpdate } = parseRuangRawatInap(kamarItem.content);
-          if (rooms.length > 0) {
-            setRuangRawatInapData(rooms);
-            setTanggalUpdateKamar(tanggalUpdate);
+        const rows = json.data || [];
+        if (rows.length > 0) {
+          const rooms = rows.map((r) => ({
+            nama: r.nama_ruang,
+            kelas: r.kelas,
+            tt: r.jumlah_bed,
+            terisi: r.bed_terisi,
+            kosong: r.bed_kosong,
+            color: getKelasColor(r.kelas),
+          }));
+          setRuangRawatInapData(rooms);
+
+          const terbaru = rows.reduce(
+            (latest, r) => (!latest || new Date(r.updated_at) > new Date(latest) ? r.updated_at : latest),
+            null
+          );
+          if (terbaru) {
+            setTanggalUpdateKamar(
+              new Date(terbaru).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })
+            );
           }
         }
       })
       .catch((err) => {
-        console.error('[INFO LAYANAN FETCH ERROR]', err);
+        console.error('[KAMAR FETCH ERROR]', err);
       });
   }, []);
 
@@ -1238,41 +1277,68 @@ export default function LandingPage() {
             </h4>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {ruangRawatInapData.map((r, idx) => {
-              const punyaDetail = typeof r.kosong === 'number';
-              const penuh = punyaDetail && r.kosong <= 0;
-              return (
-                <div key={`${r.nama}-${idx}`} className="bg-white border border-[#0B2B24]/6 rounded-2xl p-5 hover:border-[#C08829]/30 hover:shadow-[0_14px_34px_rgba(11,43,36,0.08)] transition">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-                    style={{ backgroundColor: `${r.color}14` }}
-                  >
-                    <BedIcon color={r.color} />
-                  </div>
-                  <span
-                    className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1.5"
-                    style={{ backgroundColor: `${r.color}14`, color: r.color }}
-                  >
-                    {r.kelas}
-                  </span>
-                  <h5 className="font-fraunces font-semibold text-[15px] text-[#0B2B24]">{r.nama}</h5>
-                  <p className="text-[12px] text-[#0B2B24]/55 mt-1">{r.tt} TT</p>
-                  {punyaDetail && (
-                    <span
-                      className="inline-block text-[10.5px] font-bold px-2 py-0.5 rounded-full mt-1.5"
-                      style={
-                        penuh
-                          ? { backgroundColor: `${CLAY}14`, color: CLAY }
-                          : { backgroundColor: `${EMERALD}14`, color: EMERALD }
-                      }
-                    >
-                      {penuh ? 'Penuh' : `${r.kosong} Bed Kosong`}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+          <div className="bg-white border border-[#0B2B24]/6 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13.5px] min-w-[600px]">
+                <thead>
+                  <tr className="bg-[#0B2B24]">
+                    <th className="text-left font-fraunces font-semibold text-white px-5 py-3.5">Ruangan</th>
+                    <th className="text-left font-fraunces font-semibold text-white px-5 py-3.5">Kelas</th>
+                    <th className="text-right font-fraunces font-semibold text-white px-5 py-3.5">Total TT</th>
+                    <th className="text-right font-fraunces font-semibold text-white px-5 py-3.5">Terisi</th>
+                    <th className="text-right font-fraunces font-semibold text-white px-5 py-3.5">Kosong</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ruangRawatInapData.map((r, idx) => {
+                    const punyaDetail = typeof r.kosong === 'number';
+                    const terisi = typeof r.terisi === 'number'
+                      ? r.terisi
+                      : (punyaDetail ? r.tt - r.kosong : null);
+                    const penuh = punyaDetail && r.kosong <= 0;
+
+                    return (
+                      <tr key={`${r.nama}-${idx}`} className={idx % 2 === 1 ? 'bg-[#FBF9F4]' : ''}>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: r.color }} />
+                            <span className="font-fraunces font-semibold text-[#0B2B24]">{r.nama}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span
+                            className="inline-block text-[10.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: `${r.color}14`, color: r.color }}
+                          >
+                            {r.kelas}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-right font-semibold text-[#0B2B24] tabular-nums">{r.tt} TT</td>
+                        <td className="px-5 py-3 text-right text-[#0B2B24]/70 tabular-nums">
+                          {terisi !== null ? `${terisi} TT` : '—'}
+                        </td>
+                        <td className="px-5 py-3 text-right">
+                          {punyaDetail ? (
+                            <span
+                              className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full tabular-nums"
+                              style={
+                                penuh
+                                  ? { backgroundColor: `${CLAY}14`, color: CLAY }
+                                  : { backgroundColor: `${EMERALD}14`, color: EMERALD }
+                              }
+                            >
+                              {penuh ? 'Penuh' : `${r.kosong} TT`}
+                            </span>
+                          ) : (
+                            <span className="text-[#0B2B24]/40">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

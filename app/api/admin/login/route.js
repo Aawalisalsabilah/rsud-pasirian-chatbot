@@ -34,7 +34,6 @@ export async function POST(request) {
     }
 
     // ===== BUAT TOKEN SESI BARU (BUKAN SECRET STATIS) =====
-    // Setiap login sukses dapet token acak baru yang disimpen di Redis.
     let sessionToken;
     try {
       sessionToken = await createAdminSession();
@@ -54,7 +53,7 @@ export async function POST(request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 hari, samain kayak TTL di Redis
+      maxAge: 60 * 60 * 24 * 7, 
     });
 
     return response;
