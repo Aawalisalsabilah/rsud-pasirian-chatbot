@@ -434,7 +434,7 @@ export default function ChatPage() {
 
   const topics = [
     { icon: '🩺', label: 'Jadwal Pelayanan Poli Klinik', shortLabel: 'Jadwal Poli Klinik', isPoliPicker: true },
-    { icon: '🛏️', label: 'Info Kamar Rawat Inap', shortLabel: 'Kamar Rawat Inap', isInfoLayanan: true },
+    { icon: '🛏️', label: 'Info Kamar Rawat Inap', shortLabel: 'Kamar Rawat Inap', text: 'Info ketersediaan kamar rawat inap yang tersedia saat ini', loading: 'Mengambil info kamar rawat inap...' },
     { icon: '📋', label: 'Standar Pelayanan Publik', shortLabel: 'Standar Pelayanan Publik', isStaticList: true },
     { icon: '📝', label: 'Panduan Pendaftaran JKN Mobile', shortLabel: 'Pendaftaran JKN Mobile', isLink: true, href: '/#panduan-jkn' },
     { icon: '🪪', label: 'Cara Daftar Pasien BPJS', shortLabel: 'Daftar Pasien BPJS', isStatic: true, staticKey: 'bpjs' },
@@ -519,54 +519,6 @@ export default function ChatPage() {
     sendMessage(`Jadwal dan dokter untuk ${namaPoli}`, `Mencari jadwal ${namaPoli}...`, namaPoli);
   };
 
-  const handleShowInfoLayanan = async () => {
-    if (isLoading) return;
-
-    setMessages((prev) => [...prev, { role: 'user', content: 'Info Kamar Rawat Inap' }]);
-    setIsLoading(true);
-    setLoadingText('Mengambil info kamar rawat inap...');
-
-    try {
-      const res = await fetch('/api/info-layanan');
-      const data = await res.json();
-      const items = data.items || [];
-
-      if (items.length === 0) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: 'Maaf, info ketersediaan kamar belum tersedia saat ini. Silakan hubungi bagian informasi RSUD Pasirian.' },
-        ]);
-      } else if (items.length === 1) {
-        setMessages((prev) => [...prev, { role: 'assistant', content: items[0].content }]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            type: 'infolayanan-buttons',
-            items,
-            content: 'Silakan pilih info ruangan yang ingin Anda lihat:',
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error(error);
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Maaf, gagal memuat info kamar rawat inap. Silakan periksa koneksi Anda.' }]);
-    } finally {
-      setIsLoading(false);
-      setLoadingText('Sedang menyusun jawaban...');
-    }
-  };
-
-  const handleInfoLayananSelect = (item) => {
-    if (isLoading) return;
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', content: item.title },
-      { role: 'assistant', content: item.content },
-    ]);
-  };
-
   const handleShowStandarPelayanan = () => {
     if (isLoading) return;
 
@@ -600,8 +552,6 @@ export default function ChatPage() {
   const handleTopicClick = (topic) => {
     if (topic.isPoliPicker) {
       handleShowPoliList();
-    } else if (topic.isInfoLayanan) {
-      handleShowInfoLayanan();
     } else if (topic.isStaticList) {
       handleShowStandarPelayanan();
     } else if (topic.isStatic) {
@@ -719,23 +669,6 @@ export default function ChatPage() {
                             className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {namaPoli}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : msg.type === 'infolayanan-buttons' ? (
-                    <div className="space-y-3">
-                      <p className="text-sm md:text-base leading-relaxed text-[#0B2B24]">{msg.content}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {msg.items.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            disabled={isLoading}
-                            onClick={() => handleInfoLayananSelect(item)}
-                            className="text-left text-xs md:text-sm font-medium px-3.5 py-2 rounded-full border border-[#C08829]/40 bg-[#FBF9F4] hover:bg-[#C08829]/10 text-[#0B2B24] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {item.title}
                           </button>
                         ))}
                       </div>
