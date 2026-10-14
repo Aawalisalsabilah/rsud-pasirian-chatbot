@@ -440,6 +440,7 @@ export default function ChatPage() {
     { icon: '🪪', label: 'Cara Daftar Pasien BPJS', shortLabel: 'Daftar Pasien BPJS', isStatic: true, staticKey: 'bpjs' },
     { icon: '🧾', label: 'Cara Daftar Pasien Umum', shortLabel: 'Daftar Pasien Umum', isStatic: true, staticKey: 'umum' },
     { icon: '📞', label: 'Ubah Jadwal Kontrol BPJS', shortLabel: 'Ubah Jadwal Kontrol', isStatic: true, staticKey: 'ubahJadwal' },
+    { icon: '✉️', label: 'Ajukan Permintaan / Pengaduan Informasi', shortLabel: 'Ajukan Informasi', isLink: true, href: '/tindak-lanjut' },
   ];
 
   const sendMessage = async (messageContent, label = 'Sedang menyusun jawaban...', selectedPoli = null) => {
@@ -463,7 +464,7 @@ export default function ChatPage() {
       const data = await response.json();
 
       if (response.ok && data.reply) {
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply, canFollowUp: true }]);
       } else {
         setMessages((prev) => [...prev, { role: 'assistant', content: 'Mohon maaf, sistem sedang mengalami gangguan sesaat. Silakan coba kirim kembali pertanyaan Anda.' }]);
       }
@@ -695,13 +696,25 @@ export default function ChatPage() {
                       </div>
                     </div>
                   ) : msg.role === 'assistant' ? (
-                    <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkBreaks]}
-                        components={{ a: MarkdownLink }}
-                      >
-                        {msg.content}
-                      </ReactMarkdown>
+                    <div>
+                      <div className="text-sm md:text-base leading-relaxed space-y-2 text-[#0B2B24] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-1">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkBreaks]}
+                          components={{ a: MarkdownLink }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                      {msg.canFollowUp && (
+                        <div className="mt-3 pt-3 border-t border-[#0B2B24]/8">
+                          <Link
+                            href="/tindak-lanjut"
+                            className="text-xs md:text-[13px] font-semibold text-[#C08829] hover:underline"
+                          >
+                            Jawaban belum sesuai? Ajukan permintaan atau pengaduan informasi
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <span className="whitespace-pre-line wrap-break-word font-medium">{msg.content}</span>
