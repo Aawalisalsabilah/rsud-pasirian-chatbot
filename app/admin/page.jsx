@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Poppins } from 'next/font/google';
 import TiketTab from './TiketTab';
+import InfoGapTab from './InfoGapTab';
 
 const fraunces = Poppins({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
 const inter = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
@@ -200,7 +201,14 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
 }
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman' | 'tiket'
+  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman' | 'tiket' | 'infogap'
+  const [kbDraft, setKbDraft] = useState(null); // draf FAQ dari tiket / information gap (B09)
+
+  function bukaEditorKB(draft) {
+    setKbDraft(draft);
+    setTab('knowledge');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
 
@@ -293,18 +301,30 @@ export default function AdminDashboard() {
           >
             Tindak Lanjut Informasi
           </button>
+          <button
+            onClick={() => setTab('infogap')}
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'infogap'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Information Gap
+          </button>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-5 sm:px-6 py-8">
         {tab === 'knowledge' ? (
-          <KnowledgeTab />
+          <KnowledgeTab draftAwal={kbDraft} onDraftDipakai={() => setKbDraft(null)} />
         ) : tab === 'poli' ? (
           <PoliTab />
         ) : tab === 'kamar' ? (
           <KamarTab />
         ) : tab === 'tiket' ? (
-          <TiketTab />
+          <TiketTab onPerbaruiKB={bukaEditorKB} />
+        ) : tab === 'infogap' ? (
+          <InfoGapTab onPerbaruiKB={bukaEditorKB} />
         ) : (
           <AnnouncementTab />
         )}
@@ -313,14 +333,20 @@ export default function AdminDashboard() {
   );
 }
 
-function KnowledgeTab() {
+function KnowledgeTab({ draftAwal, onDraftDipakai }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(draftAwal || null);
   const [saving, setSaving] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
   const [search, setSearch] = useState('');
   const formRef = useRef(null);
+
+  // Draf dari tiket / information gap cukup dipakai sekali saat tab dibuka.
+  useEffect(() => {
+    if (draftAwal) onDraftDipakai?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadData() {
     setLoading(true);
@@ -600,6 +626,14 @@ function KnowledgeForm({ initial, onCancel, onSave, saving }) {
       <p className="font-(family-name:--font-fraunces) font-semibold text-[16px] text-[#0B2B24] mb-4">
         {initial.id ? 'Edit Data' : 'Tambah Data Baru'}
       </p>
+
+      {initial.konteks && (
+        <div className="mb-4 rounded-xl border border-[#C08829]/30 bg-[#C08829]/8 px-3.5 py-3 text-[12.5px] text-[#0B2B24]/80">
+          <p className="font-semibold text-[#8a5a12] mb-0.5">Berdasarkan tindak lanjut</p>
+          <p className="line-clamp-3">{initial.konteks}</p>
+          <p className="mt-1 text-[11.5px] text-[#0B2B24]/55">Kategori sudah dipilih otomatis. Periksa kembali isinya sebelum menyimpan.</p>
+        </div>
+      )}
 
       <label className="block text-[12.5px] font-semibold text-[#0B2B24]/70 mb-1.5">Kategori</label>
       <select
