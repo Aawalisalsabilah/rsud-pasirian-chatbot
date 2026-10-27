@@ -63,12 +63,91 @@ function KartuRingkasan({ label, nilai, sub, warna }) {
   );
 }
 
-function DetailTiket({ tiket, onTutup }) {
+const MIN_RINGKASAN = 20;
+
+function AlurStatus({ status }) {
+  const idx = STATUS_URUTAN.indexOf(status);
+  return (
+    <ol className="flex items-center gap-2" aria-label="Alur status tiket">
+      {STATUS_URUTAN.map((s, i) => {
+        const aktif = i <= idx;
+        return (
+          <li key={s} className="flex items-center gap-2">
+            <span
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold ${aktif ? 'text-white' : 'text-[#0B2B24]/40 bg-[#0B2B24]/5'}`}
+              style={aktif ? { backgroundColor: STATUS_TIKET[s].bg } : undefined}
+              aria-current={i === idx ? 'step' : undefined}
+            >
+              {i < idx ? '✓' : i + 1} {STATUS_TIKET[s].label}
+            </span>
+            {i < STATUS_URUTAN.length - 1 && <span className={`h-px w-5 ${i < idx ? 'bg-[#0B2B24]/40' : 'bg-[#0B2B24]/15'}`} />}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function KonfirmasiSelesai({ tiket, ringkasan, onBatal, onLanjut }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0B2B24]/50 p-4" onClick={onBatal}>
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="judul-konfirmasi-selesai"
+      >
+        <h3 id="judul-konfirmasi-selesai" className="font-(family-name:--font-fraunces) text-[18px] font-semibold">
+          Tandai tiket sebagai selesai?
+        </h3>
+        <p className="mt-2 text-[13.5px] text-[#0B2B24]/70">
+          Pengguna akan dikabari lewat WhatsApp ke <strong>+{tiket.no_wa}</strong>. Tindakan ini tidak bisa dibatalkan
+          dan tiket akan dikunci.
+        </p>
+        <div className="mt-4 rounded-xl bg-[#1F6B4F]/5 border border-[#1F6B4F]/15 p-3 text-[13px]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#1F6B4F]/80 mb-1">Pratinjau pesan</p>
+          <p className="whitespace-pre-line text-[#0B2B24]/85">
+            {`Halo${tiket.nama ? ` ${tiket.nama}` : ''}, tiket ${tiket.nomor_tiket} Anda telah selesai ditindaklanjuti.\n\n${ringkasan}`}
+          </p>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={onBatal} className="rounded-full border border-[#0B2B24]/15 px-4 py-2 text-[13px] font-semibold hover:bg-[#FBF9F4]">
+            Batal
+          </button>
+          <button onClick={onLanjut} className="rounded-full bg-[#1F6B4F] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0B2B24]">
+            Ya, tandai selesai
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailTiket({ tiket, onTutup, onUbah }) {
+  const [catatanBaru, setCatatanBaru] = useState('');
+  const [ringkasan, setRingkasan] = useState(tiket.ringkasan_penyelesaian || '');
+  const [konfirmasi, setKonfirmasi] = useState(false);
+  const terkunci = tiket.status === 'selesai';
+  const ringkasanCukup = ringkasan.trim().length >= MIN_RINGKASAN;
+
+  function tambahCatatan() {
+    const isi = catatanBaru.trim();
+    if (!isi) return;
+    onUbah({ catatan_internal: [...tiket.catatan_internal, { isi, oleh: 'Admin', waktu: new Date().toISOString() }] }, 'Catatan internal ditambahkan.');
+    setCatatanBaru('');
+  }
+
+  function tandaiSelesai() {
+    onUbah({ status: 'selesai', ringkasan_penyelesaian: ringkasan.trim() }, 'Tiket selesai. Notifikasi WhatsApp akan dikirim ke pengguna.');
+    setKonfirmasi(false);
+  }
+
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onTutup();
+    const onKey = (e) => e.key === 'Escape' && !konfirmasi && onTutup();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onTutup]);
+  }, [onTutup, konfirmasi]);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-[#0B2B24]/40" onClick={onTutup}>
@@ -95,8 +174,9 @@ function DetailTiket({ tiket, onTutup }) {
         </div>
 
         <div className="px-6 py-6 space-y-6">
+          <AlurStatus status={tiket.status} />
+
           <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge status={tiket.status} />
             <JenisLabel jenis={tiket.jenis} />
             <span className="text-[12px] text-[#0B2B24]/50">· {tiket.kategori}</span>
           </div>
@@ -152,16 +232,55 @@ function DetailTiket({ tiket, onTutup }) {
                 ))}
               </ul>
             )}
+            {!terkunci && (
+              <div className="mt-3">
+                <label htmlFor="catatan-baru" className="sr-only">Catatan internal baru</label>
+                <textarea
+                  id="catatan-baru"
+                  value={catatanBaru}
+                  onChange={(e) => setCatatanBaru(e.target.value)}
+                  rows={2}
+                  maxLength={500}
+                  placeholder="Tulis catatan untuk sesama admin. Tidak dikirim ke pengguna."
+                  className="w-full rounded-xl border border-[#0B2B24]/12 bg-white p-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C08829]/40"
+                />
+                <div className="mt-2 flex justify-end">
+                  <button
+                    onClick={tambahCatatan}
+                    disabled={!catatanBaru.trim()}
+                    className="rounded-full border border-[#0B2B24]/15 px-4 py-1.5 text-[12.5px] font-semibold hover:bg-[#FBF9F4] disabled:opacity-40"
+                  >
+                    Tambah catatan
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
 
           <section>
             <h4 className="text-[12px] font-semibold text-[#0B2B24]/55 mb-2">Ringkasan penyelesaian (dikirim ke pengguna via WA)</h4>
-            {tiket.ringkasan_penyelesaian ? (
+            {terkunci ? (
               <p className="rounded-xl border border-[#1F6B4F]/20 bg-[#1F6B4F]/5 p-4 text-[13.5px] leading-relaxed">
                 {tiket.ringkasan_penyelesaian}
               </p>
+            ) : tiket.status === 'baru' ? (
+              <p className="text-[13px] text-[#0B2B24]/45 italic">Bisa diisi setelah tiket mulai diproses.</p>
             ) : (
-              <p className="text-[13px] text-[#0B2B24]/45 italic">Belum diisi.</p>
+              <>
+                <label htmlFor="ringkasan" className="sr-only">Ringkasan penyelesaian</label>
+                <textarea
+                  id="ringkasan"
+                  value={ringkasan}
+                  onChange={(e) => setRingkasan(e.target.value)}
+                  rows={4}
+                  maxLength={1000}
+                  placeholder="Jawaban atau hasil tindak lanjut yang akan dibaca pengguna."
+                  className="w-full rounded-xl border border-[#0B2B24]/12 bg-white p-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C08829]/40"
+                />
+                <p className={`mt-1 text-[11.5px] ${ringkasanCukup ? 'text-[#0B2B24]/45' : 'text-[#9E3B32]'}`}>
+                  {ringkasanCukup ? `${ringkasan.trim().length}/1000 karakter` : `Minimal ${MIN_RINGKASAN} karakter sebelum tiket bisa diselesaikan.`}
+                </p>
+              </>
             )}
           </section>
 
@@ -179,23 +298,83 @@ function DetailTiket({ tiket, onTutup }) {
             </section>
           )}
 
-          <p className="rounded-xl border border-dashed border-[#C08829]/50 bg-[#C08829]/5 p-4 text-[12.5px] text-[#0B2B24]/70">
-            Ubah status, tambah catatan, dan tombol &ldquo;Perbarui knowledge base&rdquo; akan ditambahkan di tahap berikutnya (B08 &amp; B09).
+          <div className="rounded-xl border border-[#0B2B24]/8 bg-white p-4">
+            {tiket.status === 'baru' && (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[13px] text-[#0B2B24]/65">Tiket belum ditangani.</p>
+                <button
+                  onClick={() => onUbah({ status: 'diproses' }, 'Status diubah menjadi Diproses.')}
+                  className="rounded-full bg-[#C08829] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#A0701C]"
+                >
+                  Mulai proses
+                </button>
+              </div>
+            )}
+            {tiket.status === 'diproses' && (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[13px] text-[#0B2B24]/65">Isi ringkasan penyelesaian, lalu tandai selesai.</p>
+                <button
+                  onClick={() => setKonfirmasi(true)}
+                  disabled={!ringkasanCukup}
+                  className="rounded-full bg-[#1F6B4F] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0B2B24] disabled:opacity-40 disabled:hover:bg-[#1F6B4F]"
+                >
+                  Tandai selesai
+                </button>
+              </div>
+            )}
+            {terkunci && (
+              <p className="text-[13px] text-[#0B2B24]/65">🔒 Tiket sudah selesai dan dikunci. Status tidak bisa diubah lagi.</p>
+            )}
+          </div>
+
+          <p className="text-[11.5px] text-[#0B2B24]/40">
+            Tombol &ldquo;Perbarui knowledge base&rdquo; menyusul di B09.
           </p>
         </div>
       </aside>
+
+      {konfirmasi && (
+        <KonfirmasiSelesai
+          tiket={tiket}
+          ringkasan={ringkasan.trim()}
+          onBatal={() => setKonfirmasi(false)}
+          onLanjut={tandaiSelesai}
+        />
+      )}
     </div>
   );
 }
 
 export default function TiketTab() {
-  const [semuaTiket] = useState(TIKET_MOCK);
+  // Salinan data contoh. Perubahan hanya tersimpan di memori: hilang saat halaman di-refresh.
+  const [semuaTiket, setSemuaTiket] = useState(() => TIKET_MOCK.map((t) => ({ ...t, catatan_internal: [...t.catatan_internal] })));
+  const [pesan, setPesan] = useState('');
   const [cari, setCari] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [filterKategori, setFilterKategori] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [halaman, setHalaman] = useState(1);
-  const [dipilih, setDipilih] = useState(null);
+  const [nomorDipilih, setNomorDipilih] = useState(null);
+  const dipilih = semuaTiket.find((t) => t.nomor_tiket === nomorDipilih) || null;
+
+  useEffect(() => {
+    if (!pesan) return;
+    const id = setTimeout(() => setPesan(''), 3500);
+    return () => clearTimeout(id);
+  }, [pesan]);
+
+  // Nanti diganti PATCH /api/admin/tiket/[nomor] dari Tasya.
+  function ubahTiket(nomor, perubahan, info) {
+    setSemuaTiket((daftar) =>
+      daftar.map((t) => {
+        if (t.nomor_tiket !== nomor) return t;
+        if (t.status === 'selesai') return t; // tiket selesai dikunci
+        if (perubahan.status && !STATUS_TIKET[t.status].next.includes(perubahan.status)) return t;
+        return { ...t, ...perubahan, updated_at: new Date().toISOString() };
+      })
+    );
+    if (info) setPesan(info);
+  }
 
   const ringkasan = useMemo(() => {
     const hitung = { baru: 0, diproses: 0, selesai: 0 };
@@ -302,7 +481,7 @@ export default function TiketTab() {
                 {tampil.map((t) => (
                   <tr
                     key={t.nomor_tiket}
-                    onClick={() => setDipilih(t)}
+                    onClick={() => setNomorDipilih(t.nomor_tiket)}
                     className="cursor-pointer hover:bg-[#FBF9F4] transition"
                   >
                     <td className="px-5 py-4 align-top">
@@ -330,7 +509,7 @@ export default function TiketTab() {
             <ul className="md:hidden divide-y divide-[#0B2B24]/6">
               {tampil.map((t) => (
                 <li key={t.nomor_tiket}>
-                  <button onClick={() => setDipilih(t)} className="w-full text-left px-4 py-4 hover:bg-[#FBF9F4]">
+                  <button onClick={() => setNomorDipilih(t.nomor_tiket)} className="w-full text-left px-4 py-4 hover:bg-[#FBF9F4]">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-semibold text-[13.5px]">{t.nomor_tiket}</div>
@@ -373,7 +552,20 @@ export default function TiketTab() {
         </div>
       </div>
 
-      {dipilih && <DetailTiket tiket={dipilih} onTutup={() => setDipilih(null)} />}
+      {dipilih && (
+        <DetailTiket
+          key={dipilih.nomor_tiket}
+          tiket={dipilih}
+          onTutup={() => setNomorDipilih(null)}
+          onUbah={(perubahan, info) => ubahTiket(dipilih.nomor_tiket, perubahan, info)}
+        />
+      )}
+
+      {pesan && (
+        <div role="status" className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#0B2B24] px-5 py-3 text-[13px] font-medium text-white shadow-xl">
+          {pesan}
+        </div>
+      )}
     </div>
   );
 }
