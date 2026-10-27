@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { MessageQuestion, Repeat, Ticket, Flag, More } from 'iconsax-react';
+import { useEffect, useRef, useState } from 'react';
+import { MessageQuestion, Repeat, Ticket, Flag, More, Danger, Refresh2 } from 'iconsax-react';
 import {
   KATEGORI_TIKET,
   ALASAN_GAP,
@@ -9,8 +9,8 @@ import {
   kategoriKbDari,
   formatTanggalTiket,
 } from '@/lib/tiket-constants';
-// SEMENTARA: data contoh. Ganti dengan fetch ke API information gap (B06) kalau sudah ada.
-import { INFOGAP_MOCK } from '@/lib/infogap-mock';
+// Semua data lewat lapisan ini (mock / API asli). Lihat lib/tiket-api.js & docs/kontrak-api-tiket.md
+import { SUMBER_DATA, ambilDaftarGap, ubahStatusGap } from '@/lib/tiket-api';
 
 const PER_HALAMAN = 10;
 
@@ -97,65 +97,60 @@ function MenuAksi({ label, items }) {
 
 const URUTAN_STATUS_GAP = ['belum_ditinjau', 'ditinjau', 'diabaikan'];
 
+const RINGKASAN_KOSONG = {
+  perStatus: { belum_ditinjau: 0, ditinjau: 0, diabaikan: 0 },
+  total: 0, kemunculan: 0, punyaTiket: 0, daftarKategori: [], maks: 1, perAlasan: {},
+};
+
 export default function InfoGapTab({ onPerbaruiKB }) {
-  const [semuaGap, setSemuaGap] = useState(() => INFOGAP_MOCK.map((g) => ({ ...g })));
   const [tabStatus, setTabStatus] = useState('belum_ditinjau');
   const [cari, setCari] = useState('');
+  const [cariAktif, setCariAktif] = useState('');
   const [filterAlasan, setFilterAlasan] = useState('');
   const [filterKategori, setFilterKategori] = useState('');
   const [urut, setUrut] = useState('jumlah');
   const [halaman, setHalaman] = useState(1);
-  const [pesan, setPesan] = useState('');
+  const [pesan, setPesan] = useState(null); // { teks, galat }
+
+  const [daftar, setDaftar] = useState([]);
+  const [totalHasil, setTotalHasil] = useState(0);
+  const [ringkasan, setRingkasan] = useState(RINGKASAN_KOSONG);
+  const [memuat, setMemuat] = useState(true);
+  const [galat, setGalat] = useState('');
+  const [versi, setVersi] = useState(0);
 
   useEffect(() => {
     if (!pesan) return;
-    const id = setTimeout(() => setPesan(''), 3500);
+    const id = setTimeout(() => setPesan(null), 3500);
     return () => clearTimeout(id);
   }, [pesan]);
 
-  const ringkasan = useMemo(() => {
-    const aktif = semuaGap.filter((g) => g.status !== 'diabaikan');
-    const perKategori = {};
-    const perAlasan = {};
-    aktif.forEach((g) => {
-      perKategori[g.kategori] ??= { kali: 0, unik: 0 };
-      perKategori[g.kategori].kali += g.jumlah;
-      perKategori[g.kategori].unik += 1;
-      perAlasan[g.alasan] ??= { kali: 0, unik: 0 };
-      perAlasan[g.alasan].kali += g.jumlah;
-      perAlasan[g.alasan].unik += 1;
-    });
-    const daftarKategori = Object.entries(perKategori).sort((a, b) => b[1].kali - a[1].kali);
-    const perStatus = {};
-    URUTAN_STATUS_GAP.forEach((st) => { perStatus[st] = semuaGap.filter((g) => g.status === st).length; });
-    return {
-      total: aktif.length,
-      kemunculan: aktif.reduce((a, g) => a + g.jumlah, 0),
-      punyaTiket: aktif.filter((g) => g.nomor_tiket).length,
-      daftarKategori,
-      maks: daftarKategori[0]?.[1].kali || 1,
-      perAlasan,
-      perStatus,
-    };
-  }, [semuaGap]);
+  useEffect(() => {
+    const id = setTimeout(() => { setCariAktif(cari.trim()); setHalaman(1); }, 300);
+    return () => clearTimeout(id);
+  }, [cari]);
 
-  const hasil = useMemo(() => {
-    const q = cari.trim().toLowerCase();
-    return semuaGap
-      .filter((g) => g.status === tabStatus)
-      .filter((g) => !q || g.pertanyaan.toLowerCase().includes(q))
-      .filter((g) => !filterAlasan || g.alasan === filterAlasan)
-      .filter((g) => !filterKategori || g.kategori === filterKategori)
-      .sort((a, b) =>
-        urut === 'jumlah'
-          ? b.jumlah - a.jumlah
-          : new Date(b.terakhir_muncul) - new Date(a.terakhir_muncul)
-      );
-  }, [semuaGap, tabStatus, cari, filterAlasan, filterKategori, urut]);
+  useEffect(() => {
+    let batal = false;
+    setMemuat(true);
+    setGalat('');
+    ambilDaftarGap({
+      status: tabStatus, kategori: filterKategori, alasan: filterAlasan, cari: cariAktif, urut,
+      halaman, per_halaman: PER_HALAMAN,
+    })
+      .then((r) => {
+        if (batal) return;
+        setDaftar(r.data);
+        setTotalHasil(r.total);
+        setRingkasan(r.ringkasan);
+      })
+      .catch((e) => { if (!batal) setGalat(e.message); })
+      .finally(() => { if (!batal) setMemuat(false); });
+    return () => { batal = true; };
+  }, [tabStatus, filterKategori, filterAlasan, cariAktif, urut, halaman, versi]);
 
-  const totalHalaman = Math.max(1, Math.ceil(hasil.length / PER_HALAMAN));
+  const totalHalaman = Math.max(1, Math.ceil(totalHasil / PER_HALAMAN));
   const halamanAman = Math.min(halaman, totalHalaman);
-  const tampil = hasil.slice((halamanAman - 1) * PER_HALAMAN, halamanAman * PER_HALAMAN);
   const adaFilter = cari || filterAlasan || filterKategori;
 
   function ubah(setter) {
@@ -163,13 +158,17 @@ export default function InfoGapTab({ onPerbaruiKB }) {
   }
 
   function resetFilter() {
-    setCari(''); setFilterAlasan(''); setFilterKategori(''); setHalaman(1);
+    setCari(''); setCariAktif(''); setFilterAlasan(''); setFilterKategori(''); setHalaman(1);
   }
 
-  // Nanti diganti PATCH ke API information gap.
-  function pindahStatus(id, status) {
-    setSemuaGap((daftar) => daftar.map((g) => (g.id === id ? { ...g, status } : g)));
-    setPesan(`Dipindahkan ke "${STATUS_GAP[status].label}".`);
+  async function pindahStatus(id, status) {
+    try {
+      await ubahStatusGap(id, status);
+      setPesan({ teks: `Dipindahkan ke "${STATUS_GAP[status].label}".` });
+      setVersi((v) => v + 1);
+    } catch (e) {
+      setPesan({ teks: e.message, galat: true });
+    }
   }
 
   function perbaruiKB(g) {
@@ -203,7 +202,8 @@ export default function InfoGapTab({ onPerbaruiKB }) {
         <h2 className="font-(family-name:--font-fraunces) text-[22px] font-semibold">Information Gap</h2>
         <p className="mt-1 text-[13px] text-[#0B2B24]/55 max-w-3xl">
           Pertanyaan pengguna yang belum bisa dijawab dengan baik oleh chatbot. Daftar ini terpisah dari tiket dan
-          tidak otomatis menjadi tiket. Data saat ini masih data contoh.
+          tidak otomatis menjadi tiket.
+          {SUMBER_DATA === 'mock' && <span className="ml-1 font-medium text-[#A0701C]">Mode data contoh — perubahan hilang saat halaman di-refresh.</span>}
         </p>
       </div>
 
@@ -362,7 +362,34 @@ export default function InfoGapTab({ onPerbaruiKB }) {
           )}
         </div>
 
-        {tampil.length === 0 ? (
+        {galat ? (
+          <div className="px-6 py-14 text-center" role="alert">
+            <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#9E3B32]/10 text-[#9E3B32]">
+              <Danger size={22} variant="Bulk" color="currentColor" aria-hidden="true" />
+            </span>
+            <p className="font-semibold">Data information gap gagal dimuat</p>
+            <p className="mt-1 text-[13px] text-[#0B2B24]/55">{galat}</p>
+            <button
+              onClick={() => setVersi((v) => v + 1)}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#0B2B24] px-4 py-1.5 text-[12.5px] font-semibold hover:bg-[#0B2B24] hover:text-white transition"
+            >
+              <Refresh2 size={15} color="currentColor" aria-hidden="true" /> Coba lagi
+            </button>
+          </div>
+        ) : memuat && daftar.length === 0 ? (
+          <div className="divide-y divide-[#0B2B24]/6" aria-label="Memuat daftar pertanyaan">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4 animate-pulse" aria-hidden="true">
+                <span className="h-9 w-9 rounded-lg bg-[#0B2B24]/8" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-2/5 rounded bg-[#0B2B24]/8" />
+                  <div className="h-2.5 w-1/6 rounded bg-[#0B2B24]/6" />
+                </div>
+                <div className="h-3 w-16 rounded bg-[#0B2B24]/6" />
+              </div>
+            ))}
+          </div>
+        ) : daftar.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <p className="font-semibold">
               {adaFilter ? 'Tidak ada pertanyaan yang cocok.' : `Tidak ada pertanyaan di "${STATUS_GAP[tabStatus].label}".`}
@@ -373,7 +400,7 @@ export default function InfoGapTab({ onPerbaruiKB }) {
           </div>
         ) : (
           <>
-            <table className="hidden md:table w-full table-fixed text-left text-[13px]">
+            <table className={`hidden md:table w-full table-fixed text-left text-[13px] transition-opacity ${memuat ? 'opacity-50' : ''}`} aria-busy={memuat}>
               <colgroup>
                 <col className="w-[40%]" />
                 <col className="w-[17%]" />
@@ -397,7 +424,7 @@ export default function InfoGapTab({ onPerbaruiKB }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#0B2B24]/6">
-                {tampil.map((g) => (
+                {daftar.map((g) => (
                   <tr key={g.id} className="hover:bg-[#FBF9F4]/70">
                     <td className="px-5 py-4 align-middle">
                       <div className="flex items-center gap-3">
@@ -426,7 +453,7 @@ export default function InfoGapTab({ onPerbaruiKB }) {
             </table>
 
             <ul className="md:hidden divide-y divide-[#0B2B24]/6">
-              {tampil.map((g) => (
+              {daftar.map((g) => (
                 <li key={g.id} className="px-4 py-4">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium text-[13.5px] leading-snug">{g.pertanyaan}</p>
@@ -444,11 +471,12 @@ export default function InfoGapTab({ onPerbaruiKB }) {
           </>
         )}
 
+        {!galat && (
         <div className="flex items-center justify-between gap-3 border-t border-[#0B2B24]/8 px-5 py-3 text-[12.5px]">
           <span className="text-[#0B2B24]/55">
-            {hasil.length === 0
+            {totalHasil === 0
               ? '0 pertanyaan'
-              : `${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, hasil.length)} dari ${hasil.length} pertanyaan`}
+              : `${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, totalHasil)} dari ${totalHasil} pertanyaan`}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -468,12 +496,13 @@ export default function InfoGapTab({ onPerbaruiKB }) {
             </button>
           </div>
         </div>
+        )}
       </div>
       </section>
 
       {pesan && (
-        <div role="status" className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#0B2B24] px-5 py-3 text-[13px] font-medium text-white shadow-xl">
-          {pesan}
+        <div role="status" className={`fixed bottom-6 left-1/2 z-[70] max-w-[90vw] -translate-x-1/2 rounded-full px-5 py-3 text-[13px] font-medium text-white shadow-xl ${pesan.galat ? 'bg-[#9E3B32]' : 'bg-[#0B2B24]'}`}>
+          {pesan.teks}
         </div>
       )}
     </div>

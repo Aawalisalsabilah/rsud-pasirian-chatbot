@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { TickCircle, Lock1, Star1, Notification, Timer1, Ticket, DocumentText, ArrowRight2, ArrowLeft2, ArrowSwapHorizontal, NoteText, Trash } from 'iconsax-react';
+import { useCallback, useEffect, useState } from 'react';
+import { TickCircle, Lock1, Star1, Notification, Timer1, Ticket, DocumentText, ArrowRight2, ArrowLeft2, ArrowSwapHorizontal, NoteText, Trash, Send2, Danger, Book1, Refresh2 } from 'iconsax-react';
 import {
   JENIS_TIKET,
   KATEGORI_TIKET,
@@ -11,31 +11,29 @@ import {
   formatTanggalTiket,
   kategoriKbDari,
 } from '@/lib/tiket-constants';
-// SEMENTARA: data contoh. Ganti dengan fetch('/api/admin/tiket') kalau API Tasya sudah jadi.
-import { TIKET_MOCK } from '@/lib/tiket-mock';
+// Semua data lewat lapisan ini (mock / API asli). Lihat lib/tiket-api.js & docs/kontrak-api-tiket.md
+import {
+  SUMBER_DATA,
+  ambilDaftarTiket,
+  ambilDetailTiket,
+  mulaiProsesTiket,
+  selesaikanTiket,
+  tambahCatatanTiket,
+  hapusCatatanTiket,
+} from '@/lib/tiket-api';
 
 const PER_HALAMAN = 10;
-
-// Riwayat awal disusun dari data contoh. Nanti riwayat asli datang dari API Tasya.
-function buatRiwayatAwal(t) {
-  const r = [{ tipe: 'dibuat', aksi: 'Tiket dibuat oleh pengguna', oleh: 'Sistem', waktu: t.created_at }];
-  const waktuCatatan = t.catatan_internal.map((c) => c.waktu);
-  if (t.status !== 'baru') {
-    r.push({ tipe: 'status', aksi: 'Status diubah: Baru → Diproses', oleh: 'Admin', waktu: waktuCatatan[0] || t.updated_at });
-  }
-  t.catatan_internal.forEach((c) => r.push({ tipe: 'catatan', aksi: 'Catatan internal ditambahkan', oleh: c.oleh, waktu: c.waktu }));
-  if (t.status === 'selesai') {
-    r.push({ tipe: 'selesai', aksi: 'Tiket diselesaikan', sub: 'Notifikasi WhatsApp dikirim ke pengguna', oleh: 'Admin', waktu: t.updated_at });
-  }
-  return r.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
-}
 
 const GAYA_RIWAYAT = {
   dibuat: { Ikon: DocumentText, warna: '#0B2B24' },
   status: { Ikon: ArrowSwapHorizontal, warna: '#C08829' },
   catatan: { Ikon: NoteText, warna: '#5B6B66' },
-  hapus: { Ikon: Trash, warna: '#9E3B32' },
+  hapus_catatan: { Ikon: Trash, warna: '#9E3B32' },
   selesai: { Ikon: TickCircle, warna: '#1F6B4F' },
+  wa_terkirim: { Ikon: Send2, warna: '#1F6B4F' },
+  wa_gagal: { Ikon: Danger, warna: '#9E3B32' },
+  rating: { Ikon: Star1, warna: '#C08829' },
+  kb_diperbarui: { Ikon: Book1, warna: '#0B2B24' },
 };
 
 function RiwayatPenanganan({ riwayat }) {
@@ -129,7 +127,7 @@ function KartuRingkasan({ label, nilai, sub, warna, Ikon }) {
   );
 }
 
-function CatatanItem({ catatan, bisaHapus, onHapus }) {
+function CatatanItem({ catatan, bisaHapus, onHapus, sibuk }) {
   const [konfirmasi, setKonfirmasi] = useState(false);
   return (
     <li
@@ -167,6 +165,7 @@ function CatatanItem({ catatan, bisaHapus, onHapus }) {
             </button>
             <button
               onClick={onHapus}
+              disabled={sibuk}
               autoFocus
               className="rounded-full bg-[#9E3B32] px-3 py-1 text-[12px] font-semibold text-white hover:bg-[#842f28]"
             >
@@ -232,7 +231,7 @@ function AlurStatus({ status }) {
   );
 }
 
-function KonfirmasiSelesai({ tiket, ringkasan, onBatal, onLanjut }) {
+function KonfirmasiSelesai({ tiket, ringkasan, onBatal, onLanjut, sibuk }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0B2B24]/50 p-4" onClick={onBatal}>
       <div
@@ -259,8 +258,12 @@ function KonfirmasiSelesai({ tiket, ringkasan, onBatal, onLanjut }) {
           <button onClick={onBatal} className="rounded-full border border-[#0B2B24]/15 px-4 py-2 text-[13px] font-semibold hover:bg-[#FBF9F4]">
             Batal
           </button>
-          <button onClick={onLanjut} className="rounded-full bg-[#1F6B4F] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0B2B24]">
-            Ya, tandai selesai
+          <button
+            onClick={onLanjut}
+            disabled={sibuk}
+            className="rounded-full bg-[#1F6B4F] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0B2B24] disabled:opacity-60"
+          >
+            {sibuk ? 'Menyimpan…' : 'Ya, tandai selesai'}
           </button>
         </div>
       </div>
@@ -268,22 +271,21 @@ function KonfirmasiSelesai({ tiket, ringkasan, onBatal, onLanjut }) {
   );
 }
 
-function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
+function DetailTiket({ tiket, onTutup, onAksi, sibuk, onPerbaruiKB }) {
   const [catatanBaru, setCatatanBaru] = useState('');
   const [ringkasan, setRingkasan] = useState(tiket.ringkasan_penyelesaian || '');
   const [konfirmasi, setKonfirmasi] = useState(false);
   const terkunci = tiket.status === 'selesai';
   const ringkasanCukup = ringkasan.trim().length >= MIN_RINGKASAN;
 
-  function tambahCatatan() {
+  async function tambahCatatan() {
     const isi = catatanBaru.trim();
     if (!isi) return;
-    onUbah({ catatan_internal: [...tiket.catatan_internal, { isi, oleh: 'Admin', waktu: new Date().toISOString() }] }, 'Catatan internal ditambahkan.');
-    setCatatanBaru('');
+    if (await onAksi('tambahCatatan', isi)) setCatatanBaru('');
   }
 
-  function tandaiSelesai() {
-    onUbah({ status: 'selesai', ringkasan_penyelesaian: ringkasan.trim() }, 'Tiket selesai. Notifikasi WhatsApp akan dikirim ke pengguna.');
+  async function tandaiSelesai() {
+    await onAksi('selesaikan', ringkasan.trim());
     setKonfirmasi(false);
   }
 
@@ -373,17 +375,13 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
               <p className="text-[13px] text-[#0B2B24]/45 italic">Belum ada catatan.</p>
             ) : (
               <ul className="space-y-2">
-                {tiket.catatan_internal.map((c, i) => (
+                {tiket.catatan_internal.map((c) => (
                   <CatatanItem
-                    key={`${c.waktu}-${i}`}
+                    key={c.id}
                     catatan={c}
                     bisaHapus={!terkunci}
-                    onHapus={() =>
-                      onUbah(
-                        { catatan_internal: tiket.catatan_internal.filter((_, j) => j !== i) },
-                        'Catatan internal dihapus.'
-                      )
-                    }
+                    sibuk={sibuk}
+                    onHapus={() => onAksi('hapusCatatan', c.id)}
                   />
                 ))}
               </ul>
@@ -410,9 +408,10 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
                     </button>
                     <button
                       onClick={tambahCatatan}
-                      className="rounded-full bg-[#0B2B24] px-4 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#153b31] transition"
+                      disabled={sibuk}
+                      className="rounded-full bg-[#0B2B24] px-4 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#153b31] transition disabled:opacity-60"
                     >
-                      Tambah catatan
+                      {sibuk ? 'Menyimpan…' : 'Tambah catatan'}
                     </button>
                   </div>
                 )}
@@ -479,10 +478,11 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-[13px] text-[#0B2B24]/65">Tiket belum ditangani.</p>
                 <button
-                  onClick={() => onUbah({ status: 'diproses' }, 'Status diubah menjadi Diproses.')}
-                  className="rounded-full bg-[#C08829] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#A0701C]"
+                  onClick={() => onAksi('mulaiProses')}
+                  disabled={sibuk}
+                  className="rounded-full bg-[#C08829] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#A0701C] disabled:opacity-60"
                 >
-                  Mulai proses
+                  {sibuk ? 'Menyimpan…' : 'Mulai proses'}
                 </button>
               </div>
             )}
@@ -491,7 +491,7 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
                 <p className="text-[13px] text-[#0B2B24]/65">Isi ringkasan penyelesaian, lalu tandai selesai.</p>
                 <button
                   onClick={() => setKonfirmasi(true)}
-                  disabled={!ringkasanCukup}
+                  disabled={!ringkasanCukup || sibuk}
                   className="rounded-full bg-[#1F6B4F] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0B2B24] disabled:opacity-40 disabled:hover:bg-[#1F6B4F]"
                 >
                   Tandai selesai
@@ -538,79 +538,146 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
           ringkasan={ringkasan.trim()}
           onBatal={() => setKonfirmasi(false)}
           onLanjut={tandaiSelesai}
+          sibuk={sibuk}
         />
       )}
     </div>
   );
 }
 
+function BarisSkeleton() {
+  return (
+    <tr aria-hidden="true">
+      <td className="px-5 py-4" colSpan={6}>
+        <div className="flex items-center gap-3 animate-pulse">
+          <span className="h-9 w-9 rounded-lg bg-[#0B2B24]/8" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-1/3 rounded bg-[#0B2B24]/8" />
+            <div className="h-2.5 w-1/5 rounded bg-[#0B2B24]/6" />
+          </div>
+          <div className="hidden lg:block h-3 w-1/4 rounded bg-[#0B2B24]/6" />
+          <div className="h-6 w-16 rounded-md bg-[#0B2B24]/8" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function PanelSementara({ judul, children, onTutup }) {
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-[#0B2B24]/40" onClick={onTutup}>
+      <aside className="h-full w-full max-w-xl overflow-y-auto bg-[#FBF9F4] shadow-2xl" onClick={(e) => e.stopPropagation()} aria-busy="true">
+        <div className="sticky top-0 z-20 bg-[#0B2B24] px-6 py-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.08em] uppercase text-white/50">Detail Tiket</p>
+            <h3 className="mt-1 font-(family-name:--font-fraunces) text-[19px] font-semibold text-white">{judul}</h3>
+          </div>
+          <button onClick={onTutup} className="rounded-full border border-white/25 px-3 py-1.5 text-[12.5px] font-semibold text-white/90 hover:bg-white/10">
+            Tutup
+          </button>
+        </div>
+        <div className="px-6 py-6">{children}</div>
+      </aside>
+    </div>
+  );
+}
+
+const AKSI = {
+  mulaiProses: { fn: (n) => mulaiProsesTiket(n), pesan: 'Status diubah menjadi Diproses.' },
+  selesaikan: { fn: (n, x) => selesaikanTiket(n, x), pesan: 'Tiket selesai. Notifikasi WhatsApp dikirim ke pengguna.' },
+  tambahCatatan: { fn: (n, x) => tambahCatatanTiket(n, x), pesan: 'Catatan internal ditambahkan.' },
+  hapusCatatan: { fn: (n, x) => hapusCatatanTiket(n, x), pesan: 'Catatan internal dihapus.' },
+};
+
 export default function TiketTab({ onPerbaruiKB }) {
-  // Salinan data contoh. Perubahan hanya tersimpan di memori: hilang saat halaman di-refresh.
-  const [semuaTiket, setSemuaTiket] = useState(() => TIKET_MOCK.map((t) => ({ ...t, catatan_internal: [...t.catatan_internal], riwayat: buatRiwayatAwal(t) })));
-  const [pesan, setPesan] = useState('');
+  // --- filter & halaman ---
   const [cari, setCari] = useState('');
+  const [cariAktif, setCariAktif] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [filterKategori, setFilterKategori] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [halaman, setHalaman] = useState(1);
+
+  // --- data daftar ---
+  const [daftar, setDaftar] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [ringkasan, setRingkasan] = useState(null);
+  const [memuat, setMemuat] = useState(true);
+  const [galat, setGalat] = useState('');
+  const [versi, setVersi] = useState(0); // naikkan untuk memuat ulang
+
+  // --- detail ---
   const [nomorDipilih, setNomorDipilih] = useState(null);
-  const dipilih = semuaTiket.find((t) => t.nomor_tiket === nomorDipilih) || null;
+  const [detail, setDetail] = useState(null);
+  const [galatDetail, setGalatDetail] = useState('');
+  const [versiDetail, setVersiDetail] = useState(0);
+  const [sibuk, setSibuk] = useState(false);
+
+  // --- notifikasi kecil ---
+  const [pesan, setPesan] = useState(null); // { teks, galat }
 
   useEffect(() => {
     if (!pesan) return;
-    const id = setTimeout(() => setPesan(''), 3500);
+    const id = setTimeout(() => setPesan(null), 3500);
     return () => clearTimeout(id);
   }, [pesan]);
 
-  // Nanti diganti PATCH /api/admin/tiket/[nomor] dari Tasya.
-  function ubahTiket(nomor, perubahan, info) {
-    setSemuaTiket((daftar) =>
-      daftar.map((t) => {
-        if (t.nomor_tiket !== nomor) return t;
-        if (t.status === 'selesai') return t; // tiket selesai dikunci
-        if (perubahan.status && !STATUS_TIKET[t.status].next.includes(perubahan.status)) return t;
-        const waktu = new Date().toISOString();
-        const log = [];
-        if (perubahan.status === 'selesai') {
-          log.push({ tipe: 'selesai', aksi: 'Tiket diselesaikan', sub: 'Notifikasi WhatsApp dikirim ke pengguna', oleh: 'Admin', waktu });
-        } else if (perubahan.status) {
-          log.push({ tipe: 'status', aksi: `Status diubah: ${STATUS_TIKET[t.status].label} → ${STATUS_TIKET[perubahan.status].label}`, oleh: 'Admin', waktu });
-        }
-        if (perubahan.catatan_internal) {
-          const bertambah = perubahan.catatan_internal.length > t.catatan_internal.length;
-          log.push(
-            bertambah
-              ? { tipe: 'catatan', aksi: 'Catatan internal ditambahkan', oleh: 'Admin', waktu }
-              : { tipe: 'hapus', aksi: 'Catatan internal dihapus', oleh: 'Admin', waktu }
-          );
-        }
-        return { ...t, ...perubahan, riwayat: [...t.riwayat, ...log], updated_at: waktu };
+  // Tunggu 300 ms setelah berhenti mengetik baru mencari
+  useEffect(() => {
+    const id = setTimeout(() => { setCariAktif(cari.trim()); setHalaman(1); }, 300);
+    return () => clearTimeout(id);
+  }, [cari]);
+
+  useEffect(() => {
+    let batal = false;
+    setMemuat(true);
+    setGalat('');
+    ambilDaftarTiket({
+      status: filterStatus, jenis: filterJenis, kategori: filterKategori, cari: cariAktif,
+      halaman, per_halaman: PER_HALAMAN,
+    })
+      .then((r) => {
+        if (batal) return;
+        setDaftar(r.data);
+        setTotal(r.total);
+        setRingkasan(r.ringkasan);
       })
-    );
-    if (info) setPesan(info);
+      .catch((e) => { if (!batal) setGalat(e.message); })
+      .finally(() => { if (!batal) setMemuat(false); });
+    return () => { batal = true; };
+  }, [filterStatus, filterJenis, filterKategori, cariAktif, halaman, versi]);
+
+  useEffect(() => {
+    if (!nomorDipilih) { setDetail(null); return; }
+    let batal = false;
+    setGalatDetail('');
+    ambilDetailTiket(nomorDipilih)
+      .then((d) => { if (!batal) setDetail(d); })
+      .catch((e) => { if (!batal) setGalatDetail(e.message); });
+    return () => { batal = true; };
+  }, [nomorDipilih, versiDetail]);
+
+  const tutupDetail = useCallback(() => { setNomorDipilih(null); setDetail(null); }, []);
+
+  // Menjalankan aksi di panel detail. Mengembalikan true kalau berhasil.
+  async function jalankanAksi(nama, nilai) {
+    setSibuk(true);
+    try {
+      const d = await AKSI[nama].fn(nomorDipilih, nilai);
+      setDetail(d);
+      setVersi((v) => v + 1);
+      setPesan({ teks: AKSI[nama].pesan });
+      return true;
+    } catch (e) {
+      setPesan({ teks: e.message, galat: true });
+      return false;
+    } finally {
+      setSibuk(false);
+    }
   }
 
-  const ringkasan = useMemo(() => {
-    const hitung = { baru: 0, diproses: 0, selesai: 0 };
-    semuaTiket.forEach((t) => { hitung[t.status] = (hitung[t.status] || 0) + 1; });
-    const dinilai = semuaTiket.filter((t) => t.rating);
-    const rata = dinilai.length ? dinilai.reduce((a, t) => a + t.rating, 0) / dinilai.length : null;
-    return { ...hitung, rata, jumlahDinilai: dinilai.length };
-  }, [semuaTiket]);
-
-  const hasil = useMemo(() => {
-    const q = cari.trim().toLowerCase();
-    return semuaTiket
-      .filter((t) => !q || t.nomor_tiket.toLowerCase().includes(q))
-      .filter((t) => !filterJenis || t.jenis === filterJenis)
-      .filter((t) => !filterKategori || t.kategori === filterKategori)
-      .filter((t) => !filterStatus || t.status === filterStatus)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  }, [semuaTiket, cari, filterJenis, filterKategori, filterStatus]);
-
-  const totalHalaman = Math.max(1, Math.ceil(hasil.length / PER_HALAMAN));
+  const totalHalaman = Math.max(1, Math.ceil(total / PER_HALAMAN));
   const halamanAman = Math.min(halaman, totalHalaman);
-  const tampil = hasil.slice((halamanAman - 1) * PER_HALAMAN, halamanAman * PER_HALAMAN);
   const adaFilter = cari || filterJenis || filterKategori || filterStatus;
 
   function ubah(setter) {
@@ -618,7 +685,7 @@ export default function TiketTab({ onPerbaruiKB }) {
   }
 
   function resetFilter() {
-    setCari(''); setFilterJenis(''); setFilterKategori(''); setFilterStatus(''); setHalaman(1);
+    setCari(''); setCariAktif(''); setFilterJenis(''); setFilterKategori(''); setFilterStatus(''); setHalaman(1);
   }
 
   return (
@@ -626,18 +693,19 @@ export default function TiketTab({ onPerbaruiKB }) {
       <div>
         <h2 className="font-(family-name:--font-fraunces) text-[22px] font-semibold">Tindak Lanjut Informasi</h2>
         <p className="mt-1 text-[13px] text-[#0B2B24]/55">
-          Permintaan dan pengaduan informasi dari pengguna. Data saat ini masih data contoh.
+          Permintaan dan pengaduan informasi dari pengguna.
+          {SUMBER_DATA === 'mock' && <span className="ml-1 font-medium text-[#A0701C]">Mode data contoh — perubahan hilang saat halaman di-refresh.</span>}
         </p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KartuRingkasan label="Tiket baru" nilai={ringkasan.baru} sub="belum ditangani" warna={STATUS_TIKET.baru.bg} Ikon={Notification} />
-        <KartuRingkasan label="Diproses" nilai={ringkasan.diproses} sub="sedang ditindaklanjuti" warna={STATUS_TIKET.diproses.bg} Ikon={Timer1} />
-        <KartuRingkasan label="Selesai" nilai={ringkasan.selesai} sub="pengguna sudah dikabari" warna={STATUS_TIKET.selesai.bg} Ikon={TickCircle} />
+        <KartuRingkasan label="Tiket baru" nilai={ringkasan?.baru ?? '–'} sub="belum ditangani" warna={STATUS_TIKET.baru.bg} Ikon={Notification} />
+        <KartuRingkasan label="Diproses" nilai={ringkasan?.diproses ?? '–'} sub="sedang ditindaklanjuti" warna={STATUS_TIKET.diproses.bg} Ikon={Timer1} />
+        <KartuRingkasan label="Selesai" nilai={ringkasan?.selesai ?? '–'} sub="pengguna sudah dikabari" warna={STATUS_TIKET.selesai.bg} Ikon={TickCircle} />
         <KartuRingkasan
           label="Rata-rata rating"
-          nilai={ringkasan.rata ? ringkasan.rata.toFixed(1) : '-'}
-          sub={`dari ${ringkasan.jumlahDinilai} penilaian`}
+          nilai={ringkasan?.rata ? ringkasan.rata.toFixed(1) : '–'}
+          sub={ringkasan ? `dari ${ringkasan.jumlahDinilai} penilaian` : 'memuat…'}
           warna="#0B2B24"
           Ikon={Star1}
         />
@@ -647,7 +715,7 @@ export default function TiketTab({ onPerbaruiKB }) {
         <div className="px-5 pt-5">
           <h3 className="flex items-center gap-2 text-[17px] font-semibold">
             <Ticket size={22} variant="Bulk" color="#C08829" aria-hidden="true" />
-            {hasil.length} Tiket{adaFilter ? ' ditemukan' : ''}
+            {galat ? 'Tiket' : memuat && !ringkasan ? 'Memuat tiket…' : `${total} Tiket${adaFilter ? ' ditemukan' : ''}`}
           </h3>
           <p className="mt-0.5 text-[12.5px] text-[#0B2B24]/55">Kelola dan pantau tindak lanjut permintaan serta pengaduan informasi.</p>
         </div>
@@ -682,14 +750,36 @@ export default function TiketTab({ onPerbaruiKB }) {
           )}
         </div>
 
-        {tampil.length === 0 ? (
+        {galat ? (
+          <div className="px-6 py-14 text-center border-t border-[#0B2B24]/6" role="alert">
+            <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#9E3B32]/10 text-[#9E3B32]">
+              <Danger size={22} variant="Bulk" color="currentColor" aria-hidden="true" />
+            </span>
+            <p className="font-semibold">Daftar tiket gagal dimuat</p>
+            <p className="mt-1 text-[13px] text-[#0B2B24]/55">{galat}</p>
+            <button
+              onClick={() => setVersi((v) => v + 1)}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#0B2B24] px-4 py-1.5 text-[12.5px] font-semibold hover:bg-[#0B2B24] hover:text-white transition"
+            >
+              <Refresh2 size={15} color="currentColor" aria-hidden="true" /> Coba lagi
+            </button>
+          </div>
+        ) : memuat && daftar.length === 0 ? (
+          <table className="w-full border-t border-[#0B2B24]/8" aria-label="Memuat daftar tiket">
+            <tbody className="divide-y divide-[#0B2B24]/6">
+              {Array.from({ length: 5 }, (_, i) => <BarisSkeleton key={i} />)}
+            </tbody>
+          </table>
+        ) : daftar.length === 0 ? (
           <div className="px-6 py-14 text-center border-t border-[#0B2B24]/6">
-            <p className="font-semibold">Tidak ada tiket yang cocok.</p>
-            <p className="mt-1 text-[13px] text-[#0B2B24]/50">Coba ubah kata kunci atau filter.</p>
+            <p className="font-semibold">{adaFilter ? 'Tidak ada tiket yang cocok.' : 'Belum ada tiket masuk.'}</p>
+            <p className="mt-1 text-[13px] text-[#0B2B24]/50">
+              {adaFilter ? 'Coba ubah kata kunci atau filter.' : 'Tiket dari formulir Tindak Lanjut Informasi akan muncul di sini.'}
+            </p>
           </div>
         ) : (
           <>
-            <table className="hidden md:table w-full table-fixed text-left text-[13px]">
+            <table className={`hidden md:table w-full table-fixed text-left text-[13px] transition-opacity ${memuat ? 'opacity-50' : ''}`} aria-busy={memuat}>
               <colgroup>
                 <col className="w-[25%]" />
                 <col className="w-[14%]" />
@@ -709,7 +799,7 @@ export default function TiketTab({ onPerbaruiKB }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#0B2B24]/6">
-                {tampil.map((t) => (
+                {daftar.map((t) => (
                   <tr
                     key={t.nomor_tiket}
                     onClick={() => setNomorDipilih(t.nomor_tiket)}
@@ -748,7 +838,7 @@ export default function TiketTab({ onPerbaruiKB }) {
             </table>
 
             <ul className="md:hidden divide-y divide-[#0B2B24]/6 border-t border-[#0B2B24]/8">
-              {tampil.map((t) => (
+              {daftar.map((t) => (
                 <li key={t.nomor_tiket}>
                   <button onClick={() => setNomorDipilih(t.nomor_tiket)} className="w-full text-left px-4 py-4 hover:bg-[#FBF9F4]">
                     <div className="flex items-start gap-3">
@@ -774,11 +864,12 @@ export default function TiketTab({ onPerbaruiKB }) {
           </>
         )}
 
+        {!galat && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#0B2B24]/8 px-5 py-4 text-[12.5px]">
           <span className="text-[#0B2B24]/55">
-            {hasil.length === 0
+            {total === 0
               ? '0 tiket'
-              : `Menampilkan ${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, hasil.length)} dari ${hasil.length} tiket`}
+              : `Menampilkan ${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, total)} dari ${total} tiket`}
           </span>
           <nav className="flex items-center gap-1.5" aria-label="Halaman">
             <button
@@ -811,26 +902,51 @@ export default function TiketTab({ onPerbaruiKB }) {
             </button>
           </nav>
         </div>
+        )}
       </section>
 
-      {dipilih && (
+      {nomorDipilih && detail?.nomor_tiket === nomorDipilih ? (
         <DetailTiket
-          key={dipilih.nomor_tiket}
-          tiket={dipilih}
-          onTutup={() => setNomorDipilih(null)}
-          onUbah={(perubahan, info) => ubahTiket(dipilih.nomor_tiket, perubahan, info)}
+          key={detail.nomor_tiket}
+          tiket={detail}
+          onTutup={tutupDetail}
+          onAksi={jalankanAksi}
+          sibuk={sibuk}
           onPerbaruiKB={onPerbaruiKB}
         />
-      )}
+      ) : nomorDipilih ? (
+        <PanelSementara judul={nomorDipilih} onTutup={tutupDetail}>
+          {galatDetail ? (
+            <div className="text-center py-10" role="alert">
+              <p className="font-semibold">Detail tiket gagal dimuat</p>
+              <p className="mt-1 text-[13px] text-[#0B2B24]/55">{galatDetail}</p>
+              <button
+                onClick={() => setVersiDetail((v) => v + 1)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#0B2B24] px-4 py-1.5 text-[12.5px] font-semibold hover:bg-[#0B2B24] hover:text-white transition"
+              >
+                <Refresh2 size={15} color="currentColor" aria-hidden="true" /> Coba lagi
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4 animate-pulse" aria-label="Memuat detail tiket">
+              <div className="h-24 rounded-xl bg-[#0B2B24]/6" />
+              <div className="h-4 w-1/3 rounded bg-[#0B2B24]/8" />
+              <div className="h-20 rounded-xl bg-[#0B2B24]/6" />
+              <div className="h-4 w-1/4 rounded bg-[#0B2B24]/8" />
+              <div className="h-16 rounded-xl bg-[#0B2B24]/6" />
+            </div>
+          )}
+        </PanelSementara>
+      ) : null}
 
       {pesan && (
         <div
           role="status"
-          className={`fixed bottom-6 z-[70] rounded-full bg-[#0B2B24] px-5 py-3 text-[13px] font-medium text-white shadow-xl ${
-            dipilih ? 'right-6 sm:right-[calc(18rem-0px)] sm:translate-x-1/2' : 'left-1/2 -translate-x-1/2'
-          }`}
+          className={`fixed bottom-6 z-[70] max-w-[90vw] rounded-full px-5 py-3 text-[13px] font-medium text-white shadow-xl ${
+            pesan.galat ? 'bg-[#9E3B32]' : 'bg-[#0B2B24]'
+          } ${nomorDipilih ? 'right-6 sm:right-72 sm:translate-x-1/2' : 'left-1/2 -translate-x-1/2'}`}
         >
-          {pesan}
+          {pesan.teks}
         </div>
       )}
     </div>
