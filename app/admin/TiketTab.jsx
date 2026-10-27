@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { TickCircle, Lock1, Star1, Notification, Timer1, Ticket, DocumentText, ArrowRight2, ArrowLeft2 } from 'iconsax-react';
+import { TickCircle, Lock1, Star1, Notification, Timer1, Ticket, DocumentText, ArrowRight2, ArrowLeft2, ArrowSwapHorizontal, NoteText, Trash } from 'iconsax-react';
 import {
   JENIS_TIKET,
   KATEGORI_TIKET,
@@ -18,32 +18,57 @@ const PER_HALAMAN = 10;
 
 // Riwayat awal disusun dari data contoh. Nanti riwayat asli datang dari API Tasya.
 function buatRiwayatAwal(t) {
-  const r = [{ aksi: 'Tiket dibuat oleh pengguna', oleh: 'Sistem', waktu: t.created_at }];
+  const r = [{ tipe: 'dibuat', aksi: 'Tiket dibuat oleh pengguna', oleh: 'Sistem', waktu: t.created_at }];
   const waktuCatatan = t.catatan_internal.map((c) => c.waktu);
   if (t.status !== 'baru') {
-    r.push({ aksi: 'Status diubah: Baru → Diproses', oleh: 'Admin', waktu: waktuCatatan[0] || t.updated_at });
+    r.push({ tipe: 'status', aksi: 'Status diubah: Baru → Diproses', oleh: 'Admin', waktu: waktuCatatan[0] || t.updated_at });
   }
-  t.catatan_internal.forEach((c) => r.push({ aksi: 'Catatan internal ditambahkan', oleh: c.oleh, waktu: c.waktu }));
+  t.catatan_internal.forEach((c) => r.push({ tipe: 'catatan', aksi: 'Catatan internal ditambahkan', oleh: c.oleh, waktu: c.waktu }));
   if (t.status === 'selesai') {
-    r.push({ aksi: 'Status diubah: Diproses → Selesai, notifikasi WhatsApp dikirim', oleh: 'Admin', waktu: t.updated_at });
+    r.push({ tipe: 'selesai', aksi: 'Tiket diselesaikan', sub: 'Notifikasi WhatsApp dikirim ke pengguna', oleh: 'Admin', waktu: t.updated_at });
   }
   return r.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
 }
 
+const GAYA_RIWAYAT = {
+  dibuat: { Ikon: DocumentText, warna: '#0B2B24' },
+  status: { Ikon: ArrowSwapHorizontal, warna: '#C08829' },
+  catatan: { Ikon: NoteText, warna: '#5B6B66' },
+  hapus: { Ikon: Trash, warna: '#9E3B32' },
+  selesai: { Ikon: TickCircle, warna: '#1F6B4F' },
+};
+
 function RiwayatPenanganan({ riwayat }) {
+  const urut = [...riwayat].reverse(); // terbaru di atas
   return (
-    <ol className="relative ml-1.5 border-l border-[#0B2B24]/12">
-      {[...riwayat].reverse().map((r, i) => (
-        <li key={i} className="relative pl-5 pb-4 last:pb-0">
-          <span
-            className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-[#FBF9F4] ${i === 0 ? 'bg-[#C08829]' : 'bg-[#0B2B24]/25'}`}
-          />
-          <p className="text-[13px] font-medium">{r.aksi}</p>
-          <p className="text-[11.5px] text-[#0B2B24]/45">
-            {r.oleh} · {formatTanggalTiket(r.waktu, true)}
-          </p>
-        </li>
-      ))}
+    <ol className="space-y-0">
+      {urut.map((r, i) => {
+        const g = GAYA_RIWAYAT[r.tipe] || GAYA_RIWAYAT.status;
+        const terakhir = i === urut.length - 1;
+        return (
+          <li key={i} className="relative flex gap-3 pb-5 last:pb-0">
+            {!terakhir && <span className="absolute left-4 top-9 bottom-1 w-px -translate-x-1/2 bg-[#0B2B24]/12" aria-hidden="true" />}
+            <span
+              className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${g.warna}17`, color: g.warna }}
+            >
+              <g.Ikon size={16} variant="Bold" color="currentColor" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1 pt-1">
+              <p className="flex flex-wrap items-center gap-2 text-[13px] font-semibold leading-snug">
+                {r.aksi}
+                {i === 0 && (
+                  <span className="rounded-md bg-[#0B2B24] px-1.5 py-0.5 text-[10.5px] font-semibold text-white">Terbaru</span>
+                )}
+              </p>
+              {r.sub && <p className="text-[12.5px] text-[#0B2B24]/70">{r.sub}</p>}
+              <p className="mt-0.5 text-[11.5px] text-[#0B2B24]/45">
+                {r.oleh} · {formatTanggalTiket(r.waktu, true)}
+              </p>
+            </div>
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -101,6 +126,56 @@ function KartuRingkasan({ label, nilai, sub, warna, Ikon }) {
       <div className="mt-2 font-(family-name:--font-fraunces) text-[30px] font-semibold leading-tight tabular-nums">{nilai}</div>
       {sub && <div className="mt-1 text-[11.5px] text-[#0B2B24]/50">{sub}</div>}
     </div>
+  );
+}
+
+function CatatanItem({ catatan, bisaHapus, onHapus }) {
+  const [konfirmasi, setKonfirmasi] = useState(false);
+  return (
+    <li
+      className={`group rounded-r-xl border-l-[3px] px-3.5 py-2.5 text-[13px] transition ${
+        konfirmasi ? 'border-[#9E3B32] bg-[#9E3B32]/[0.06]' : 'border-[#0B2B24]/20 bg-[#0B2B24]/[0.045]'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="whitespace-pre-line break-words">{catatan.isi}</p>
+          <p className="mt-1 text-[11.5px] text-[#0B2B24]/45">
+            {catatan.oleh} · {formatTanggalTiket(catatan.waktu, true)}
+          </p>
+        </div>
+        {bisaHapus && !konfirmasi && (
+          <button
+            onClick={() => setKonfirmasi(true)}
+            aria-label="Hapus catatan"
+            title="Hapus catatan"
+            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#0B2B24]/40 transition hover:bg-[#9E3B32]/10 hover:text-[#9E3B32] focus-visible:text-[#9E3B32]"
+          >
+            <Trash size={16} color="currentColor" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+      {konfirmasi && (
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-[#9E3B32]/15 pt-2.5">
+          <span className="text-[12.5px] font-medium text-[#9E3B32]">Hapus catatan ini?</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setKonfirmasi(false)}
+              className="rounded-full px-3 py-1 text-[12px] font-semibold text-[#0B2B24]/65 hover:bg-[#0B2B24]/5"
+            >
+              Batal
+            </button>
+            <button
+              onClick={onHapus}
+              autoFocus
+              className="rounded-full bg-[#9E3B32] px-3 py-1 text-[12px] font-semibold text-white hover:bg-[#842f28]"
+            >
+              Hapus
+            </button>
+          </div>
+        </div>
+      )}
+    </li>
   );
 }
 
@@ -213,6 +288,12 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
   }
 
   useEffect(() => {
+    const sebelumnya = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = sebelumnya; };
+  }, []);
+
+  useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && !konfirmasi && onTutup();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -293,12 +374,17 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
             ) : (
               <ul className="space-y-2">
                 {tiket.catatan_internal.map((c, i) => (
-                  <li key={i} className="rounded-r-xl border-l-[3px] border-[#0B2B24]/20 bg-[#0B2B24]/[0.045] px-3.5 py-2.5 text-[13px]">
-                    <p>{c.isi}</p>
-                    <p className="mt-1 text-[11.5px] text-[#0B2B24]/45">
-                      {c.oleh} · {formatTanggalTiket(c.waktu, true)}
-                    </p>
-                  </li>
+                  <CatatanItem
+                    key={`${c.waktu}-${i}`}
+                    catatan={c}
+                    bisaHapus={!terkunci}
+                    onHapus={() =>
+                      onUbah(
+                        { catatan_internal: tiket.catatan_internal.filter((_, j) => j !== i) },
+                        'Catatan internal dihapus.'
+                      )
+                    }
+                  />
                 ))}
               </ul>
             )}
@@ -485,11 +571,19 @@ export default function TiketTab({ onPerbaruiKB }) {
         if (perubahan.status && !STATUS_TIKET[t.status].next.includes(perubahan.status)) return t;
         const waktu = new Date().toISOString();
         const log = [];
-        if (perubahan.status) {
-          const teks = `Status diubah: ${STATUS_TIKET[t.status].label} → ${STATUS_TIKET[perubahan.status].label}`;
-          log.push({ aksi: perubahan.status === 'selesai' ? `${teks}, notifikasi WhatsApp dikirim` : teks, oleh: 'Admin', waktu });
+        if (perubahan.status === 'selesai') {
+          log.push({ tipe: 'selesai', aksi: 'Tiket diselesaikan', sub: 'Notifikasi WhatsApp dikirim ke pengguna', oleh: 'Admin', waktu });
+        } else if (perubahan.status) {
+          log.push({ tipe: 'status', aksi: `Status diubah: ${STATUS_TIKET[t.status].label} → ${STATUS_TIKET[perubahan.status].label}`, oleh: 'Admin', waktu });
         }
-        if (perubahan.catatan_internal) log.push({ aksi: 'Catatan internal ditambahkan', oleh: 'Admin', waktu });
+        if (perubahan.catatan_internal) {
+          const bertambah = perubahan.catatan_internal.length > t.catatan_internal.length;
+          log.push(
+            bertambah
+              ? { tipe: 'catatan', aksi: 'Catatan internal ditambahkan', oleh: 'Admin', waktu }
+              : { tipe: 'hapus', aksi: 'Catatan internal dihapus', oleh: 'Admin', waktu }
+          );
+        }
         return { ...t, ...perubahan, riwayat: [...t.riwayat, ...log], updated_at: waktu };
       })
     );
@@ -730,7 +824,12 @@ export default function TiketTab({ onPerbaruiKB }) {
       )}
 
       {pesan && (
-        <div role="status" className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#0B2B24] px-5 py-3 text-[13px] font-medium text-white shadow-xl">
+        <div
+          role="status"
+          className={`fixed bottom-6 z-[70] rounded-full bg-[#0B2B24] px-5 py-3 text-[13px] font-medium text-white shadow-xl ${
+            dipilih ? 'right-6 sm:right-[calc(18rem-0px)] sm:translate-x-1/2' : 'left-1/2 -translate-x-1/2'
+          }`}
+        >
           {pesan}
         </div>
       )}
