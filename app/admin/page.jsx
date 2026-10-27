@@ -200,8 +200,22 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
   );
 }
 
+const TAB_VALID = ['knowledge', 'poli', 'kamar', 'pengumuman', 'tiket', 'infogap'];
+
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman' | 'tiket' | 'infogap'
+  // Tab aktif disimpan di URL (?tab=...) supaya tetap sama saat halaman di-refresh.
+  const [tab, setTabState] = useState(null); // null = sedang membaca URL
+  useEffect(() => {
+    const dariUrl = new URLSearchParams(window.location.search).get('tab');
+    setTabState(TAB_VALID.includes(dariUrl) ? dariUrl : 'knowledge');
+  }, []);
+
+  function setTab(t) {
+    setTabState(t);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', t);
+    window.history.replaceState(null, '', url);
+  }
   const [kbDraft, setKbDraft] = useState(null); // draf FAQ dari tiket / information gap (B09)
 
   function bukaEditorKB(draft) {
@@ -315,7 +329,7 @@ export default function AdminDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-5 sm:px-6 py-8">
-        {tab === 'knowledge' ? (
+        {tab === null ? null : tab === 'knowledge' ? (
           <KnowledgeTab draftAwal={kbDraft} onDraftDipakai={() => setKbDraft(null)} />
         ) : tab === 'poli' ? (
           <PoliTab />
