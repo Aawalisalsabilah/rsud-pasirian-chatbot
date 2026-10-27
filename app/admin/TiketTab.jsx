@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { TickCircle, Lock1, Star1, Notification, Timer1, Ticket, DocumentText, ArrowRight2, ArrowLeft2 } from 'iconsax-react';
 import {
   JENIS_TIKET,
   KATEGORI_TIKET,
@@ -55,10 +56,9 @@ function StatusBadge({ status }) {
   if (!s) return null;
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold whitespace-nowrap"
-      style={{ color: s.color, backgroundColor: `${s.bg}1A` }}
+      className="inline-flex items-center rounded-md px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap"
+      style={{ color: s.color, backgroundColor: `${s.bg}17` }}
     >
-      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.bg }} />
       {s.label}
     </span>
   );
@@ -67,31 +67,39 @@ function StatusBadge({ status }) {
 function JenisLabel({ jenis }) {
   const j = JENIS_TIKET[jenis];
   if (!j) return null;
+  return <span className="text-[12.5px] font-semibold whitespace-nowrap text-[#0B2B24]">{j.label}</span>;
+}
+
+// Tile seragam untuk semua baris: penanda "ini tiket". Status & jenis dibaca dari kolomnya sendiri.
+function TileTiket() {
   return (
-    <span className="text-[12px] font-semibold whitespace-nowrap" style={{ color: j.color }}>
-      {j.label}
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#C08829]/12 text-[#A0701C]">
+      <DocumentText size={18} variant="Bulk" color="currentColor" aria-hidden="true" />
     </span>
   );
 }
 
 function Bintang({ nilai }) {
   return (
-    <span className="text-[#C08829] tracking-[0.1em]" aria-label={`${nilai} dari 5`}>
-      {'★'.repeat(nilai)}
-      <span className="text-[#0B2B24]/15">{'★'.repeat(5 - nilai)}</span>
+    <span className="inline-flex gap-0.5" role="img" aria-label={`${nilai} dari 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star1 key={i} size={18} variant="Bold" color={i <= nilai ? '#C08829' : 'rgba(11,43,36,0.15)'} aria-hidden="true" />
+      ))}
     </span>
   );
 }
 
-function KartuRingkasan({ label, nilai, sub, warna }) {
+function KartuRingkasan({ label, nilai, sub, warna, Ikon }) {
   return (
     <div className="bg-white rounded-2xl border border-[#0B2B24]/8 px-5 py-4">
-      <div className="flex items-center gap-2 text-[12px] font-semibold text-[#0B2B24]/55">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: warna }} />
-        {label}
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-[13px] font-semibold text-[#0B2B24]/75">{label}</span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white" style={{ backgroundColor: warna }}>
+          <Ikon size={18} variant="Bold" color="currentColor" aria-hidden="true" />
+        </span>
       </div>
-      <div className="mt-1.5 font-(family-name:--font-fraunces) text-[28px] font-semibold leading-none">{nilai}</div>
-      {sub && <div className="mt-1.5 text-[11.5px] text-[#0B2B24]/45">{sub}</div>}
+      <div className="mt-2 font-(family-name:--font-fraunces) text-[30px] font-semibold leading-tight tabular-nums">{nilai}</div>
+      {sub && <div className="mt-1 text-[11.5px] text-[#0B2B24]/50">{sub}</div>}
     </div>
   );
 }
@@ -133,7 +141,7 @@ function AlurStatus({ status }) {
                 }`}
                 style={warna ? { backgroundColor: warna, boxShadow: sekarang ? `0 0 0 5px ${BRASS}2E` : undefined } : undefined}
               >
-                {lewat ? '✓' : i + 1}
+                {lewat ? <TickCircle size={20} variant="Bold" color="currentColor" aria-hidden="true" /> : i + 1}
               </span>
               <span className={`mt-2 text-[12.5px] font-semibold ${i <= idx ? 'text-[#0B2B24]' : 'text-[#0B2B24]/40'}`}>
                 {STATUS_TIKET[s].label}
@@ -405,7 +413,10 @@ function DetailTiket({ tiket, onTutup, onUbah, onPerbaruiKB }) {
               </div>
             )}
             {terkunci && (
-              <p className="text-[13px] text-[#0B2B24]/65">🔒 Tiket sudah selesai dan dikunci. Status tidak bisa diubah lagi.</p>
+              <p className="flex items-center gap-2 text-[13px] text-[#0B2B24]/65">
+                <Lock1 size={18} variant="Bulk" color="#1F6B4F" aria-hidden="true" />
+                Tiket sudah selesai dan dikunci. Status tidak bisa diubah lagi.
+              </p>
             )}
           </div>
 
@@ -526,64 +537,81 @@ export default function TiketTab({ onPerbaruiKB }) {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KartuRingkasan label="Tiket baru" nilai={ringkasan.baru} warna={STATUS_TIKET.baru.bg} />
-        <KartuRingkasan label="Diproses" nilai={ringkasan.diproses} warna={STATUS_TIKET.diproses.bg} />
-        <KartuRingkasan label="Selesai" nilai={ringkasan.selesai} warna={STATUS_TIKET.selesai.bg} />
+        <KartuRingkasan label="Tiket baru" nilai={ringkasan.baru} sub="belum ditangani" warna={STATUS_TIKET.baru.bg} Ikon={Notification} />
+        <KartuRingkasan label="Diproses" nilai={ringkasan.diproses} sub="sedang ditindaklanjuti" warna={STATUS_TIKET.diproses.bg} Ikon={Timer1} />
+        <KartuRingkasan label="Selesai" nilai={ringkasan.selesai} sub="pengguna sudah dikabari" warna={STATUS_TIKET.selesai.bg} Ikon={TickCircle} />
         <KartuRingkasan
           label="Rata-rata rating"
           nilai={ringkasan.rata ? ringkasan.rata.toFixed(1) : '-'}
           sub={`dari ${ringkasan.jumlahDinilai} penilaian`}
-          warna="#C08829"
+          warna="#0B2B24"
+          Ikon={Star1}
         />
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#0B2B24]/8 p-4 flex flex-col lg:flex-row gap-3 lg:items-center">
-        <input
-          type="search"
-          value={cari}
-          onChange={ubah(setCari)}
-          placeholder="Cari nomor tiket, mis. TKT-20261027"
-          aria-label="Cari nomor tiket"
-          className={`${selectBase} lg:flex-1 placeholder:text-[#0B2B24]/35`}
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:flex">
-          <select value={filterJenis} onChange={ubah(setFilterJenis)} aria-label="Filter jenis" className={selectBase}>
-            <option value="">Semua jenis</option>
-            {Object.entries(JENIS_TIKET).map(([v, j]) => <option key={v} value={v}>{j.label}</option>)}
-          </select>
-          <select value={filterKategori} onChange={ubah(setFilterKategori)} aria-label="Filter kategori" className={selectBase}>
-            <option value="">Semua kategori</option>
-            {KATEGORI_TIKET.map((k) => <option key={k.value} value={k.value}>{k.value}</option>)}
-          </select>
-          <select value={filterStatus} onChange={ubah(setFilterStatus)} aria-label="Filter status" className={selectBase}>
-            <option value="">Semua status</option>
-            {STATUS_URUTAN.map((s) => <option key={s} value={s}>{STATUS_TIKET[s].label}</option>)}
-          </select>
+      <section className="bg-white rounded-2xl border border-[#0B2B24]/8">
+        <div className="px-5 pt-5">
+          <h3 className="flex items-center gap-2 text-[17px] font-semibold">
+            <Ticket size={22} variant="Bulk" color="#C08829" aria-hidden="true" />
+            {hasil.length} Tiket{adaFilter ? ' ditemukan' : ''}
+          </h3>
+          <p className="mt-0.5 text-[12.5px] text-[#0B2B24]/55">Kelola dan pantau tindak lanjut permintaan serta pengaduan informasi.</p>
         </div>
-        {adaFilter && (
-          <button onClick={resetFilter} className="text-[12.5px] font-semibold text-[#C08829] hover:underline whitespace-nowrap">
-            Reset filter
-          </button>
-        )}
-      </div>
 
-      <div className="bg-white rounded-2xl border border-[#0B2B24]/8 overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center px-5 py-4">
+          <input
+            type="search"
+            value={cari}
+            onChange={ubah(setCari)}
+            placeholder="Cari nomor tiket, mis. TKT-20261027"
+            aria-label="Cari nomor tiket"
+            className={`${selectBase} lg:flex-1 placeholder:text-[#0B2B24]/35`}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:flex">
+            <select value={filterJenis} onChange={ubah(setFilterJenis)} aria-label="Filter jenis" className={selectBase}>
+              <option value="">Semua jenis</option>
+              {Object.entries(JENIS_TIKET).map(([v, j]) => <option key={v} value={v}>{j.label}</option>)}
+            </select>
+            <select value={filterKategori} onChange={ubah(setFilterKategori)} aria-label="Filter kategori" className={selectBase}>
+              <option value="">Semua kategori</option>
+              {KATEGORI_TIKET.map((k) => <option key={k.value} value={k.value}>{k.value}</option>)}
+            </select>
+            <select value={filterStatus} onChange={ubah(setFilterStatus)} aria-label="Filter status" className={selectBase}>
+              <option value="">Semua status</option>
+              {STATUS_URUTAN.map((st) => <option key={st} value={st}>{STATUS_TIKET[st].label}</option>)}
+            </select>
+          </div>
+          {adaFilter && (
+            <button onClick={resetFilter} className="text-[12.5px] font-semibold text-[#C08829] hover:underline whitespace-nowrap">
+              Reset filter
+            </button>
+          )}
+        </div>
+
         {tampil.length === 0 ? (
-          <div className="px-6 py-14 text-center">
+          <div className="px-6 py-14 text-center border-t border-[#0B2B24]/6">
             <p className="font-semibold">Tidak ada tiket yang cocok.</p>
             <p className="mt-1 text-[13px] text-[#0B2B24]/50">Coba ubah kata kunci atau filter.</p>
           </div>
         ) : (
           <>
-            {/* Tabel untuk layar lebar */}
-            <table className="hidden md:table w-full text-left text-[13px]">
-              <thead className="bg-[#FBF9F4] text-[11.5px] font-semibold uppercase tracking-[0.05em] text-[#0B2B24]/50">
-                <tr>
-                  <th className="px-5 py-3">Nomor &amp; tanggal</th>
-                  <th className="px-5 py-3">Jenis &amp; kategori</th>
-                  <th className="px-5 py-3">Deskripsi</th>
-                  <th className="px-5 py-3">Pelapor</th>
-                  <th className="px-5 py-3">Status</th>
+            <table className="hidden md:table w-full table-fixed text-left text-[13px]">
+              <colgroup>
+                <col className="w-[25%]" />
+                <col className="w-[14%]" />
+                <col className="w-[28%]" />
+                <col className="w-[14%]" />
+                <col className="w-[10%]" />
+                <col className="w-[9%]" />
+              </colgroup>
+              <thead className="text-[12.5px] font-semibold text-[#0B2B24]">
+                <tr className="border-y border-[#0B2B24]/8">
+                  <th className="px-5 py-3">Tiket</th>
+                  <th className="px-4 py-3">Jenis</th>
+                  <th className="px-4 py-3">Deskripsi</th>
+                  <th className="px-4 py-3">Pelapor</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3"><span className="sr-only">Aksi</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#0B2B24]/6">
@@ -591,43 +619,60 @@ export default function TiketTab({ onPerbaruiKB }) {
                   <tr
                     key={t.nomor_tiket}
                     onClick={() => setNomorDipilih(t.nomor_tiket)}
-                    className="cursor-pointer hover:bg-[#FBF9F4] transition"
+                    className="group cursor-pointer hover:bg-[#FBF9F4] transition"
                   >
-                    <td className="px-5 py-4 align-top">
-                      <div className="font-semibold whitespace-nowrap">{t.nomor_tiket}</div>
-                      <div className="mt-0.5 text-[12px] text-[#0B2B24]/50">{formatTanggalTiket(t.created_at, true)}</div>
+                    <td className="px-5 py-3.5 align-middle">
+                      <div className="flex items-center gap-3">
+                        <TileTiket />
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-[13.5px]">{t.kategori}</p>
+                          <p className="truncate text-[12px] text-[#0B2B24]/50">{t.nomor_tiket}</p>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-5 py-4 align-top">
-                      <JenisLabel jenis={t.jenis} />
-                      <div className="mt-0.5 text-[12px] text-[#0B2B24]/60">{t.kategori}</div>
+                    <td className="px-4 py-3.5 align-middle">
+                      <p className="text-[#0B2B24]/80">{JENIS_TIKET[t.jenis]?.label.replace(' Informasi', '')}</p>
+                      <p className="text-[12px] text-[#0B2B24]/50">{formatTanggalTiket(t.created_at)}</p>
                     </td>
-                    <td className="px-5 py-4 align-top max-w-[320px]">
-                      <p className="line-clamp-2 text-[#0B2B24]/80">{t.deskripsi}</p>
+                    <td className="px-4 py-3.5 align-middle">
+                      <p className="line-clamp-2 text-[#0B2B24]/75">{t.deskripsi}</p>
                     </td>
-                    <td className="px-5 py-4 align-top">
-                      <div className="font-medium">{t.nama || <span className="italic text-[#0B2B24]/45">Tanpa nama</span>}</div>
-                      <div className="mt-0.5 text-[12px] text-[#0B2B24]/50 tabular-nums">{samarkanWa(t.no_wa)}</div>
+                    <td className="px-4 py-3.5 align-middle">
+                      <p className="truncate font-medium">{t.nama || <span className="italic font-normal text-[#0B2B24]/45">Tanpa nama</span>}</p>
+                      <p className="text-[12px] text-[#0B2B24]/50 tabular-nums">{samarkanWa(t.no_wa)}</p>
                     </td>
-                    <td className="px-5 py-4 align-top"><StatusBadge status={t.status} /></td>
+                    <td className="px-4 py-3.5 align-middle"><StatusBadge status={t.status} /></td>
+                    <td className="px-4 py-3.5 align-middle">
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-[#0B2B24]/12 px-2.5 py-1.5 text-[12.5px] font-semibold text-[#0B2B24]/80 group-hover:border-[#0B2B24]/30">
+                        Detail
+                        <ArrowRight2 size={14} color="currentColor" aria-hidden="true" />
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Kartu untuk HP */}
-            <ul className="md:hidden divide-y divide-[#0B2B24]/6">
+            <ul className="md:hidden divide-y divide-[#0B2B24]/6 border-t border-[#0B2B24]/8">
               {tampil.map((t) => (
                 <li key={t.nomor_tiket}>
                   <button onClick={() => setNomorDipilih(t.nomor_tiket)} className="w-full text-left px-4 py-4 hover:bg-[#FBF9F4]">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-[13.5px]">{t.nomor_tiket}</div>
-                        <div className="text-[11.5px] text-[#0B2B24]/50">{formatTanggalTiket(t.created_at, true)}</div>
+                    <div className="flex items-start gap-3">
+                      <TileTiket />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-[13.5px]">{t.kategori}</p>
+                            <p className="text-[12px] text-[#0B2B24]/50">{t.nomor_tiket}</p>
+                          </div>
+                          <StatusBadge status={t.status} />
+                        </div>
+                        <p className="mt-1.5 line-clamp-2 text-[13px] text-[#0B2B24]/75">{t.deskripsi}</p>
+                        <p className="mt-1 text-[12px] text-[#0B2B24]/50">
+                          {JENIS_TIKET[t.jenis]?.label} · {formatTanggalTiket(t.created_at)}
+                        </p>
                       </div>
-                      <StatusBadge status={t.status} />
                     </div>
-                    <div className="mt-2"><JenisLabel jenis={t.jenis} /> <span className="text-[12px] text-[#0B2B24]/55">· {t.kategori}</span></div>
-                    <p className="mt-1 line-clamp-2 text-[13px] text-[#0B2B24]/75">{t.deskripsi}</p>
                   </button>
                 </li>
               ))}
@@ -635,31 +680,44 @@ export default function TiketTab({ onPerbaruiKB }) {
           </>
         )}
 
-        <div className="flex items-center justify-between gap-3 border-t border-[#0B2B24]/8 px-5 py-3 text-[12.5px]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#0B2B24]/8 px-5 py-4 text-[12.5px]">
           <span className="text-[#0B2B24]/55">
             {hasil.length === 0
               ? '0 tiket'
-              : `${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, hasil.length)} dari ${hasil.length} tiket`}
+              : `Menampilkan ${(halamanAman - 1) * PER_HALAMAN + 1}–${Math.min(halamanAman * PER_HALAMAN, hasil.length)} dari ${hasil.length} tiket`}
           </span>
-          <div className="flex items-center gap-2">
+          <nav className="flex items-center gap-1.5" aria-label="Halaman">
             <button
               onClick={() => setHalaman(halamanAman - 1)}
               disabled={halamanAman <= 1}
-              className="rounded-full border border-[#0B2B24]/15 px-3 py-1.5 font-semibold disabled:opacity-35 hover:bg-[#FBF9F4]"
+              aria-label="Halaman sebelumnya"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0B2B24]/12 hover:bg-[#FBF9F4] disabled:opacity-30"
             >
-              Sebelumnya
+              <ArrowLeft2 size={16} color="currentColor" aria-hidden="true" />
             </button>
-            <span className="tabular-nums text-[#0B2B24]/60">{halamanAman}/{totalHalaman}</span>
+            {Array.from({ length: totalHalaman }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                onClick={() => setHalaman(n)}
+                aria-current={n === halamanAman ? 'page' : undefined}
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums transition ${
+                  n === halamanAman ? 'bg-[#0B2B24] text-white' : 'border border-[#0B2B24]/12 text-[#0B2B24]/70 hover:bg-[#FBF9F4]'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
             <button
               onClick={() => setHalaman(halamanAman + 1)}
               disabled={halamanAman >= totalHalaman}
-              className="rounded-full border border-[#0B2B24]/15 px-3 py-1.5 font-semibold disabled:opacity-35 hover:bg-[#FBF9F4]"
+              aria-label="Halaman berikutnya"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#0B2B24]/12 hover:bg-[#FBF9F4] disabled:opacity-30"
             >
-              Berikutnya
+              <ArrowRight2 size={16} color="currentColor" aria-hidden="true" />
             </button>
-          </div>
+          </nav>
         </div>
-      </div>
+      </section>
 
       {dipilih && (
         <DetailTiket
