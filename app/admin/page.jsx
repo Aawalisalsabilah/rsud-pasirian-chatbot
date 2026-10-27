@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Poppins } from 'next/font/google';
+import TiketTab from './TiketTab';
 
 const fraunces = Poppins({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'], variable: '--font-fraunces' });
 const inter = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
@@ -199,7 +200,7 @@ function LogoutConfirmModal({ onConfirm, onCancel }) {
 }
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman'
+  const [tab, setTab] = useState('knowledge'); // 'knowledge' | 'poli' | 'kamar' | 'pengumuman' | 'tiket'
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
 
@@ -282,6 +283,16 @@ export default function AdminDashboard() {
           >
             Papan Pengumuman
           </button>
+          <button
+            onClick={() => setTab('tiket')}
+            className={`shrink-0 px-4 sm:px-5 py-3.5 text-[13.5px] font-semibold border-b-[3px] -mb-px transition ${
+              tab === 'tiket'
+                ? 'border-[#C08829] text-[#0B2B24]'
+                : 'border-transparent text-[#0B2B24]/50 hover:text-[#0B2B24]/80'
+            }`}
+          >
+            Tindak Lanjut Informasi
+          </button>
         </div>
       </nav>
 
@@ -292,6 +303,8 @@ export default function AdminDashboard() {
           <PoliTab />
         ) : tab === 'kamar' ? (
           <KamarTab />
+        ) : tab === 'tiket' ? (
+          <TiketTab />
         ) : (
           <AnnouncementTab />
         )}
