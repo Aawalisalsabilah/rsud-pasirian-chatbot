@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
-// TODO: ganti kalau endpoint dari Tasya (B11) sudah beda
 const API_RATING = '/api/rating';
 
 const KOMENTAR_MAX = 500;
@@ -95,7 +94,10 @@ function KartuStatus({ tipe }) {
 
 export default function RatingPage() {
   const params = useParams();
-  const nomor = decodeURIComponent(params.nomor || '');
+  // Segmen URL berisi TOKEN acak dari link WhatsApp (bukan nomor tiket, supaya tidak bisa ditebak).
+  // Nama folder [nomor] dibiarkan supaya tidak mengubah struktur halaman.
+  const token = decodeURIComponent(params.nomor || '');
+  const [nomor, setNomor] = useState('');
 
   const [view, setView] = useState('loading');
   const [rating, setRating] = useState(0);
@@ -107,12 +109,13 @@ export default function RatingPage() {
 
   useEffect(() => {
     let batal = false;
-    fetch(`${API_RATING}?nomor=${encodeURIComponent(nomor)}`, { cache: 'no-store' })
+    fetch(`${API_RATING}?token=${encodeURIComponent(token)}`, { cache: 'no-store' })
       .then(async (res) => {
         if (batal) return;
         if (res.status === 404) return setView('notfound');
         if (!res.ok) return setView('error');
         const json = await res.json();
+        setNomor(json.data?.nomor_tiket || '');
         if (json.data?.status !== 'selesai') return setView('belum-selesai');
         if (json.data?.sudah_dinilai) return setView('sudah-dinilai');
         setView('ready');
@@ -123,7 +126,7 @@ export default function RatingPage() {
     return () => {
       batal = true;
     };
-  }, [nomor]);
+  }, [token]);
 
   const errRating = rating === 0 ? 'Pilih jumlah bintang dulu.' : '';
   const bintangAktif = hover || rating;
@@ -141,7 +144,7 @@ export default function RatingPage() {
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
-          nomor_tiket: nomor,
+          token,
           rating,
           komentar: komentar.trim() || null,
         }),

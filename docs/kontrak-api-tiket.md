@@ -3,6 +3,8 @@
 > Pegangan bersama untuk **form (Salsa)**, **API (Tasya)**, dan **dashboard admin (Kharis)**.
 > Kalau mau mengubah sesuatu di sini, **bilang di grup dulu**, karena tiga bagian ikut terdampak.
 
+> **Status: SUDAH DIIMPLEMENTASIKAN** (B05, B06, B08, B10, B11). Semua endpoint di bawah sudah ada di `app/api/` dan sudah diuji.
+
 Skema database: [`supabase/schema-tiket.sql`](../supabase/schema-tiket.sql)
 Daftar nilai bersama (jenis, kategori, status): [`lib/tiket-constants.js`](../lib/tiket-constants.js)
 
@@ -27,6 +29,7 @@ Daftar nilai bersama (jenis, kategori, status): [`lib/tiket-constants.js`](../li
 | `400` | Input tidak valid (format salah, field kurang) |
 | `401` | Belum login admin (dari middleware) |
 | `404` | Tiket / gap tidak ditemukan |
+| `429` | Terlalu banyak laporan dari satu perangkat (maks 5 tiket per jam per IP) |
 | `409` | **Ditolak aturan database** — mis. tiket sudah selesai, status lompat, rating dua kali |
 | `500` | Error lain di server |
 
@@ -60,10 +63,13 @@ Request:
   "nama": "Rina Wulandari",
   "no_wa": "6285712345678",
   "persetujuan_wa": true,
-  "information_gap_id": null
+  "information_gap_id": null,
+  "pertanyaan_chatbot": null
 }
 ```
-- `nama` boleh `null`. `information_gap_id` opsional (diisi kalau pengguna datang dari chatbot yang gagal menjawab).
+- `nama` boleh `null`, maks 60 karakter.
+- `information_gap_id` opsional: otomatis diisi form kalau pengguna datang dari link chatbot (`/tindak-lanjut?gap=<id>`).
+- `pertanyaan_chatbot` opsional: pertanyaan asli pengguna di chatbot.
 - **Jangan kirim** `status` / `nomor_tiket` — database mengisinya sendiri.
 
 Response `201`:
@@ -80,23 +86,23 @@ const { data, error } = await supabase
   .single();
 ```
 
-### `GET /api/rating?nomor=TKT-...` — cek tiket sebelum dinilai *(B11)*
+### `GET /api/rating?token=<token>` — cek tiket sebelum dinilai *(B11)*
+
+> Link rating di WhatsApp memakai **token acak 24 karakter** (`/rating/<token>`), bukan nomor tiket,
+> supaya orang lain tidak bisa menebak dan menilai tiket milik orang lain. Halaman `app/rating/[nomor]`
+> sudah disesuaikan (isi segmen URL-nya sekarang token).
 
 Response `200`:
 ```json
 { "data": { "nomor_tiket": "TKT-...", "status": "selesai", "sudah_dinilai": false } }
 ```
-`404` kalau nomor tidak ada.
+`404` kalau token tidak ada. Hanya 3 data ini yang dikembalikan (tanpa nomor WA / deskripsi).
 
 ### `POST /api/rating` — kirim penilaian *(B11)*
 
-Request: `{ "nomor_tiket": "TKT-...", "rating": 4, "komentar": "Cepat" }` (`komentar` boleh `null`)
+Request: `{ "token": "<token>", "rating": 4, "komentar": "Cepat" }` (`komentar` boleh `null`, maks 500)
 Response `201`: `{ "data": { "ok": true } }` · `409` kalau belum selesai / sudah dinilai.
 
-```js
-// cari id tiket dulu, lalu:
-await supabase.from('tiket_rating').insert({ tiket_id, rating, komentar });
-```
 
 ---
 
@@ -277,7 +283,16 @@ Body: `{ "status": "ditinjau" }` (atau `belum_ditinjau` / `diabaikan`) → `200 
 
 ---
 
-## 4. Mencatat information gap dari chatbot *(B06, Aisyah & Tasya)*
+## 4. Mencatat information gap dari chatbot *(B06)*
+
+**Implementasi saat ini** (`lib/information-gap.js` + `app/api/chat/route.js`):
+1. System prompt chatbot ditambah instruksi: kalau jawaban **tidak ada di DATA RESMI**, model menulis penanda `[[INFO_TIDAK_TERSEDIA]]` di akhir jawaban.
+2. Route chat membuang penanda itu, mencatat pertanyaan lewat `catat_information_gap`, lalu menambahkan link *"ajukan permintaan informasi"* ke `/tindak-lanjut?gap=<id>`.
+3. Kategori ditebak dari kata kunci (BPJS, jadwal, kamar, obat, biaya, daftar).
+
+Kriteria ini masih **usulan** sampai B02 disepakati.
+
+### Catatan lama (usulan awal)
 
 Di `lib/knowledge.js`, fungsi `searchRelevantKnowledge()` mencari FAQ dengan
 `match_threshold: 0.6`. **Usulan kriteria "tidak ditemukan"**: tidak ada satu pun potongan FAQ
@@ -296,7 +311,15 @@ Fungsi ini otomatis menggabungkan pertanyaan yang sama (jumlah + 1).
 
 ---
 
-## 5. Checklist sebelum bilang "API sudah jadi"
+## 5. Variabel `.env` tambahan
+
+| Nama | Wajib? | Fungsi |
+|---|---|---|
+| `NEXT_PUBLIC_TIKET_SUMBER` | Ya, isi `api` | Dashboard memakai API asli (tanpa ini: data contoh) |
+| `APP_URL` | Disarankan | Domain untuk link rating di WA, mis. `https://rsud-pasirian-chatbot.vercel.app`. Kalau kosong, dipakai alamat yang sedang diakses admin. |
+| `WA_FONNTE_TOKEN` | Opsional | Token [Fonnte](https://fonnte.com) untuk kirim WA sungguhan. Kalau kosong, WA **disimulasikan** (dicatat di `tiket_notifikasi_wa` & terminal). |
+
+## 6. Checklist sebelum bilang "API sudah jadi"
 
 - [ ] `supabase/schema-tiket.sql` sudah dijalankan di Supabase tim (cukup sekali)
 - [ ] Semua endpoint admin ada di dalam `app/api/admin/...`

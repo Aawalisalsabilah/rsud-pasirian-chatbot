@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 
-// TODO: ganti kalau endpoint dari Tasya (B05) sudah beda
 const API_TIKET = '/api/tiket';
 
 const DESKRIPSI_MIN = 20;
@@ -129,6 +128,8 @@ export default function TindakLanjutPage() {
           kategori,
           deskripsi: deskripsiTrim,
           nama: nama.trim() || null,
+          // Kalau pengguna datang dari link chatbot (/tindak-lanjut?gap=...), hubungkan tiket ke information gap-nya
+          information_gap_id: new URLSearchParams(window.location.search).get('gap') || null,
           no_wa: normalisasiWa(noWa),
           persetujuan_wa: setuju,
         }),
