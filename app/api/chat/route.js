@@ -3,6 +3,7 @@ import Groq from 'groq-sdk';
 import { buildSystemPrompt, getValidDoctorNames, detectPendaftaranAmbiguous } from '@/lib/knowledge';
 import { chatRateLimit, getClientIp } from '@/lib/rate-limit';
 import { put } from '@vercel/blob';
+import { INSTRUKSI_GAP, pisahkanPenanda, catatGap, saranTindakLanjut } from '@/lib/information-gap';
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
@@ -246,7 +247,7 @@ export async function POST(request) {
             content: m.content,
         }));
         const fullMessages = [
-            { role: 'system', content: dynamicSystemPrompt },
+            { role: 'system', content: dynamicSystemPrompt + INSTRUKSI_GAP },
             ...sanitizedMessages,
         ];
 
@@ -258,6 +259,14 @@ export async function POST(request) {
         });
 
         reply = chatCompletion.choices[0]?.message?.content || 'Maaf, sistem tidak memberikan respon.';
+
+        // B06: pertanyaan yang tidak ada jawabannya di data resmi dicatat sebagai information gap
+        const { reply: tanpaPenanda, adaGap } = pisahkanPenanda(reply);
+        reply = tanpaPenanda;
+        if (adaGap) {
+            const gapId = await catatGap(lastUserMessage?.content);
+            reply += saranTindakLanjut(gapId);
+        }
 
         if (containsUnknownDoctor(reply, validDoctorNames)) {
             console.warn('[INJECTION SUSPECTED] Reply menyebut nama dokter tidak dikenal:', reply);

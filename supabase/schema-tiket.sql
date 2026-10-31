@@ -17,6 +17,8 @@
 --    - catatan internal tidak benar-benar dihapus (soft delete) demi jejak audit
 --
 --  Daftar nilai (jenis/kategori/status) harus sama dengan lib/tiket-constants.js
+--  Sudah disesuaikan dengan catatan Salsa (nama maks 60, link rating pakai token acak,
+--  kolom opsional pertanyaan_chatbot, nomor tiket unik di level database).
 -- =====================================================================
 
 create extension if not exists pgcrypto;  -- untuk gen_random_uuid()
@@ -87,13 +89,15 @@ create table if not exists public.tiket (
                            'Jadwal dokter', 'BPJS / JKN', 'Pendaftaran', 'Rawat inap',
                            'Farmasi', 'Biaya & administrasi', 'Lainnya')),
   deskripsi              text not null check (char_length(trim(deskripsi)) between 20 and 1000),
-  nama                   text check (nama is null or char_length(trim(nama)) between 1 and 100),
+  nama                   text check (nama is null or char_length(trim(nama)) between 1 and 60),
   no_wa                  text not null check (no_wa ~ '^628[0-9]{8,11}$'),
   persetujuan_wa         boolean not null check (persetujuan_wa = true),
   status                 text not null default 'baru' check (status in ('baru', 'diproses', 'selesai')),
   ringkasan_penyelesaian text check (ringkasan_penyelesaian is null
                                      or char_length(trim(ringkasan_penyelesaian)) between 20 and 1000),
   information_gap_id     uuid references public.information_gap (id) on delete set null,
+  pertanyaan_chatbot     text check (pertanyaan_chatbot is null or char_length(pertanyaan_chatbot) <= 1000),
+  token_rating           text not null unique,               -- diisi otomatis, dipakai di link rating WA (bukan nomor tiket, supaya tidak bisa ditebak)
   created_at             timestamptz not null default now(),
   updated_at             timestamptz not null default now(),
   selesai_at             timestamptz,
@@ -190,6 +194,7 @@ begin
   end loop;
 
   new.nomor_tiket            := v_nomor;
+  new.token_rating           := encode(gen_random_bytes(12), 'hex');  -- 24 karakter acak
   new.status                 := 'baru';   -- pengguna tidak bisa membuat tiket yang langsung "selesai"
   new.ringkasan_penyelesaian := null;
   new.selesai_at             := null;
@@ -216,6 +221,7 @@ begin
      or new.deskripsi is distinct from old.deskripsi
      or new.nama      is distinct from old.nama
      or new.no_wa     is distinct from old.no_wa
+     or new.token_rating is distinct from old.token_rating
      or new.created_at is distinct from old.created_at then
     raise exception 'Data laporan dari pengguna tidak boleh diubah.' using errcode = 'P0001';
   end if;
